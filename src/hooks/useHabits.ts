@@ -9,8 +9,8 @@ export function useHabits() {
 
   const storageService = StorageService.getInstance();
 
-  // Load habits
-  const loadHabits = useCallback(async () => {
+  // Update the refreshHabits method to return a Promise
+  const refreshHabits = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
       const loadedHabits = await storageService.getHabits();
@@ -41,14 +41,14 @@ export function useHabits() {
   );
 
   useEffect(() => {
-    loadHabits();
-  }, [loadHabits]);
+    refreshHabits();
+  }, [refreshHabits]);
 
   return {
     habits,
     loading,
     error,
     addHabit,
-    refreshHabits: loadHabits,
+    refreshHabits,
   };
 }

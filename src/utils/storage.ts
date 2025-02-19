@@ -38,6 +38,104 @@ export class StorageService {
     }
   }
 
+  // Add this method to the StorageService class
+  async updateHabitCompletion(
+    habitId: string,
+    date: string,
+    completed: boolean
+  ): Promise<void> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!data) throw new Error("No storage data found");
+
+      const storageData: StorageData = JSON.parse(data);
+      const habitIndex = storageData.habits.findIndex((h) => h.id === habitId);
+
+      if (habitIndex === -1) throw new Error("Habit not found");
+
+      const habit = storageData.habits[habitIndex];
+
+      // Find if there's already a log for today
+      const logIndex = habit.completionLogs.findIndex(
+        (log) => log.date.split("T")[0] === date
+      );
+
+      if (logIndex >= 0) {
+        // Update existing log
+        habit.completionLogs[logIndex].completed = completed;
+      } else {
+        // Add new log for today
+        habit.completionLogs.push({
+          date: new Date(date).toISOString(),
+          completed,
+        });
+      }
+
+      // Update streak count
+      this.updateStreak(habit);
+
+      // Save updated data
+      storageData.lastUpdated = new Date().toISOString();
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+    } catch (error) {
+      console.error("Failed to update habit completion:", error);
+      throw new Error("Failed to update habit completion");
+    }
+  }
+
+  // Helper method to update streak (add this to the StorageService class)
+  private updateStreak(habit: Habit): void {
+    if (habit.completionLogs.length === 0) {
+      habit.streak = 0;
+      return;
+    }
+
+    // Sort logs by date, most recent first
+    const sortedLogs = [...habit.completionLogs].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    // Get current date without time
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .split("T")[0];
+
+    // Check if the most recent log is from today or yesterday and was completed
+    const mostRecentLog = sortedLogs[0];
+    const mostRecentDate = mostRecentLog.date.split("T")[0];
+
+    if (!mostRecentLog.completed) {
+      habit.streak = 0;
+      return;
+    }
+
+    // If most recent is today, count backward from yesterday
+    // If most recent is before today, count backward from most recent
+    let currentDate = mostRecentDate === today ? yesterday : mostRecentDate;
+    let streak = mostRecentLog.completed ? 1 : 0;
+
+    // Count consecutive completed days
+    for (let i = 1; i < sortedLogs.length; i++) {
+      const log = sortedLogs[i];
+      const logDate = log.date.split("T")[0];
+
+      // Check if this log is from the previous day
+      const expectedDate = new Date(currentDate);
+      expectedDate.setDate(expectedDate.getDate() - 1);
+      const expectedDateStr = expectedDate.toISOString().split("T")[0];
+
+      if (logDate === expectedDateStr && log.completed) {
+        streak++;
+        currentDate = logDate;
+      } else {
+        break;
+      }
+    }
+
+    habit.streak = streak;
+  }
+
   // Get all habits
   async getHabits(): Promise<Habit[]> {
     try {
