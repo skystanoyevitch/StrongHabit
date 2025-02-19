@@ -21,13 +21,13 @@ if (
 interface HabitCardProps {
   habit: Habit;
   onToggleComplete: (habitId: string, completed: boolean) => void;
-  onpress: () => void;
+  onPress?: () => void;
 }
 
 export const HabitCard: React.FC<HabitCardProps> = ({
   habit,
   onToggleComplete,
-  onpress,
+  onPress,
 }) => {
   // Calculate whether habit is completed today
   const isCompletedToday = React.useMemo(() => {
