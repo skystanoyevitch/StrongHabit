@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, SafeAreaView, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useHabits } from "../hooks/useHabits";
 import { HabitList } from "../components/HabitList";
 import { Habit } from "../types/habit";
@@ -11,6 +11,18 @@ export default function HomeScreen() {
   const { habits, loading, error, refreshHabits } = useHabits();
   const storageService = StorageService.getInstance();
   const navigation = useNavigation();
+
+  // Inside the HomeScreen component
+  useFocusEffect(
+    React.useCallback(() => {
+      // Refresh habits when screen comes into focus
+      refreshHabits();
+
+      return () => {
+        // Cleanup if needed
+      };
+    }, [refreshHabits])
+  );
 
   // Effect to initialize storage
   useEffect(() => {
