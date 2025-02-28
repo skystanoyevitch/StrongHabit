@@ -131,7 +131,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onSubmit, onCancel }) => {
             value={formData.name}
             onChangeText={(text) => handleChange("name", text)}
             placeholder="Enter habit name"
-            maxLength={50}
+            maxLength={60}
           />
           {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
         </View>
