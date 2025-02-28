@@ -83,6 +83,18 @@ export class StorageService {
     }
   }
 
+  // // In StorageService class
+  // // Add this temporary test method
+  // async simulatePriorCompletion(
+  //   habitId: string,
+  //   daysAgo: number
+  // ): Promise<void> {
+  //   const date = new Date();
+  //   date.setDate(date.getDate() - daysAgo);
+  //   const dateStr = date.toISOString().split("T")[0];
+  //   return this.updateHabitCompletion(habitId, dateStr, true);
+  // }
+
   // Helper method to update streak (add this to the StorageService class)
   private updateStreak(habit: Habit): void {
     if (habit.completionLogs.length === 0) {
