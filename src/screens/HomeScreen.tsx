@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, SafeAreaView, Alert } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useHabits } from "../hooks/useHabits";
@@ -33,33 +33,36 @@ export default function HomeScreen() {
   }, []);
 
   // Handle habit completion toggle
-  const handleToggleComplete = async (habitId: string, completed: boolean) => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const habit = habits.find((h) => h.id === habitId);
+  const handleToggleComplete = useCallback(
+    async (habitId: string, completed: boolean) => {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const habit = habits.find((h) => h.id === habitId);
 
-      if (!habit) return;
+        if (!habit) return;
 
-      // Update local storage with new completion status
-      await storageService.updateHabitCompletion(habitId, today, completed);
+        // Update local storage with new completion status
+        await storageService.updateHabitCompletion(habitId, today, completed);
 
-      // Refresh habits to reflect changes
-      refreshHabits();
-    } catch (err) {
-      console.error("Failed to toggle habit completion:", err);
-      Alert.alert("Error", "Failed to update habit status");
-    }
-  };
+        // Refresh habits to reflect changes
+        refreshHabits();
+      } catch (err) {
+        console.error("Failed to toggle habit completion:", err);
+        Alert.alert("Error", "Failed to update habit status");
+      }
+    },
+    [habits, storageService, refreshHabits]
+  );
 
   // Handle navigation to habit detail screen
-  const handleHabitPress = (habit: Habit) => {
+  const handleHabitPress = useCallback((habit: Habit) => {
     // We'll implement this navigation later
     // navigation.navigate('HabitDetail', { habitId: habit.id });
     Alert.alert(
       "Coming Soon",
       "Habit details will be available in a future update"
     );
-  };
+  }, []);
 
   // console.log(navigation.getState());
   return (
