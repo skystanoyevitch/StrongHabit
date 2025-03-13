@@ -50,14 +50,14 @@ export default function HomeScreen() {
 
         if (!habit) return;
 
-        // Update local storage with new completion status
         await storageService.updateHabitCompletion(habitId, today, completed);
-
-        // Refresh habits to reflect changes
         refreshHabits();
       } catch (err) {
         console.error("Failed to toggle habit completion:", err);
-        Alert.alert("Error", "Failed to update habit status");
+        Alert.alert(
+          "Update Error",
+          "Failed to update habit status. Please try again."
+        );
       }
     },
     [habits, storageService, refreshHabits]
