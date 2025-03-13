@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, SafeAreaView, Alert } from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  NavigationProp,
+} from "@react-navigation/native";
+import { RootStackParamList } from "../types/navigation"; // Adjust the import path as necessary
 import { useHabits } from "../hooks/useHabits";
 import { HabitList } from "../components/HabitList";
 import { Habit } from "../types/habit";
@@ -10,7 +15,7 @@ export default function HomeScreen() {
   // Get habits data and operations from our custom hook
   const { habits, loading, error, refreshHabits } = useHabits();
   const storageService = StorageService.getInstance();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   // Refresh habits when screen comes into focus
   useFocusEffect(
@@ -63,14 +68,12 @@ export default function HomeScreen() {
   );
 
   // Handle navigation to habit detail screen
-  const handleHabitPress = useCallback((habit: Habit) => {
-    // Placeholder for future navigation implementation
-    // navigation.navigate('HabitDetail', { habitId: habit.id });
-    Alert.alert(
-      "Coming Soon",
-      "Habit details will be available in a future update"
-    );
-  }, []);
+  const handleHabitPress = useCallback(
+    (habit: Habit) => {
+      navigation.navigate("HabitDetail", { habit });
+    },
+    [navigation]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
