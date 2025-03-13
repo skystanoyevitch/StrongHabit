@@ -26,10 +26,19 @@ export default function HomeScreen() {
 
   // Effect to initialize storage
   useEffect(() => {
-    storageService.initialize().catch((err) => {
-      console.error("Failed to initialize storage:", err);
-      Alert.alert("Error", "There was a problem loading your habits");
-    });
+    const initializeStorage = async () => {
+      try {
+        await storageService.initialize();
+      } catch (err) {
+        console.error("Failed to initialize storage:", err);
+        Alert.alert(
+          "Initialization Error",
+          "There was a problem loading your habits. Please try again."
+        );
+      }
+    };
+
+    initializeStorage();
   }, []);
 
   // Handle habit completion toggle
