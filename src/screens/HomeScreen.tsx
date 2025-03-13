@@ -12,10 +12,9 @@ export default function HomeScreen() {
   const storageService = StorageService.getInstance();
   const navigation = useNavigation();
 
-  // Inside the HomeScreen component
+  // Refresh habits when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      // Refresh habits when screen comes into focus
       refreshHabits();
 
       return () => {
@@ -65,7 +64,7 @@ export default function HomeScreen() {
 
   // Handle navigation to habit detail screen
   const handleHabitPress = useCallback((habit: Habit) => {
-    // We'll implement this navigation later
+    // Placeholder for future navigation implementation
     // navigation.navigate('HabitDetail', { habitId: habit.id });
     Alert.alert(
       "Coming Soon",
@@ -73,7 +72,6 @@ export default function HomeScreen() {
     );
   }, []);
 
-  // console.log(navigation.getState());
   return (
     <SafeAreaView style={styles.container}>
       <HabitList
