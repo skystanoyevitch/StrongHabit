@@ -43,8 +43,10 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   initialValues,
   isEditing = false,
 }) => {
-  // Form state
-  const [formData, setFormData] = useState<HabitFormInput>(initialFormState);
+  // Update form state initialization to use initialValues if provided
+  const [formData, setFormData] = useState<HabitFormInput>(
+    initialValues || initialFormState
+  );
   const [errors, setErrors] = useState<
     Partial<Record<keyof HabitFormInput, string>>
   >({});
@@ -125,13 +127,19 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     "#FF2D55", // Pink
   ];
 
+  // Update the title based on whether we're editing
+  const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
+
+  // Update submit button text
+  const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Create New Habit</Text>
+        <Text style={styles.title}>{formTitle}</Text>
 
         {/* Name Input */}
         <View style={styles.formGroup}>
@@ -234,7 +242,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             style={[styles.button, styles.submitButton]}
             onPress={handleSubmit}
           >
-            <Text style={styles.submitButtonText}>Create Habit</Text>
+            <Text style={styles.submitButtonText}>{submitButtonText}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
