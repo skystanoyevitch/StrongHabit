@@ -1,20 +1,24 @@
 export interface HabitLog {
   date: string;
   completed: boolean;
-  notes?: string;
 }
+
+export type HabitFrequency = "daily" | "weekly" | "monthly";
 
 export interface Habit {
   id: string;
   name: string;
-  description?: string;
-  frequency: "daily" | "weekly";
-  timeOfDay?: string; // HH:mm format
-  createdAt: string; // ISO string format
-  archivedAt?: string; // ISO string format
-  streak: number;
-  completionLogs: HabitLog[];
+  description: string;
+  frequency: HabitFrequency;
+  createdAt: string;
+  updatedAt?: string;
+  archivedAt?: string | null;
+  reminderTime?: string | null;
   reminder?: boolean;
   color?: string;
-  icon?: string;
+  streak: number;
+  completionLogs: Array<{
+    date: string;
+    completed: boolean;
+  }>;
 }
