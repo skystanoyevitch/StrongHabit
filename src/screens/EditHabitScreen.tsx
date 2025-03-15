@@ -81,9 +81,9 @@ export default function EditHabitScreen(): React.ReactElement {
   );
 
   const initialValues: FormValues = {
-    name: habit.name,
-    description: habit.description,
-    frequency: habit.frequency,
+    name: habit.name || "",
+    description: habit.description || "",
+    frequency: habit.frequency || "daily",
     reminderTime: habit.reminderTime || null,
     reminder: habit.reminder ?? false,
     color: habit.color ?? "#000000",
