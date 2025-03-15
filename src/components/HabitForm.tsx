@@ -16,7 +16,10 @@ import { Habit } from "../types/habit";
 type HabitFormInput = Omit<
   Habit,
   "id" | "createdAt" | "streak" | "completionLogs"
->;
+> & {
+  reminder: boolean;
+  color: string;
+};
 
 // Define initial form state
 const initialFormState: HabitFormInput = {
@@ -30,9 +33,16 @@ const initialFormState: HabitFormInput = {
 interface HabitFormProps {
   onSubmit: (habit: HabitFormInput) => void;
   onCancel?: () => void;
+  initialValues?: HabitFormInput;
+  isEditing?: boolean;
 }
 
-export const HabitForm: React.FC<HabitFormProps> = ({ onSubmit, onCancel }) => {
+export const HabitForm: React.FC<HabitFormProps> = ({
+  onSubmit,
+  onCancel,
+  initialValues,
+  isEditing = false,
+}) => {
   // Form state
   const [formData, setFormData] = useState<HabitFormInput>(initialFormState);
   const [errors, setErrors] = useState<
