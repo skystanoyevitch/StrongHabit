@@ -162,11 +162,30 @@ export class StorageService {
     }
   }
 
+  private validateHabit(habit: Partial<Habit>): void {
+    if (!habit.name || habit.name.trim().length === 0) {
+      throw new Error("Habit name is required");
+    }
+
+    if (!habit.description || habit.description.trim().length === 0) {
+      throw new Error("Habit description is required");
+    }
+
+    if (
+      !habit.frequency ||
+      !["daily", "weekly", "monthly"].includes(habit.frequency)
+    ) {
+      throw new Error("Invalid habit frequency");
+    }
+  }
+
   // Add new habit
   async addHabit(
     habit: Omit<Habit, "id" | "createdAt" | "streak" | "completionLogs">
   ): Promise<Habit> {
     try {
+      this.validateHabit(habit);
+
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       const storageData: StorageData = data
         ? JSON.parse(data)
@@ -188,6 +207,46 @@ export class StorageService {
     } catch (error) {
       console.error("Failed to add habit:", error);
       throw new Error("Failed to add new habit");
+    }
+  }
+
+  async updateHabit(habit: Habit): Promise<void> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!data) throw new Error("No storage data found");
+
+      const storageData: StorageData = JSON.parse(data);
+      const index = storageData.habits.findIndex((h) => h.id === habit.id);
+
+      if (index === -1) {
+        throw new Error("Habit not found");
+      }
+
+      storageData.habits[index] = habit;
+      storageData.lastUpdated = new Date().toISOString();
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+    } catch (error) {
+      console.error("Error updating habit:", error);
+      throw new Error("Failed to update habit");
+    }
+  }
+
+  async deleteHabit(habitId: string): Promise<void> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!data) throw new Error("No storage data found");
+
+      const storageData: StorageData = JSON.parse(data);
+      storageData.habits = storageData.habits.filter(
+        (habit) => habit.id !== habitId
+      );
+      storageData.lastUpdated = new Date().toISOString();
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+    } catch (error) {
+      console.error("Error deleting habit:", error);
+      throw new Error("Failed to delete habit");
     }
   }
 }
