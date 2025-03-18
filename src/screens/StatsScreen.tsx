@@ -15,6 +15,8 @@ import { calculateWeeklyStats } from "../utils/statsUtils";
 import { StatsCard } from "../components/StatsCard";
 import { WeeklyChart } from "../components/WeeklyChart";
 import { AchievementsSection } from "../features/achievements/AchievementsSection";
+import { sharedStyles } from "../styles/shared";
+
 import {
   checkAchievements,
   UnlockedAchievement,
@@ -135,6 +137,9 @@ const StatsScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <Text style={sharedStyles.welcomeText}>
+        📊 Your awesome progress dashboard!
+      </Text>
       <View style={styles.statsGrid}>
         <StatsCard
           title="Active Habits"
@@ -169,6 +174,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f8f8",
   },
+  scrollContainer: {
+    padding: 20,
+  },
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -200,11 +208,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 24,
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: "600",
     color: "#333",
+    padding: 16,
+    textAlign: "center",
   },
   summaryContainer: {
     flexDirection: "row",
