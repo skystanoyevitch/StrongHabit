@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Habit } from "../types/habit";
 import { sharedStyles } from "../styles/shared";
-
+import { AnimatedTitle } from "./AnimatedTitle";
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
   Habit,
@@ -129,10 +129,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   ];
 
   // Update the title based on whether we're editing
-  const formTitle = isEditing
-    ? "Edit Habit"
-    : "🌟 Create an amazing new habit!";
-
+  const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
 
@@ -142,7 +139,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={sharedStyles.welcomeText}>{formTitle}</Text>
+        <AnimatedTitle text={formTitle} />
 
         {/* Name Input */}
         <View style={styles.formGroup}>
@@ -273,7 +270,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollContainer: {
-    padding: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   formGroup: {
     marginBottom: 20,
