@@ -17,7 +17,7 @@ type HabitFormInput = Omit<
   Habit,
   "id" | "createdAt" | "streak" | "completionLogs"
 > & {
-  reminder: boolean;
+  reminderEnabled: boolean;
   color: string;
 };
 
@@ -26,7 +26,7 @@ const initialFormState: HabitFormInput = {
   name: "",
   description: "",
   frequency: "daily",
-  reminder: false,
+  reminderEnabled: false,
   color: "#007AFF",
 };
 
@@ -205,8 +205,8 @@ export const HabitForm: React.FC<HabitFormProps> = ({
           <View style={styles.switchContainer}>
             <Text style={styles.label}>Set Reminder</Text>
             <Switch
-              value={formData.reminder}
-              onValueChange={(value) => handleChange("reminder", value)}
+              value={formData.reminderEnabled}
+              onValueChange={(value) => handleChange("reminderEnabled", value)}
               trackColor={{ false: "#ccc", true: "#007AFF" }}
               thumbColor={formData.reminder ? "#fff" : "#f4f3f4"}
             />
