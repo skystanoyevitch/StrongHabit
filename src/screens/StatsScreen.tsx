@@ -11,6 +11,14 @@ import { useIsFocused } from "@react-navigation/native";
 import { useHabits } from "../hooks/useHabits";
 import { Habit } from "../types/habit";
 import { StatsData } from "../types/stats";
+import { calculateWeeklyStats } from "../utils/statsUtils";
+import { StatsCard } from "../components/StatsCard";
+import { WeeklyChart } from "../components/WeeklyChart";
+import { AchievementsSection } from "../features/achievements/AchievementsSection";
+import {
+  checkAchievements,
+  UnlockedAchievement,
+} from "../features/achievements/achievementUtils";
 
 const initialStats: StatsData = {
   totalHabits: 0,
@@ -18,6 +26,11 @@ const initialStats: StatsData = {
   completionRate: 0,
   longestStreak: 0,
   habitWithLongestStreak: "",
+  weeklyStats: {
+    bestDay: "",
+    dailyCompletions: {},
+    totalCompletions: 0,
+  },
 };
 
 const StatsScreen: React.FC = () => {
@@ -25,6 +38,9 @@ const StatsScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [statsData, setStatsData] = useState<StatsData>(initialStats);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<
+    UnlockedAchievement[]
+  >([]);
 
   const calculateStats = useCallback(() => {
     setIsCalculating(true);
@@ -34,6 +50,8 @@ const StatsScreen: React.FC = () => {
       const activeHabits = habits.filter(
         (habit: Habit) => !habit.archivedAt
       ).length;
+
+      const weeklyStats = calculateWeeklyStats(habits);
 
       // Find habit with longest streak
       const { maxStreak, habitWithMaxStreak } = habits.reduce(
@@ -72,12 +90,26 @@ const StatsScreen: React.FC = () => {
           ? Math.round((totalCompletions / totalPossible) * 100)
           : 0;
 
+      // Check achievements for each habit
+      const allUnlockedAchievements = habits.flatMap((habit) =>
+        checkAchievements(habit)
+      );
+
+      // Remove duplicates
+      const uniqueAchievements = Array.from(
+        new Map(allUnlockedAchievements.map((a) => [a.id, a])).values()
+      );
+
+      setUnlockedAchievements(uniqueAchievements);
+
       setStatsData({
+        ...statsData,
         totalHabits: habits.length,
         activeHabits,
         completionRate,
         longestStreak: maxStreak,
         habitWithLongestStreak: habitWithMaxStreak,
+        weeklyStats,
       });
     } catch (error) {
       console.error("Error calculating stats:", error);
@@ -102,75 +134,33 @@ const StatsScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Your Progress</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.statsGrid}>
+        <StatsCard
+          title="Active Habits"
+          value={statsData.activeHabits}
+          style={styles.card}
+        />
+        <StatsCard
+          title="Completion Rate"
+          value={`${Math.round(statsData.completionRate)}%`}
+          style={styles.card}
+        />
+        <StatsCard
+          title="Longest Streak"
+          value={statsData.longestStreak}
+          subtitle={statsData.habitWithLongestStreak}
+          style={styles.card}
+        />
+      </View>
 
-        {isCalculating ? (
-          <ActivityIndicator size="small" color="#007AFF" />
-        ) : habits.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              Add some habits to see your statistics!
-            </Text>
-          </View>
-        ) : (
-          <>
-            {/* Summary Cards */}
-            <View style={styles.summaryContainer}>
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryValue}>{statsData.totalHabits}</Text>
-                <Text style={styles.summaryLabel}>Total Habits</Text>
-              </View>
-
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryValue}>
-                  {statsData.activeHabits}
-                </Text>
-                <Text style={styles.summaryLabel}>Active Habits</Text>
-              </View>
-
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryValue}>
-                  {statsData.completionRate}%
-                </Text>
-                <Text style={styles.summaryLabel}>Completion Rate</Text>
-              </View>
-            </View>
-
-            {/* Streak Information */}
-            <View style={styles.streakContainer}>
-              <Text style={styles.sectionTitle}>Current Streaks</Text>
-              {statsData.longestStreak > 0 ? (
-                <View style={styles.streakCard}>
-                  <Text style={styles.streakValue}>
-                    {statsData.longestStreak}
-                  </Text>
-                  <View style={styles.streakInfo}>
-                    <Text style={styles.streakLabel}>Longest Streak</Text>
-                    <Text style={styles.streakHabit}>
-                      {statsData.habitWithLongestStreak}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                <Text style={styles.noDataText}>
-                  Complete your habits consistently to build streaks!
-                </Text>
-              )}
-            </View>
-
-            {/* We'll add chart components here later */}
-            <View style={styles.chartSection}>
-              <Text style={styles.sectionTitle}>Weekly Overview</Text>
-              <View style={styles.chartPlaceholder}>
-                <Text style={styles.placeholderText}>Charts coming soon!</Text>
-              </View>
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+      <View style={styles.chartSection}>
+        <WeeklyChart
+          dailyCompletions={statsData.weeklyStats.dailyCompletions}
+        />
+      </View>
+      <AchievementsSection unlockedAchievements={unlockedAchievements} />
+    </ScrollView>
   );
 };
 
@@ -179,8 +169,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f8f8",
   },
-  scrollContainer: {
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     padding: 16,
+    justifyContent: "space-between",
+  },
+  card: {
+    width: "48%",
+    marginBottom: 16,
+  },
+  chartSection: {
+    backgroundColor: "#ffffff",
+    padding: 16,
+    margin: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   loadingContainer: {
     flex: 1,
@@ -265,17 +273,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
     marginTop: 4,
-  },
-  chartSection: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   chartPlaceholder: {
     height: 200,
