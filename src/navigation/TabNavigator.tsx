@@ -5,6 +5,7 @@ import AddHabitScreen from "../screens/AddHabitScreen";
 import StatsScreen from "../screens/StatsScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "react-native-paper";
+import SettingsScreen from "../screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -58,6 +59,16 @@ const TabNavigator = () => {
             />
           ),
           title: "Statistics",
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cog" size={size} color={color} />
+          ),
+          title: "Settings",
         }}
       />
     </Tab.Navigator>
