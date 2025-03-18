@@ -4,6 +4,8 @@ import { useNavigation } from "@react-navigation/native";
 import { HabitForm } from "../components/HabitForm";
 import { StorageService } from "../utils/storage";
 import { Habit } from "../types/habit";
+import { AnimatedTitle } from '../components/AnimatedTitle';
+
 
 export default function AddHabitScreen() {
   const navigation = useNavigation();
