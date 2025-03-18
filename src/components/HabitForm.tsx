@@ -11,6 +11,7 @@ import {
   Switch,
 } from "react-native";
 import { Habit } from "../types/habit";
+import { sharedStyles } from "../styles/shared";
 
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
@@ -128,7 +129,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   ];
 
   // Update the title based on whether we're editing
-  const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
+  const formTitle = isEditing ? "Edit Habit" : "🌟 Create an amazing new habit!";
 
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
@@ -139,7 +140,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>{formTitle}</Text>
+        <Text style={sharedStyles.welcomeText}>{formTitle}</Text>
 
         {/* Name Input */}
         <View style={styles.formGroup}>
@@ -257,12 +258,6 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 20,
-    color: "#333",
   },
   formGroup: {
     marginBottom: 20,
