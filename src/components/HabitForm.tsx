@@ -129,7 +129,9 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   ];
 
   // Update the title based on whether we're editing
-  const formTitle = isEditing ? "Edit Habit" : "🌟 Create an amazing new habit!";
+  const formTitle = isEditing
+    ? "Edit Habit"
+    : "🌟 Create an amazing new habit!";
 
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
@@ -187,7 +189,14 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               ]}
               onPress={() => handleChange("frequency", "daily")}
             >
-              <Text style={styles.radioText}>Daily</Text>
+              <Text
+                style={[
+                  styles.radioText,
+                  formData.frequency === "daily" && styles.radioTextSelected,
+                ]}
+              >
+                Daily
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -196,7 +205,14 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               ]}
               onPress={() => handleChange("frequency", "weekly")}
             >
-              <Text style={styles.radioText}>Weekly</Text>
+              <Text
+                style={[
+                  styles.radioText,
+                  formData.frequency === "weekly" && styles.radioTextSelected,
+                ]}
+              >
+                Weekly
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -308,10 +324,14 @@ const styles = StyleSheet.create({
   },
   radioSelected: {
     backgroundColor: "#007AFF",
+    color: "#fff",
   },
   radioText: {
     color: "#007AFF",
     fontWeight: "500",
+  },
+  radioTextSelected: {
+    color: "#fff", // This will make the text white when selected
   },
   colorContainer: {
     flexDirection: "row",
