@@ -249,4 +249,87 @@ export class StorageService {
       throw new Error("Failed to delete habit");
     }
   }
+
+  async restoreData(backupData: string): Promise<boolean> {
+    try {
+      const parsedData = JSON.parse(backupData) as StorageData;
+
+      // Validate backup data structure
+      if (!this.isValidStorageData(parsedData)) {
+        throw new Error("Invalid backup data format");
+      }
+
+      // Perform data migration if needed
+      const migratedData = await this.migrateData(parsedData);
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migratedData));
+      return true;
+    } catch (error) {
+      console.error("Restore failed:", error);
+      throw new Error("Failed to restore data");
+    }
+  }
+
+  async cleanupOldData(): Promise<void> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!data) return;
+
+      const storageData: StorageData = JSON.parse(data);
+
+      // Remove habits older than 1 year
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+      storageData.habits = storageData.habits.filter((habit) => {
+        const habitDate = new Date(habit.createdAt);
+        return habitDate > oneYearAgo;
+      });
+
+      // Cleanup old completion logs
+      storageData.habits.forEach((habit) => {
+        habit.completionLogs = habit.completionLogs.filter((log) => {
+          const logDate = new Date(log.date);
+          return logDate > oneYearAgo;
+        });
+      });
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+    } catch (error) {
+      console.error("Cleanup failed:", error);
+      throw new Error("Failed to cleanup old data");
+    }
+  }
+
+  private async migrateData(data: StorageData): Promise<StorageData> {
+    // Handle data structure changes between versions
+    switch (data.version) {
+      case 1:
+        // Current version, no migration needed
+        return data;
+
+      default:
+        // Unknown version, return as is but log warning
+        console.warn("Unknown data version:", data.version);
+        return data;
+    }
+  }
+
+  private isValidStorageData(data: any): data is StorageData {
+    return (
+      data &&
+      Array.isArray(data.habits) &&
+      typeof data.lastUpdated === "string" &&
+      typeof data.version === "number" &&
+      data.habits.every(
+        (habit: any) =>
+          habit.id &&
+          habit.name &&
+          habit.description &&
+          habit.frequency &&
+          habit.createdAt &&
+          Array.isArray(habit.completionLogs)
+      )
+    );
+  }
 }
