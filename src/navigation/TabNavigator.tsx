@@ -14,6 +14,7 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
+        headerShown: true, // This removes tab screen headers
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
