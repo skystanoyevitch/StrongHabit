@@ -11,6 +11,7 @@ import { HabitList } from "../components/HabitList";
 import { Habit } from "../types/habit";
 import { StorageService } from "../utils/storage";
 import { sharedStyles } from "../styles/shared";
+import { AnimatedTitle } from "../components/AnimatedTitle";
 
 export default function HomeScreen() {
   // Get habits data and operations from our custom hook
@@ -78,9 +79,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={sharedStyles.welcomeText}>
-        ✨ Welcome to your habits journey!
-      </Text>
+      <AnimatedTitle text="Welcome to StrongHabit" />
       <HabitList
         habits={habits}
         loading={loading}
