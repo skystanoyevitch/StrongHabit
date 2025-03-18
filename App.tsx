@@ -6,6 +6,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
+import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -16,9 +17,17 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Poppins_600SemiBold,
+  });
+
   useEffect(() => {
     registerForPushNotificationsAsync();
   }, []);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <NavigationContainer>
