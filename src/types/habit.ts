@@ -14,6 +14,8 @@ export interface Habit {
   updatedAt?: string;
   archivedAt?: string | null;
   reminderTime?: string | null;
+  reminderEnabled: boolean;
+  notificationId?: string;
   reminder?: boolean;
   color?: string;
   streak: number;
