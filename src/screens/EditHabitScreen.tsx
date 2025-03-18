@@ -24,7 +24,7 @@ interface FormValues {
   description: string;
   frequency: HabitFrequency;
   reminderTime?: string | null;
-  reminder: boolean;
+  reminderEnabled: boolean;
   color: string;
 }
 
@@ -85,7 +85,7 @@ export default function EditHabitScreen(): React.ReactElement {
     description: habit.description || "",
     frequency: habit.frequency || "daily",
     reminderTime: habit.reminderTime || null,
-    reminder: habit.reminder ?? false,
+    reminderEnabled: habit.reminder ?? false,
     color: habit.color ?? "#000000",
   };
 
