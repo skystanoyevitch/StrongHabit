@@ -13,6 +13,7 @@ import { StorageService } from "../utils/storage";
 import { Habit } from "../types/habit";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { sharedStyles } from "../styles/shared";
+import { AnimatedTitle } from "../components/AnimatedTitle";
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -85,7 +86,7 @@ export default function HabitDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <Text style={sharedStyles.welcomeText}>🎯 Let's review your habit goals!</Text>
+      <AnimatedTitle text="Habit Details" />
       <View style={styles.header}>
         <Text style={styles.title}>{habit.name}</Text>
         <Text style={styles.description}>{habit.description}</Text>
