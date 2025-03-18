@@ -4,4 +4,9 @@ export interface StatsData {
   completionRate: number;
   longestStreak: number;
   habitWithLongestStreak: string;
+  weeklyStats: {
+    bestDay: string;
+    dailyCompletions: Record<string, number>;
+    totalCompletions: number;
+  };
 }
