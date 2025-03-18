@@ -7,6 +7,14 @@ import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
+import {
+  useFonts as useDancingScriptFonts,
+  DancingScript_700Bold,
+} from "@expo-google-fonts/dancing-script";
+import {
+  useFonts as useBebasNeueFonts,
+  BebasNeue_400Regular,
+} from "@expo-google-fonts/bebas-neue";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,11 +29,19 @@ export default function App() {
     Poppins_600SemiBold,
   });
 
+  const [dancingScriptFontsLoaded] = useDancingScriptFonts({
+    DancingScript_700Bold,
+  });
+
+  const [bebasNeueFontsLoaded] = useBebasNeueFonts({
+    BebasNeue_400Regular,
+  });
+
   useEffect(() => {
     registerForPushNotificationsAsync();
   }, []);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !dancingScriptFontsLoaded || !bebasNeueFontsLoaded) {
     return null;
   }
 
