@@ -21,6 +21,7 @@ import {
   checkAchievements,
   UnlockedAchievement,
 } from "../features/achievements/achievementUtils";
+import { AnimatedTitle } from "../components/AnimatedTitle";
 
 const initialStats: StatsData = {
   totalHabits: 0,
@@ -137,9 +138,8 @@ const StatsScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={sharedStyles.welcomeText}>
-        📊 Your awesome progress dashboard!
-      </Text>
+      <AnimatedTitle text="Your Progress Dashboard" />
+
       <View style={styles.statsGrid}>
         <StatsCard
           title="Active Habits"
