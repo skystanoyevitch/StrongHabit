@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, SafeAreaView, Alert } from "react-native";
+import { View, StyleSheet, SafeAreaView, Alert, Text } from "react-native";
 import {
   useFocusEffect,
   useNavigation,
@@ -10,6 +10,7 @@ import { useHabits } from "../hooks/useHabits";
 import { HabitList } from "../components/HabitList";
 import { Habit } from "../types/habit";
 import { StorageService } from "../utils/storage";
+import { sharedStyles } from "../styles/shared";
 
 export default function HomeScreen() {
   // Get habits data and operations from our custom hook
@@ -77,6 +78,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={sharedStyles.welcomeText}>
+        ✨ Welcome to your habits journey!
+      </Text>
       <HabitList
         habits={habits}
         loading={loading}
@@ -92,5 +96,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 20,
+    color: "#333",
+    padding: 16,
   },
 });
