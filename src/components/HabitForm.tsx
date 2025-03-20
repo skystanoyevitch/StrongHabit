@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
+  Modal,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Habit } from "../types/habit";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "./AnimatedTitle";
@@ -51,6 +53,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   const [errors, setErrors] = useState<
     Partial<Record<keyof HabitFormInput, string>>
   >({});
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Form field update handler
   const handleChange = (field: keyof HabitFormInput, value: any) => {
@@ -65,6 +68,16 @@ export const HabitForm: React.FC<HabitFormProps> = ({
         ...prev,
         [field]: undefined,
       }));
+    }
+  };
+
+  // Function to handle time selection
+  const handleTimeChange = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      const hours = selectedDate.getHours().toString().padStart(2, "0");
+      const minutes = selectedDate.getMinutes().toString().padStart(2, "0");
+      const timeString = `${hours}:${minutes}`;
+      handleChange("reminderTime", timeString);
     }
   };
 
@@ -227,6 +240,48 @@ export const HabitForm: React.FC<HabitFormProps> = ({
           </View>
         </View>
 
+        {/* Time Picker (only show when reminderEnabled is true) */}
+        {formData.reminderEnabled && (
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Reminder Time</Text>
+            <TouchableOpacity
+              style={styles.timePickerButton}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text style={styles.timePickerText}>
+                {formData.reminderTime
+                  ? `${formData.reminderTime}`
+                  : "Set time (tap to select)"}
+              </Text>
+            </TouchableOpacity>
+
+            {showTimePicker && (
+              <DateTimePicker
+                value={
+                  formData.reminderTime
+                    ? (() => {
+                        const [hours, minutes] = formData.reminderTime
+                          .split(":")
+                          .map(Number);
+                        const date = new Date();
+                        date.setHours(hours);
+                        date.setMinutes(minutes);
+                        return date;
+                      })()
+                    : new Date()
+                }
+                mode="time"
+                is24Hour={false}
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowTimePicker(Platform.OS === "ios");
+                  handleTimeChange(selectedDate);
+                }}
+              />
+            )}
+          </View>
+        )}
+
         {/* Color Selection */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Color</Text>
@@ -371,6 +426,27 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "600",
+  },
+
+  timePickerButton: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  timePickerText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  doneButton: {
+    alignSelf: "flex-end",
+    padding: 16,
+  },
+  doneButtonText: {
+    color: "#007AFF",
+    fontSize: 18,
     fontWeight: "600",
   },
   cancelButton: {
