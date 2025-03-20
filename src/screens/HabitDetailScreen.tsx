@@ -32,10 +32,36 @@ export default function HabitDetailScreen() {
   const [markedDates, setMarkedDates] = useState<any>({});
   const storageService = StorageService.getInstance();
 
+  // const calculateStats = useCallback(() => {
+  //   const completionLogs = habit.completionLogs || {};
+  //   const totalDays = Object.keys(completionLogs).length;
+  //   const completedDays = Object.values(completionLogs).filter(Boolean).length;
+
+  //   setStats({
+  //     totalDays,
+  //     completedDays,
+  //     currentStreak: habit.streak || 0,
+  //     successRate: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
+  //   });
+
+  //   // Mark completed dates in calendar
+  //   const marked = Object.entries(completionLogs).reduce(
+  //     (acc, [date, completed]) => ({
+  //       ...acc,
+  //       [date]: {
+  //         marked: true,
+  //         dotColor: completed ? "#4CAF50" : "#FF5252",
+  //       },
+  //     }),
+  //     {}
+  //   );
+  //   setMarkedDates(marked);
+  // }, [habit]);
+
   const calculateStats = useCallback(() => {
-    const completionLogs = habit.completionLogs || {};
-    const totalDays = Object.keys(completionLogs).length;
-    const completedDays = Object.values(completionLogs).filter(Boolean).length;
+    const completionLogs = habit.completionLogs || [];
+    const totalDays = completionLogs.length;
+    const completedDays = completionLogs.filter((log) => log.completed).length;
 
     setStats({
       totalDays,
@@ -44,17 +70,20 @@ export default function HabitDetailScreen() {
       successRate: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
     });
 
-    // Mark completed dates in calendar
-    const marked = Object.entries(completionLogs).reduce(
-      (acc, [date, completed]) => ({
-        ...acc,
-        [date]: {
-          marked: true,
-          dotColor: completed ? "#4CAF50" : "#FF5252",
-        },
-      }),
-      {}
-    );
+    // Format dates for the calendar
+    const marked: { [key: string]: any } = {};
+    completionLogs.forEach((log) => {
+      const dateString = log.date.split("T")[0]; // Extract YYYY-MM-DD part
+      marked[dateString] = {
+        marked: true,
+        dotColor: log.completed ? "#4CAF50" : "#FF5252",
+        selected: true,
+        selectedColor: log.completed
+          ? "rgba(76, 175, 80, 0.2)"
+          : "rgba(255, 82, 82, 0.2)",
+      };
+    });
+
     setMarkedDates(marked);
   }, [habit]);
 
@@ -86,6 +115,16 @@ export default function HabitDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
+        </TouchableOpacity>
+        <AnimatedTitle text="Habit Details" />
+      </View>
+
       <AnimatedTitle text="Habit Details" />
       <View style={styles.header}>
         <Text style={styles.title}>{habit.name}</Text>
@@ -174,6 +213,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    padding: 8,
+    position: "absolute",
+    left: 16,
+    zIndex: 10,
   },
   statItem: {
     alignItems: "center",
