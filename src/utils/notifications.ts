@@ -71,38 +71,58 @@ export async function registerForPushNotificationsAsync() {
 }
 
 export async function scheduleHabitReminder(schedule: NotificationSchedule) {
-  // Temporarily disabled for MVP
-  console.log("Notifications temporarily disabled");
-  return `habit-reminder-${schedule.habitId}`;
+  try {
+    // Check if notifications are enabled
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Notification permission not granted");
+      return null;
+    }
 
-  // TODO: Fix notification scheduling
-  /*
-  const identifier = `habit-reminder-${schedule.habitId}`;
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: schedule.title,
-      body: schedule.body,
-      data: { habitId: schedule.habitId },
-    },
-    trigger: {
-      type: "daily",
-      hour: schedule.hour,
-      minute: schedule.minute,
-      repeats: true,
-    },
-    identifier,
-  });
-  return identifier;
-  */
+    // Cancel any existing notification for this habit
+    await cancelHabitReminder(schedule.habitId);
+
+    // Create a date object for today at the specified time
+    const scheduledTime = new Date();
+    scheduledTime.setHours(schedule.hour || 9);
+    scheduledTime.setMinutes(schedule.minute || 0);
+    scheduledTime.setSeconds(0);
+
+    // If the time has already passed today, schedule for tomorrow
+    if (scheduledTime <= new Date()) {
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
+
+    // Schedule new notification
+    const identifier = `habit-reminder-${schedule.habitId}`;
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: schedule.title || "Habit Reminder",
+        body: schedule.body || "Don't forget your habit!",
+        data: { habitId: schedule.habitId },
+      },
+      trigger: {
+        date: scheduledTime,
+        repeats: true,
+        channelId: "default",
+      },
+    });
+
+    return identifier;
+  } catch (error) {
+    console.error("Failed to schedule notification:", error);
+    return null;
+  }
 }
 
 export async function cancelHabitReminder(habitId: string) {
-  // Temporarily disabled for MVP
-  console.log("Cancel notification temporarily disabled");
-  return;
-
-  /*
-  const identifier = `habit-reminder-${habitId}`;
-  await Notifications.cancelScheduledNotificationAsync(identifier);
-  */
+  try {
+    const identifier = `habit-reminder-${habitId}`;
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+    return true;
+  } catch (error) {
+    console.error('Failed to cancel notification:', error);
+    return false;
+  }
 }
