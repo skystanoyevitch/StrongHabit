@@ -4,7 +4,7 @@
     "slug": "StrongHabit",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ios/AppIcon.appiconset/1024x1024.png",
+    "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -16,7 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.yourdomain.stronghabit",
       "buildNumber": "1.0.0",
-      "icon": "./assets/ios/AppIcon.appiconset/1024x1024.png"
+      "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png"
     },
     "android": {
       "adaptiveIcon": {
