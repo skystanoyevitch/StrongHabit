@@ -53,11 +53,11 @@ const SettingsScreen: React.FC = () => {
   };
 
   const handlePrivacyPolicy = () => {
-    Linking.openURL("https://skystanoyevitch.com/privacy");
+    Linking.openURL("https://skystanoyevitch.com/strong-habit/privacy");
   };
 
   const handleTerms = () => {
-    Linking.openURL("https://skystanoyevitch.com/terms");
+    Linking.openURL("https://skystanoyevitch.com/strong-habit/terms");
   };
 
   const handleExportData = async () => {
