@@ -139,15 +139,21 @@ const SettingsScreen: React.FC = () => {
       </SettingsSection>
 
       <SettingsSection title="Data">
-        <TouchableOpacity style={styles.setting} onPress={handleExportData}>
-          <Text style={styles.settingLabel}>Export Data</Text>
-          <MaterialCommunityIcons name="export" size={24} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.setting}>
+          <View>
+            <Text style={styles.settingLabel}>Export Data</Text>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+          <MaterialCommunityIcons name="export" size={24} color="#999" />
+        </View>
 
-        <TouchableOpacity style={styles.setting} onPress={handleBackupData}>
-          <Text style={styles.settingLabel}>Backup Data</Text>
-          <MaterialCommunityIcons name="cloud-upload" size={24} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.setting}>
+          <View>
+            <Text style={styles.settingLabel}>Backup Data</Text>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+          <MaterialCommunityIcons name="cloud-upload" size={24} color="#999" />
+        </View>
       </SettingsSection>
 
       <SettingsSection title="App Info">
@@ -163,16 +169,26 @@ const SettingsScreen: React.FC = () => {
       </SettingsSection>
 
       <SettingsSection title="Data Management">
-        <TouchableOpacity style={styles.setting} onPress={handleRestoreData}>
-          <Text style={styles.settingLabel}>Restore from Backup</Text>
-          <MaterialCommunityIcons name="restore" size={24} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.setting}>
+          <View>
+            <Text style={styles.settingLabel}>Restore from Backup</Text>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+          <MaterialCommunityIcons name="restore" size={24} color="#999" />
+        </View>
 
-        <TouchableOpacity style={styles.setting} onPress={handleCleanup}>
-          <Text style={styles.settingLabel}>Cleanup Old Data</Text>
-          <MaterialCommunityIcons name="trash-can" size={24} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.setting}>
+          <View>
+            <Text style={styles.settingLabel}>Cleanup Old Data</Text>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+          <MaterialCommunityIcons name="trash-can" size={24} color="#999" />
+        </View>
       </SettingsSection>
+
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>StrongHabit v1.0.0</Text>
+      </View>
     </ScrollView>
   );
 };
@@ -208,9 +224,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+  comingSoonText: {
+    fontSize: 12,
+    color: "#999",
+    fontStyle: "italic",
+  },
   settingValue: {
     fontSize: 16,
     color: "#666",
+  },
+  versionContainer: {
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 0,
+  },
+  versionText: {
+    fontSize: 14,
+    color: "#999",
   },
 });
 
