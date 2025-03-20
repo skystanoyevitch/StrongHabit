@@ -15,6 +15,7 @@ import {
   useFonts as useBebasNeueFonts,
   BebasNeue_400Regular,
 } from "@expo-google-fonts/bebas-neue";
+import ErrorBoundary from "./src/components/ErrorBoundry";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -42,13 +43,19 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded || !dancingScriptFontsLoaded || !bebasNeueFontsLoaded) {
-    return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>StrongHabit</Text>
+      </View>
+    );
   }
 
   return (
-    <NavigationContainer>
-      <TabNavigator />
-    </NavigationContainer>
+    <ErrorBoundary>
+      <NavigationContainer>
+        <TabNavigator />
+      </NavigationContainer>
+    </ErrorBoundary>
   );
 }
 
@@ -58,5 +65,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#007AFF",
   },
 });
