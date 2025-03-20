@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Habit, HabitLog } from "../types/habit";
+import { scheduleHabitReminder, cancelHabitReminder } from "./notifications";
 
 const STORAGE_KEY = "HABITFLOW_DATA_V1";
 
@@ -167,9 +168,9 @@ export class StorageService {
       throw new Error("Habit name is required");
     }
 
-    if (!habit.description || habit.description.trim().length === 0) {
-      throw new Error("Habit description is required");
-    }
+    // if (!habit.description || habit.description.trim().length === 0) {
+    //   throw new Error("Habit description is required");
+    // }
 
     if (
       !habit.frequency ||
@@ -199,6 +200,24 @@ export class StorageService {
         completionLogs: [],
       };
 
+      // Schedule reminder if enabled
+      if (habit.reminderEnabled && habit.reminderTime) {
+        const [hours, minutes] = habit.reminderTime.split(":").map(Number);
+
+        // Schedule the reminder
+        const notificationId = await scheduleHabitReminder({
+          habitId: newHabit.id,
+          title: `Reminder: ${habit.name}`,
+          body: `Time to complete your habit: ${habit.name}`,
+          hour: hours || 9,
+          minute: minutes || 0,
+        });
+
+        if (notificationId) {
+          newHabit.notificationId = notificationId;
+        }
+      }
+
       storageData.habits.push(newHabit);
       storageData.lastUpdated = new Date().toISOString();
 
@@ -220,6 +239,31 @@ export class StorageService {
 
       if (index === -1) {
         throw new Error("Habit not found");
+      }
+
+      // Handle notification updates
+      const oldHabit = storageData.habits[index];
+
+      // Cancel existing notification if it exists
+      if (oldHabit.notificationId) {
+        await cancelHabitReminder(habit.id);
+      }
+
+      // Schedule new notification if enabled
+      if (habit.reminderEnabled && habit.reminderTime) {
+        const [hours, minutes] = habit.reminderTime.split(":").map(Number);
+
+        const notificationId = await scheduleHabitReminder({
+          habitId: habit.id,
+          title: `Reminder: ${habit.name}`,
+          body: `Time to complete your habit: ${habit.name}`,
+          hour: hours || 9,
+          minute: minutes || 0,
+        });
+
+        if (notificationId) {
+          habit.notificationId = notificationId;
+        }
       }
 
       storageData.habits[index] = habit;
