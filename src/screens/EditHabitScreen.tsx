@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   View,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import {
   useNavigation,
@@ -18,6 +19,8 @@ import { StorageService } from "../utils/storage";
 import { HabitForm } from "../components/HabitForm";
 import { Habit, HabitFrequency } from "../types/habit";
 import { HabitError } from "../types/errors";
+import { AnimatedTitle } from "../components/AnimatedTitle";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface FormValues {
   name: string;
@@ -36,15 +39,24 @@ export default function EditHabitScreen(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const storageService = StorageService.getInstance();
 
+  // const validateForm = (values: FormValues): boolean => {
+  //   if (!values.name.trim()) {
+  //     setError("Name is required");
+  //     return false;
+  //   }
+  //   if (!values.description.trim()) {
+  //     setError("Description is required");
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
   const validateForm = (values: FormValues): boolean => {
     if (!values.name.trim()) {
       setError("Name is required");
       return false;
     }
-    if (!values.description.trim()) {
-      setError("Description is required");
-      return false;
-    }
+    // Remove the description validation since it's optional
     return true;
   };
 
@@ -91,6 +103,16 @@ export default function EditHabitScreen(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
+        </TouchableOpacity>
+        <AnimatedTitle text="Edit Habit" />
+      </View>
+
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -129,6 +151,17 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#c62828",
     fontSize: 14,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    padding: 8,
+    position: "absolute",
+    left: 16,
+    zIndex: 10,
   },
   loadingContainer: {
     flex: 1,
