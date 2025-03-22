@@ -122,7 +122,6 @@ export default function HabitDetailScreen() {
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <AnimatedTitle text="Habit Details" />
       </View>
 
       <AnimatedTitle text="Habit Details" />
@@ -155,7 +154,7 @@ export default function HabitDetailScreen() {
       <View style={styles.calendarContainer}>
         <Text style={styles.sectionTitle}>Completion History</Text>
         <CalendarList
-          pastScrollRange={3}
+          pastScrollRange={2} // Reduce from 3
           futureScrollRange={0}
           scrollEnabled={true}
           showScrollIndicator={true}
@@ -163,7 +162,7 @@ export default function HabitDetailScreen() {
           removeClippedSubviews={true}
           maxToRenderPerBatch={1}
           initialNumToRender={1}
-          windowSize={2}
+          windowSize={1} // Reduce from 2
         />
       </View>
 
@@ -215,7 +214,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
   },
   headerContainer: {
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
   },
