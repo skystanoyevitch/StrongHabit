@@ -22,6 +22,7 @@ import {
   UnlockedAchievement,
 } from "../features/achievements/achievementUtils";
 import { AnimatedTitle } from "../components/AnimatedTitle";
+import ChartErrorBoundary from "../components/ChartErrorBoundry";
 
 const initialStats: StatsData = {
   totalHabits: 0,
@@ -160,9 +161,11 @@ const StatsScreen: React.FC = () => {
       </View>
 
       <View style={styles.chartSection}>
-        <WeeklyChart
-          dailyCompletions={statsData.weeklyStats.dailyCompletions}
-        />
+        <ChartErrorBoundary>
+          <WeeklyChart
+            dailyCompletions={statsData.weeklyStats.dailyCompletions}
+          />
+        </ChartErrorBoundary>
       </View>
       <AchievementsSection unlockedAchievements={unlockedAchievements} />
     </ScrollView>
