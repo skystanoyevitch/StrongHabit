@@ -11,7 +11,7 @@ export type RootTabScreenProps<T extends keyof RootTabParamList> =
   BottomTabScreenProps<RootTabParamList, T>;
 
 export type RootStackParamList = {
-  Home: undefined;
+  HomeScreen: undefined;
   HabitDetail: { habit: Habit };
   EditHabit: { habit: Habit };
   AddHabit: undefined;
