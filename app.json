@@ -29,7 +29,12 @@
     "plugins": ["expo-font"],
     "extra": {
       "eas": {
-        "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076"
+        "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076",
+        "build": {
+          "experimental": {
+            "skipNativeDependencyValidation": true
+          }
+        }
       }
     }
   }
