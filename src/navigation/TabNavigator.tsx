@@ -22,6 +22,7 @@ const TabNavigator = () => {
           paddingBottom: 5,
           height: 100,
         },
+        freezeOnBlur: true,
       }}
     >
       <Tab.Screen
