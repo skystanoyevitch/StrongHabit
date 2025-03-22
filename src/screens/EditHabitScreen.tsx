@@ -110,7 +110,6 @@ export default function EditHabitScreen(): React.ReactElement {
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <AnimatedTitle text="Edit Habit" />
       </View>
 
       {error && (
@@ -153,7 +152,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   headerContainer: {
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
   },
