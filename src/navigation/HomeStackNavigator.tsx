@@ -14,7 +14,7 @@ export default function HomeStackNavigator() {
         headerShown: false, // This adds or removes all headers
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="HabitDetail" component={HabitDetailScreen} />
       <Stack.Screen name="EditHabit" component={EditHabitScreen} />
       <Stack.Screen name="Stats" component={StatsScreen} />
