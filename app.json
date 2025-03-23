@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
@@ -18,7 +18,8 @@
       "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "jsEngine": "hermes"
     },
     "android": {
       "adaptiveIcon": {
