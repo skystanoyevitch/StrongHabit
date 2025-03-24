@@ -12,7 +12,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.skystanoyevitch.stronghabit",
       "buildNumber": "1.0",
       "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
