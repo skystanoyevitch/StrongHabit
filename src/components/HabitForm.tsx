@@ -12,9 +12,11 @@ import {
   Modal,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Habit } from "../types/habit";
+import { Habit, DayOfWeek } from "../types/habit";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "./AnimatedTitle";
+import { DaySelection } from "./DaySelection";
+
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
   Habit,
@@ -22,6 +24,7 @@ type HabitFormInput = Omit<
 > & {
   reminderEnabled: boolean;
   color: string;
+  selectedDays: DayOfWeek[];
 };
 
 // Define initial form state
@@ -29,6 +32,7 @@ const initialFormState: HabitFormInput = {
   name: "",
   description: "",
   frequency: "daily",
+  selectedDays: [],
   reminderEnabled: false,
   color: "#007AFF",
 };
@@ -95,6 +99,11 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     // Description length validation (optional field)
     if (formData.description && formData.description.length > 200) {
       newErrors.description = "Description must be less than 200 characters";
+    }
+
+    // Frequency validation
+    if (formData.frequency === "weekly" && formData.selectedDays.length === 0) {
+      newErrors.selectedDays = "Please select at least one day";
     }
 
     // Set errors and return validation result
@@ -226,6 +235,25 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Day Selection */}
+        {formData.frequency === "weekly" && (
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Select Days</Text>
+            <DaySelection
+              selectedDays={formData.selectedDays}
+              onDaySelect={(day) => {
+                const newSelectedDays = formData.selectedDays.includes(day)
+                  ? formData.selectedDays.filter((d) => d !== day)
+                  : [...formData.selectedDays, day];
+                handleChange("selectedDays", newSelectedDays);
+              }}
+            />
+            {errors.selectedDays && (
+              <Text style={styles.errorText}>{errors.selectedDays}</Text>
+            )}
+          </View>
+        )}
 
         {/* Reminder Toggle */}
         <View style={styles.formGroup}>
