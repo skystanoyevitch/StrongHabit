@@ -156,4 +156,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  gradient: {
+    flex: 1,
+  },
 });
