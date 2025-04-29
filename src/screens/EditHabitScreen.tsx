@@ -17,7 +17,7 @@ import {
 import { RootStackParamList } from "../types/navigation";
 import { StorageService } from "../utils/storage";
 import { HabitForm } from "../components/HabitForm";
-import { Habit, HabitFrequency } from "../types/habit";
+import { DayOfWeek, Habit, HabitFrequency } from "../types/habit";
 import { HabitError } from "../types/errors";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -26,6 +26,7 @@ interface FormValues {
   name: string;
   description: string;
   frequency: HabitFrequency;
+  selectedDays: DayOfWeek[];
   reminderTime?: string | null;
   reminderEnabled: boolean;
   color: string;
@@ -96,6 +97,7 @@ export default function EditHabitScreen(): React.ReactElement {
     name: habit.name || "",
     description: habit.description || "",
     frequency: habit.frequency || "daily",
+    selectedDays: habit.selectedDays || [],
     reminderTime: habit.reminderTime || null,
     reminderEnabled: habit.reminder ?? false,
     color: habit.color ?? "#000000",
