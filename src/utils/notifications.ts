@@ -2,6 +2,7 @@ import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
+import { DayOfWeek, DAYS_OF_WEEK } from "src/types/habit";
 
 const NOTIFICATIONS_KEY = "@settings_notifications";
 
@@ -11,6 +12,8 @@ export interface NotificationSchedule {
   body: string;
   hour: number;
   minute: number;
+  frequency: "daily" | "weekly";
+  selectedDays?: DayOfWeek[];
 }
 
 export const setupNotifications = async (): Promise<boolean> => {
@@ -88,8 +91,21 @@ export async function scheduleHabitReminder(schedule: NotificationSchedule) {
     scheduledTime.setMinutes(schedule.minute || 0);
     scheduledTime.setSeconds(0);
 
-    // If the time has already passed today, schedule for tomorrow
-    if (scheduledTime <= new Date()) {
+    // If weekly frequency, find the next selected day
+    if (schedule.frequency === "weekly" && schedule.selectedDays?.length) {
+      const today = scheduledTime.getDay();
+      const nextDay =
+        schedule.selectedDays
+          .map((day) => DAYS_OF_WEEK.indexOf(day))
+          .find((dayIndex) => dayIndex > today) || schedule.selectedDays[0];
+
+      const daysUntilNext = (nextDay as number) - today;
+      scheduledTime.setDate(
+        scheduledTime.getDate() +
+          (daysUntilNext <= 0 ? 7 + daysUntilNext : daysUntilNext)
+      );
+    } else if (scheduledTime <= new Date()) {
+      // For daily habits, if time has passed, schedule for tomorrow
       scheduledTime.setDate(scheduledTime.getDate() + 1);
     }
 
@@ -104,7 +120,7 @@ export async function scheduleHabitReminder(schedule: NotificationSchedule) {
       },
       trigger: {
         date: scheduledTime,
-        repeats: true,
+        repeats: schedule.frequency === "daily",
         channelId: "default",
       },
     });
@@ -122,7 +138,7 @@ export async function cancelHabitReminder(habitId: string) {
     await Notifications.cancelScheduledNotificationAsync(identifier);
     return true;
   } catch (error) {
-    console.error('Failed to cancel notification:', error);
+    console.error("Failed to cancel notification:", error);
     return false;
   }
 }
