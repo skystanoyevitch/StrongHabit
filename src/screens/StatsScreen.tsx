@@ -138,37 +138,39 @@ const StatsScreen: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <AnimatedTitle text="Your Progress Dashboard" />
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <AnimatedTitle text="Your Progress Dashboard" />
 
-      <View style={styles.statsGrid}>
-        <StatsCard
-          title="Active Habits"
-          value={statsData.activeHabits}
-          style={styles.card}
-        />
-        <StatsCard
-          title="Completion Rate"
-          value={`${Math.round(statsData.completionRate)}%`}
-          style={styles.card}
-        />
-        <StatsCard
-          title="Longest Streak"
-          value={statsData.longestStreak}
-          subtitle={statsData.habitWithLongestStreak}
-          style={styles.card}
-        />
-      </View>
-
-      <View style={styles.chartSection}>
-        <ChartErrorBoundary>
-          <WeeklyChart
-            dailyCompletions={statsData.weeklyStats.dailyCompletions}
+        <View style={styles.statsGrid}>
+          <StatsCard
+            title="Active Habits"
+            value={statsData.activeHabits}
+            style={styles.card}
           />
-        </ChartErrorBoundary>
-      </View>
-      <AchievementsSection unlockedAchievements={unlockedAchievements} />
-    </ScrollView>
+          <StatsCard
+            title="Completion Rate"
+            value={`${Math.round(statsData.completionRate)}%`}
+            style={styles.card}
+          />
+          <StatsCard
+            title="Longest Streak"
+            value={statsData.longestStreak}
+            subtitle={statsData.habitWithLongestStreak}
+            style={styles.card}
+          />
+        </View>
+
+        <View style={styles.chartSection}>
+          <ChartErrorBoundary>
+            <WeeklyChart
+              dailyCompletions={statsData.weeklyStats.dailyCompletions}
+            />
+          </ChartErrorBoundary>
+        </View>
+        <AchievementsSection unlockedAchievements={unlockedAchievements} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
