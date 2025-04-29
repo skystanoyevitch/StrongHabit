@@ -1,20 +1,33 @@
 import React from "react";
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, Dimensions } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
+import {
+  useFonts,
+  PermanentMarker_400Regular,
+} from "@expo-google-fonts/permanent-marker";
 
 interface AnimatedTitleProps {
   text: string;
 }
 
 export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({ text }) => {
+  const [fontsLoaded] = useFonts({
+    PermanentMarker_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <MaskedView maskElement={<Text style={styles.title}>{text}</Text>}>
         <LinearGradient
           colors={[
             "#007AFF", // iOS blue
-            "#00B4DB", // Light blue
+            "#FF6B00", // Vibrant orange
+            "#007AFF", // iOS blue
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -27,12 +40,13 @@ export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({ text }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 20,
+    paddingVertical: 30,
     paddingHorizontal: 16,
+    width: "100%",
   },
   title: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 36,
+    fontFamily: "PermanentMarker_400Regular",
+    fontSize: 25,
     padding: 10,
     textAlign: "center",
     lineHeight: 40,
