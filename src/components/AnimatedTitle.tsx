@@ -1,63 +1,27 @@
 import React from "react";
-import { Text, Animated, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "@react-navigation/native";
 
 interface AnimatedTitleProps {
   text: string;
 }
 
 export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({ text }) => {
-  const translateY = React.useRef(new Animated.Value(20)).current;
-  const opacity = React.useRef(new Animated.Value(0)).current;
-
-  useFocusEffect(
-    React.useCallback(() => {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      return () => {
-        translateY.setValue(20);
-        opacity.setValue(0);
-      };
-    }, [])
-  );
-
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          opacity,
-          transform: [{ translateY }],
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <MaskedView maskElement={<Text style={styles.title}>{text}</Text>}>
         <LinearGradient
           colors={[
-            "#1A2980", // Dark blue
-            "#26D0CE", // Teal/greenish
+            "#007AFF", // iOS blue
+            "#00B4DB", // Light blue
           ]}
-          // Optional: add more color stops for purple transition
-          // colors={["#1A2980", "#4B3F72", "#26D0CE"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.gradient}
         />
       </MaskedView>
-    </Animated.View>
+    </View>
   );
 };
 
@@ -68,13 +32,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "BebasNeue_400Regular",
-    fontSize: 42,
+    fontSize: 36,
     padding: 10,
     textAlign: "center",
-    lineHeight: 46, // Add line height for better spacing
-    flexWrap: "wrap", // Enable text wrapping
+    lineHeight: 40,
+    flexWrap: "wrap",
+    letterSpacing: 1,
+    textShadowColor: "rgba(0, 0, 0, 0.1)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   gradient: {
-    height: 60,
+    height: 50,
   },
 });
