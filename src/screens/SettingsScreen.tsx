@@ -127,69 +127,86 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <SettingsSection title="Notifications">
-        <View style={styles.setting}>
-          <Text style={styles.settingLabel}>Enable Reminders</Text>
-          <Switch
-            value={notificationsEnabled}
-            onValueChange={handleNotificationToggle}
-          />
-        </View>
-      </SettingsSection>
-
-      <SettingsSection title="Data">
-        <View style={styles.setting}>
-          <View>
-            <Text style={styles.settingLabel}>Export Data</Text>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.container}>
+        <SettingsSection title="Notifications">
+          <View style={styles.setting}>
+            <Text style={styles.settingLabel}>Enable Reminders</Text>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={handleNotificationToggle}
+            />
           </View>
-          <MaterialCommunityIcons name="export" size={24} color="#999" />
-        </View>
+        </SettingsSection>
 
-        <View style={styles.setting}>
-          <View>
-            <Text style={styles.settingLabel}>Backup Data</Text>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
+        <SettingsSection title="Data">
+          <View style={styles.setting}>
+            <View>
+              <Text style={styles.settingLabel}>Export Data</Text>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+            <MaterialCommunityIcons name="export" size={24} color="#999" />
           </View>
-          <MaterialCommunityIcons name="cloud-upload" size={24} color="#999" />
-        </View>
-      </SettingsSection>
 
-      <SettingsSection title="App Info">
-        <TouchableOpacity style={styles.setting} onPress={handlePrivacyPolicy}>
-          <Text style={styles.settingLabel}>Privacy Policy</Text>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.setting} onPress={handleTerms}>
-          <Text style={styles.settingLabel}>Terms and Conditions</Text>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
-        </TouchableOpacity>
-      </SettingsSection>
-
-      <SettingsSection title="Data Management">
-        <View style={styles.setting}>
-          <View>
-            <Text style={styles.settingLabel}>Restore from Backup</Text>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          <View style={styles.setting}>
+            <View>
+              <Text style={styles.settingLabel}>Backup Data</Text>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+            <MaterialCommunityIcons
+              name="cloud-upload"
+              size={24}
+              color="#999"
+            />
           </View>
-          <MaterialCommunityIcons name="restore" size={24} color="#999" />
-        </View>
+        </SettingsSection>
 
-        <View style={styles.setting}>
-          <View>
-            <Text style={styles.settingLabel}>Cleanup Old Data</Text>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
+        <SettingsSection title="App Info">
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={handlePrivacyPolicy}
+          >
+            <Text style={styles.settingLabel}>Privacy Policy</Text>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.setting} onPress={handleTerms}>
+            <Text style={styles.settingLabel}>Terms and Conditions</Text>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </SettingsSection>
+
+        <SettingsSection title="Data Management">
+          <View style={styles.setting}>
+            <View>
+              <Text style={styles.settingLabel}>Restore from Backup</Text>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+            <MaterialCommunityIcons name="restore" size={24} color="#999" />
           </View>
-          <MaterialCommunityIcons name="trash-can" size={24} color="#999" />
-        </View>
-      </SettingsSection>
 
-      <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>StrongHabit v1.0.0</Text>
-      </View>
-    </ScrollView>
+          <View style={styles.setting}>
+            <View>
+              <Text style={styles.settingLabel}>Cleanup Old Data</Text>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+            <MaterialCommunityIcons name="trash-can" size={24} color="#999" />
+          </View>
+        </SettingsSection>
+
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>StrongHabit v1.0.0</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
