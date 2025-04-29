@@ -6,16 +6,11 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
-import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
-import {
-  useFonts as useDancingScriptFonts,
-  DancingScript_700Bold,
-} from "@expo-google-fonts/dancing-script";
-import {
-  useFonts as useBebasNeueFonts,
-  BebasNeue_400Regular,
-} from "@expo-google-fonts/bebas-neue";
-import ErrorBoundary from "./src/components/ErrorBoundry";
+import { useFonts } from "expo-font";
+import { Poppins_600SemiBold } from "@expo-google-fonts/poppins";
+import { DancingScript_700Bold } from "@expo-google-fonts/dancing-script";
+import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
+import ErrorBoundary from "./src/components/ErrorBoundary";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -28,13 +23,7 @@ Notifications.setNotificationHandler({
 export default function App() {
   const [fontsLoaded] = useFonts({
     Poppins_600SemiBold,
-  });
-
-  const [dancingScriptFontsLoaded] = useDancingScriptFonts({
     DancingScript_700Bold,
-  });
-
-  const [bebasNeueFontsLoaded] = useBebasNeueFonts({
     BebasNeue_400Regular,
   });
 
@@ -42,7 +31,7 @@ export default function App() {
     registerForPushNotificationsAsync();
   }, []);
 
-  if (!fontsLoaded || !dancingScriptFontsLoaded || !bebasNeueFontsLoaded) {
+  if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>StrongHabit</Text>
