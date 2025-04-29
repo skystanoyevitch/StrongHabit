@@ -22,7 +22,7 @@ export default function AddHabitScreen() {
         [
           {
             text: "OK",
-            onPress: () => navigation.navigate("HomeScreen" as never),
+            onPress: () => navigation.navigate("Home" as never),
           },
         ]
       );
