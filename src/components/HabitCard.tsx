@@ -48,6 +48,16 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   const streakText =
     habit.streak > 0 ? `${habit.streak} day streak!` : "Start your streak!";
 
+  const getFrequencyDisplay = () => {
+    if (habit.frequency === "daily") {
+      return "Daily";
+    } else if (habit.frequency === "weekly" && habit.selectedDays?.length) {
+      const days = habit.selectedDays.map((day) => day.slice(0, 3)).join(", ");
+      return `Weekly (${days})`;
+    }
+    return "Daily"; // Default fallback
+  };
+
   return (
     <TouchableOpacity
       style={[
@@ -66,6 +76,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               {habit.description}
             </Text>
           )}
+          <Text style={styles.frequencyText}>{getFrequencyDisplay()}</Text>
           <Text style={styles.streakText}>{streakText}</Text>
         </View>
 
@@ -115,6 +126,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginBottom: 8,
+  },
+  frequencyText: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+    marginBottom: 4,
   },
   streakText: {
     fontSize: 12,
