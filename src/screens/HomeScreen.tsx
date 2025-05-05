@@ -79,7 +79,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AnimatedTitle text="Welcome to Your Habits" />
+      <AnimatedTitle text="Today's Habits" />
       <HabitList
         habits={habits}
         loading={loading}
