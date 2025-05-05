@@ -14,4 +14,21 @@ export const sharedStyles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
+  button: {
+    backgroundColor: "#0F4D92",
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#F0F4F8",
+  },
 });
