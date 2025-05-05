@@ -12,10 +12,12 @@ import {
   Modal,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import ColorPicker from "react-native-wheel-color-picker";
 import { Habit, DayOfWeek } from "../types/habit";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "./AnimatedTitle";
 import { DaySelection } from "./DaySelection";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
@@ -58,6 +60,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     Partial<Record<keyof HabitFormInput, string>>
   >({});
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   // Form field update handler
   const handleChange = (field: keyof HabitFormInput, value: any) => {
@@ -154,6 +157,59 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
+
+  // Color Selection Section (replace the existing color selection section)
+  const renderColorPicker = () => (
+    <Modal
+      visible={showColorPicker}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => setShowColorPicker(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.colorPickerModal}>
+          <Text style={styles.colorPickerTitle}>Choose Your Color</Text>
+          <View style={styles.colorPickerWrapper}>
+            <ColorPicker
+              color={formData.color}
+              onColorChange={(color) => handleChange("color", color)}
+              thumbSize={40}
+              sliderSize={40}
+              noSnap={true}
+              row={false}
+            />
+          </View>
+          <View style={styles.predefinedColors}>
+            {colorOptions.map((color) => (
+              <TouchableOpacity
+                key={color}
+                style={[
+                  styles.predefinedColor,
+                  { backgroundColor: color },
+                  formData.color === color && styles.selectedPredefinedColor,
+                ]}
+                onPress={() => handleChange("color", color)}
+              />
+            ))}
+          </View>
+          <View style={styles.colorPickerActions}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => setShowColorPicker(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#0F4D92" }]}
+              onPress={() => setShowColorPicker(false)}
+            >
+              <Text style={styles.submitButtonText}>Select</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -313,17 +369,69 @@ export const HabitForm: React.FC<HabitFormProps> = ({
         {/* Color Selection */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Color</Text>
-          <View style={styles.colorContainer}>
-            {colorOptions.map((color) => (
-              <ColorOption
-                key={color}
-                color={color}
-                selected={formData.color === color}
-                onSelect={() => handleChange("color", color)}
-              />
-            ))}
-          </View>
+          <TouchableOpacity
+            style={styles.colorPickerPreview}
+            onPress={() => setShowColorPicker(true)}
+          >
+            <View
+              style={[styles.colorSwatch, { backgroundColor: formData.color }]}
+            />
+            <Text style={styles.colorPickerButtonText}>Select Color</Text>
+            <MaterialCommunityIcons name="palette" size={24} color="#0F4D92" />
+          </TouchableOpacity>
         </View>
+
+        {/* Color Picker Modal */}
+        <Modal
+          visible={showColorPicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowColorPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.colorPickerModal}>
+              <Text style={styles.colorPickerTitle}>Choose Your Color</Text>
+              <View style={styles.colorPickerWrapper}>
+                <ColorPicker
+                  color={formData.color}
+                  onColorChange={(color) => handleChange("color", color)}
+                  thumbSize={40}
+                  sliderSize={40}
+                  noSnap={true}
+                  row={false}
+                />
+              </View>
+              <View style={styles.predefinedColors}>
+                {colorOptions.map((color) => (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.predefinedColor,
+                      { backgroundColor: color },
+                      formData.color === color &&
+                        styles.selectedPredefinedColor,
+                    ]}
+                    onPress={() => handleChange("color", color)}
+                  />
+                ))}
+              </View>
+              <View style={styles.colorPickerActions}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={() => setShowColorPicker(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: "#0F4D92" }]}
+                  onPress={() => setShowColorPicker(false)}
+                >
+                  <Text style={styles.submitButtonText}>Select</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Form Actions */}
         <View style={styles.buttonContainer}>
@@ -397,18 +505,17 @@ const styles = StyleSheet.create({
   },
   radioOption: {
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#0F4D92",
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 20,
     marginRight: 12,
   },
   radioSelected: {
-    backgroundColor: "#007AFF",
-    color: "#fff",
+    backgroundColor: "#0F4D92",
   },
   radioText: {
-    color: "#007AFF",
+    color: "#0F4D92",
     fontWeight: "500",
   },
   radioTextSelected: {
@@ -448,7 +555,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submitButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#0F4D92",
     flex: 1,
   },
   submitButtonText: {
@@ -473,7 +580,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   doneButtonText: {
-    color: "#007AFF",
+    color: "#0F4D92",
     fontSize: 18,
     fontWeight: "600",
   },
@@ -485,5 +592,69 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 16,
     fontWeight: "500",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  colorPickerModal: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    width: "90%",
+    maxWidth: 400,
+  },
+  colorPickerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  colorPickerWrapper: {
+    height: 300,
+    marginBottom: 20,
+  },
+  predefinedColors: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  predefinedColor: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  selectedPredefinedColor: {
+    borderColor: "#007AFF",
+  },
+  colorPickerActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  colorPickerPreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  colorSwatch: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  colorPickerButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
   },
 });
