@@ -1,7 +1,6 @@
 import React from "react";
 import { Text, StyleSheet, View } from "react-native";
-import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
-import { useFonts } from "expo-font";
+import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 
 interface AnimatedTitleProps {
   text: string;
@@ -9,7 +8,7 @@ interface AnimatedTitleProps {
 
 export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({ text }) => {
   const [fontsLoaded] = useFonts({
-    BebasNeue_400Regular,
+    Poppins_600SemiBold,
   });
 
   if (!fontsLoaded) {
@@ -32,11 +31,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   title: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 36,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 32,
     textAlign: "center",
-    letterSpacing: 2,
     color: "#333333",
-    textTransform: "uppercase",
   },
 });
