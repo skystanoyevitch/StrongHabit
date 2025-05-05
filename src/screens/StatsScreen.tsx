@@ -177,7 +177,7 @@ const StatsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#F0F4F8", // Softer background color
   },
   scrollContainer: {
     padding: 20,
@@ -191,12 +191,13 @@ const styles = StyleSheet.create({
   card: {
     width: "48%",
     marginBottom: 16,
+    borderRadius: 20, // More rounded corners
   },
   chartSection: {
     backgroundColor: "#ffffff",
     padding: 16,
     margin: 16,
-    borderRadius: 12,
+    borderRadius: 20, // More rounded corners
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -207,6 +208,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#F0F4F8",
   },
   loadingText: {
     marginTop: 12,
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 20, // More rounded corners
     padding: 16,
     width: "31%",
     alignItems: "center",
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#007AFF",
+    color: "#0F4D92", // Updated to match theme
     marginBottom: 8,
   },
   summaryLabel: {
@@ -250,7 +252,7 @@ const styles = StyleSheet.create({
   },
   streakContainer: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 20, // More rounded corners
     padding: 16,
     marginBottom: 24,
     shadowColor: "#000",
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
   streakValue: {
     fontSize: 32,
     fontWeight: "700",
-    color: "#007AFF",
+    color: "#0F4D92", // Updated to match theme
     marginRight: 16,
   },
   streakInfo: {
@@ -293,7 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f2f2f2",
-    borderRadius: 8,
+    borderRadius: 20, // More rounded corners
   },
   placeholderText: {
     color: "#888",
