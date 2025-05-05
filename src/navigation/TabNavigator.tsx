@@ -15,12 +15,17 @@ const TabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
+        tabBarActiveTintColor: "#0F4D92",
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
-          paddingTop: 5,
-          paddingBottom: 5,
-          height: 100,
+          paddingTop: 8,
+          paddingBottom: 8,
+          height: 80,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 10,
         },
         freezeOnBlur: true,
       }}
