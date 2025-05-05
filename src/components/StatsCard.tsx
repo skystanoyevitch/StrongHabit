@@ -26,7 +26,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 20, // More rounded corners
     padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#007AFF",
+    color: "#0F4D92", // Updated to theme color
     marginBottom: 4,
   },
   subtitle: {
