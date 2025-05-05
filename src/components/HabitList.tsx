@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import {
   FlatList,
   View,
@@ -25,25 +25,36 @@ export const HabitList: React.FC<HabitListProps> = ({
   onHabitPress,
   onRefresh,
 }) => {
-  // State for refresh control
   const [refreshing, setRefreshing] = useState(false);
 
-  // Handle refresh action
+  // Split habits into incomplete and complete for today
+  const { incompleteHabits, completedHabits } = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return habits.reduce(
+      (acc, habit) => {
+        const isCompletedToday = habit.completionLogs.some(
+          (log) => log.date.split("T")[0] === today && log.completed
+        );
+        if (isCompletedToday) {
+          acc.completedHabits.push(habit);
+        } else {
+          acc.incompleteHabits.push(habit);
+        }
+        return acc;
+      },
+      { incompleteHabits: [] as Habit[], completedHabits: [] as Habit[] }
+    );
+  }, [habits]);
+
   const handleRefresh = useCallback(() => {
     if (onRefresh) {
       setRefreshing(true);
-
-      // Call the refresh function
-      const refreshPromise = onRefresh();
-
-      // Wait for the refresh function to complete
-      Promise.resolve(refreshPromise).finally(() => {
+      Promise.resolve(onRefresh()).finally(() => {
         setRefreshing(false);
       });
     }
   }, [onRefresh]);
 
-  // Component for empty state
   const EmptyListComponent = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyTitle}>No Habits Yet</Text>
@@ -53,51 +64,65 @@ export const HabitList: React.FC<HabitListProps> = ({
     </View>
   );
 
-  // Main render function completion
-  return (
-    <View style={styles.container}>
-      {loading && habits.length === 0 ? (
-        // Show loader when loading and no items
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>Loading habits...</Text>
-        </View>
-      ) : (
-        // Show the FlatList when not loading or when we have items
-        <FlatList
-          data={habits}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <HabitCard
-              habit={item}
-              onToggleComplete={onToggleComplete}
-              onPress={onHabitPress ? () => onHabitPress(item) : undefined}
-            />
-          )}
-          contentContainerStyle={habits.length === 0 ? { flex: 1 } : undefined}
-          ListEmptyComponent={EmptyListComponent}
-          refreshControl={
-            onRefresh ? (
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                colors={["#007AFF"]}
-                tintColor="#007AFF"
-              />
-            ) : undefined
-          }
-        />
-      )}
+  const renderSectionHeader = (title: string) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 
-  // The rest of the component will follow
+  if (loading && habits.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0F4D92" />
+        <Text style={styles.loadingText}>Loading habits...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={[...incompleteHabits, ...completedHabits]}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => {
+          const isFirstCompleted = index === incompleteHabits.length;
+          return (
+            <>
+              {isFirstCompleted &&
+                completedHabits.length > 0 &&
+                renderSectionHeader("Completed Today")}
+              {index === 0 &&
+                incompleteHabits.length > 0 &&
+                renderSectionHeader("Today's Tasks")}
+              <HabitCard
+                habit={item}
+                onToggleComplete={onToggleComplete}
+                onPress={onHabitPress ? () => onHabitPress(item) : undefined}
+              />
+            </>
+          );
+        }}
+        contentContainerStyle={habits.length === 0 ? { flex: 1 } : undefined}
+        ListEmptyComponent={EmptyListComponent}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={["#0F4D92"]}
+              tintColor="#0F4D92"
+            />
+          ) : undefined
+        }
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#F0F4F8", // Softer background color
   },
   loadingContainer: {
     flex: 1,
@@ -127,5 +152,16 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     maxWidth: "80%",
+  },
+  sectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "rgba(15, 77, 146, 0.05)",
+    marginTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#0F4D92",
   },
 });
