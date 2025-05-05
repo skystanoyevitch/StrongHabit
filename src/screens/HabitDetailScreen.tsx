@@ -75,12 +75,18 @@ export default function HabitDetailScreen() {
     completionLogs.forEach((log) => {
       const dateString = log.date.split("T")[0]; // Extract YYYY-MM-DD part
       marked[dateString] = {
-        marked: true,
-        dotColor: log.completed ? "#4CAF50" : "#FF5252",
         selected: true,
-        selectedColor: log.completed
-          ? "rgba(76, 175, 80, 0.2)"
-          : "rgba(255, 82, 82, 0.2)",
+        selectedColor: log.completed ? "#0F4D92" : "white",
+        dotColor: log.completed ? "#0F4D92" : "#FF5252",
+        marked: !log.completed,
+        ...(!log.completed && {
+          customStyles: {
+            container: {
+              borderWidth: 1,
+              borderColor: "#FF5252",
+            },
+          },
+        }),
       };
     });
 
@@ -124,7 +130,7 @@ export default function HabitDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <AnimatedTitle text="Habit Details" />
+      <AnimatedTitle text="Habit Overview" />
       <View style={styles.header}>
         <Text style={styles.title}>{habit.name}</Text>
         <Text style={styles.description}>{habit.description}</Text>
@@ -154,7 +160,7 @@ export default function HabitDetailScreen() {
       <View style={styles.calendarContainer}>
         <Text style={styles.sectionTitle}>Completion History</Text>
         <CalendarList
-          pastScrollRange={2} // Reduce from 3
+          pastScrollRange={2}
           futureScrollRange={0}
           scrollEnabled={true}
           showScrollIndicator={true}
@@ -162,7 +168,10 @@ export default function HabitDetailScreen() {
           removeClippedSubviews={true}
           maxToRenderPerBatch={1}
           initialNumToRender={1}
-          windowSize={1} // Reduce from 2
+          windowSize={1}
+          calendarHeight={320}
+          calendarWidth={320}
+          style={{ height: "100%" }}
         />
       </View>
 
@@ -190,16 +199,24 @@ export default function HabitDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F4F8", // Match app background
   },
   header: {
     padding: 20,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    margin: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 8,
+    color: "#2D3748", // Match app text color
   },
   description: {
     fontSize: 16,
@@ -208,14 +225,21 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 20,
+    padding: 16,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   headerContainer: {
     alignItems: "center",
     paddingHorizontal: 16,
+    marginBottom: 8,
   },
   backButton: {
     padding: 8,
@@ -229,7 +253,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#2196F3",
+    color: "#0F4D92", // Match app theme color
   },
   statLabel: {
     fontSize: 14,
@@ -238,28 +262,51 @@ const styles = StyleSheet.create({
   },
   calendarContainer: {
     flex: 1,
-    padding: 20,
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    overflow: "hidden",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 16,
+    color: "#2D3748", // Match app text color
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 20,
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     minWidth: 140,
     justifyContent: "center",
   },
   editButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#0F4D92", // Match app theme color
   },
   deleteButton: {
     backgroundColor: "#FF5252",
@@ -268,5 +315,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     marginLeft: 8,
+    fontWeight: "600",
   },
 });
