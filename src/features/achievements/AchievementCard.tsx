@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Achievement } from "./types";
+import { theme } from "../../constants/theme"; // Import theme
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -60,14 +61,16 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   title: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 16,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
     color: "#1F2937",
   },
   lockedText: {
     color: "#9CA3AF",
   },
   description: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 14,
     color: "#6B7280",
     marginTop: 4,
