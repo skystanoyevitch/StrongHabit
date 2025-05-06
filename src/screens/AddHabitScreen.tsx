@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { HabitForm } from "../components/HabitForm";
 import { StorageService } from "../utils/storage";
 import { Habit } from "../types/habit";
-import { AnimatedTitle } from "../components/AnimatedTitle";
 import { theme } from "../constants/theme"; // Import theme
 
 export default function AddHabitScreen() {
@@ -44,13 +43,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background, // Use theme background
-  },
-  title: {
-    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold for title
-    fontSize: 24,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
-    color: theme.colors.text, // Use theme text color
-    marginBottom: 20,
-    textAlign: "center",
   },
 });
