@@ -14,6 +14,7 @@ import { Habit } from "../types/habit";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
+import { theme } from "../constants/theme"; // Import theme
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -31,32 +32,6 @@ export default function HabitDetailScreen() {
   const [stats, setStats] = useState<CompletionStats | null>(null);
   const [markedDates, setMarkedDates] = useState<any>({});
   const storageService = StorageService.getInstance();
-
-  // const calculateStats = useCallback(() => {
-  //   const completionLogs = habit.completionLogs || {};
-  //   const totalDays = Object.keys(completionLogs).length;
-  //   const completedDays = Object.values(completionLogs).filter(Boolean).length;
-
-  //   setStats({
-  //     totalDays,
-  //     completedDays,
-  //     currentStreak: habit.streak || 0,
-  //     successRate: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
-  //   });
-
-  //   // Mark completed dates in calendar
-  //   const marked = Object.entries(completionLogs).reduce(
-  //     (acc, [date, completed]) => ({
-  //       ...acc,
-  //       [date]: {
-  //         marked: true,
-  //         dotColor: completed ? "#4CAF50" : "#FF5252",
-  //       },
-  //     }),
-  //     {}
-  //   );
-  //   setMarkedDates(marked);
-  // }, [habit]);
 
   const calculateStats = useCallback(() => {
     const completionLogs = habit.completionLogs || [];
@@ -199,11 +174,11 @@ export default function HabitDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8", // Match app background
+    backgroundColor: theme.colors.background, // Use theme background
   },
   header: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     borderRadius: 20,
     margin: 16,
     shadowColor: "#000",
@@ -213,20 +188,22 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   title: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
     fontSize: 24,
-    fontWeight: "bold",
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
     marginBottom: 8,
-    color: "#2D3748", // Match app text color
+    color: theme.colors.text, // Use theme text color
   },
   description: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.secondaryText, // Use theme secondary text color
   },
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 20,
@@ -251,18 +228,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold for stat values
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#0F4D92", // Match app theme color
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
+    color: theme.colors.primary, // Use theme primary color for emphasis
   },
   statLabel: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.secondaryText, // Use theme secondary text color
     marginTop: 4,
   },
   calendarContainer: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 20,
@@ -275,16 +254,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   sectionTitle: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 18,
-    fontWeight: "bold",
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
     marginBottom: 16,
-    color: "#2D3748", // Match app text color
+    color: theme.colors.text, // Use theme text color
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: "#000",
@@ -306,15 +286,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   editButton: {
-    backgroundColor: "#0F4D92", // Match app theme color
+    backgroundColor: theme.colors.primary, // Use theme primary color
   },
   deleteButton: {
-    backgroundColor: "#FF5252",
+    backgroundColor: theme.colors.error, // Use theme error color
   },
   buttonText: {
-    color: "#fff",
+    fontFamily: theme.fonts.semibold, // Use Inter Semibold
+    color: theme.colors.contrastPrimary, // Use contrast color for text on primary/error background
     fontSize: 16,
     marginLeft: 8,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
   },
 });
