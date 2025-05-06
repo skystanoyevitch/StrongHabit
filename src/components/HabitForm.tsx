@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontFamily: theme.fonts.semibold, // Use Inter Semibold
+    fontFamily: theme.fonts.titleMedium, // Use Quicksand Medium
     fontSize: 16,
     // fontWeight: "500", // fontWeight is part of fontFamily now
     marginBottom: 8,
@@ -481,9 +481,9 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: theme.fonts.regular, // Use Inter Regular
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: theme.colors.outline, // Use theme outline color
-    borderRadius: 8,
+    borderRadius: 24,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
@@ -513,9 +513,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   radioOption: {
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: theme.colors.primary, // Use theme primary color
-    borderRadius: 20,
+    borderRadius: 24,
     paddingVertical: 8,
     paddingHorizontal: 20,
     marginRight: 12,
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   },
   button: {
     // General button style, used by cancel
-    borderRadius: 8,
+    borderRadius: 24,
     paddingVertical: 12,
     paddingHorizontal: 24,
     alignItems: "center",
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
   },
   colorPickerModal: {
     backgroundColor: theme.colors.surface, // Use theme surface color
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
     width: "90%",
     maxWidth: 400,
@@ -657,16 +657,16 @@ const styles = StyleSheet.create({
   colorPickerPreview: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: theme.colors.outline,
-    borderRadius: 8,
+    borderRadius: 24,
     padding: 12,
     backgroundColor: theme.colors.surface, // Use theme surface color
   },
   colorSwatch: {
     width: 24,
     height: 24,
-    borderRadius: 4,
+    borderRadius: 24,
     marginRight: 8,
   },
   colorPickerButtonText: {
