@@ -157,7 +157,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   ]; // Use a predefined list of colors
 
   // Update the title based on whether we're editing
-  const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
+  const formTitle = isEditing ? "Edit Habit" : "Create a New Habit";
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
 
