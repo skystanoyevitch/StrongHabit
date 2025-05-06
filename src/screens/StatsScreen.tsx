@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,16 +6,20 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Dimensions, // Import Dimensions
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { LineChart } from "react-native-chart-kit"; // Import LineChart
 import { useHabits } from "../hooks/useHabits";
 import { Habit } from "../types/habit";
 import { StatsData } from "../types/stats";
 import { calculateWeeklyStats } from "../utils/statsUtils";
 import { StatsCard } from "../components/StatsCard";
-import { WeeklyChart } from "../components/WeeklyChart";
+// Remove WeeklyChart import
+// import { WeeklyChart } from "../components/WeeklyChart";
 import { AchievementsSection } from "../features/achievements/AchievementsSection";
 import { sharedStyles } from "../styles/shared";
+import { theme } from "../constants/theme"; // Import theme
 
 import {
   checkAchievements,
@@ -45,6 +49,14 @@ const StatsScreen: React.FC = () => {
   const [unlockedAchievements, setUnlockedAchievements] = useState<
     UnlockedAchievement[]
   >([]);
+  const [chartData, setChartData] = useState({
+    labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    datasets: [
+      {
+        data: [0, 0, 0, 0, 0, 0, 0],
+      },
+    ],
+  }); // State for chart data
 
   const calculateStats = useCallback(() => {
     setIsCalculating(true);
@@ -115,23 +127,62 @@ const StatsScreen: React.FC = () => {
         habitWithLongestStreak: habitWithMaxStreak,
         weeklyStats,
       });
+
+      // Prepare data for LineChart
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const dayMapping: { [key: string]: string } = {
+        Sunday: "Sun",
+        Monday: "Mon",
+        Tuesday: "Tue",
+        Wednesday: "Wed",
+        Thursday: "Thu",
+        Friday: "Fri",
+        Saturday: "Sat",
+      };
+
+      const completionsData = daysOfWeek.map((day) => {
+        // Find the full day name corresponding to the abbreviation
+        const fullDayName = Object.keys(dayMapping).find(
+          (key) => dayMapping[key] === day
+        );
+        return fullDayName ? weeklyStats.dailyCompletions[fullDayName] || 0 : 0;
+      });
+
+      setChartData({
+        labels: daysOfWeek,
+        datasets: [
+          {
+            data: completionsData,
+            // strokeWidth: 2, // Removed this as it causes type error
+          },
+        ],
+      });
     } catch (error) {
       console.error("Error calculating stats:", error);
     } finally {
       setIsCalculating(false);
     }
-  }, [habits]);
+  }, [habits]); // Remove statsData dependency as it causes infinite loop
 
   useEffect(() => {
-    if (habits.length > 0 && isFocused) {
+    // Recalculate only when habits change or screen focuses
+    if (habits && isFocused) {
       calculateStats();
+    } else if (!isFocused) {
+      // Optional: Reset stats or show a placeholder when screen is not focused
+      // setStatsData(initialStats);
+      // setChartData({ labels: [], datasets: [{ data: [] }] });
     }
-  }, [habits, isFocused, calculateStats]);
+    // Remove calculateStats from dependency array if it causes issues,
+    // ensure all its own dependencies (like habits) are correctly listed in its useCallback hook.
+  }, [habits, isFocused]); // Keep calculateStats out if it causes loops, rely on habits/isFocused
 
-  if (loading) {
+  if (loading && habits === null) {
+    // Adjust loading condition
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.primary} /> // Use
+        theme color
         <Text style={styles.loadingText}>Loading your habit data...</Text>
       </View>
     );
@@ -139,7 +190,7 @@ const StatsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <AnimatedTitle text="Your Progress Dashboard" />
 
         <View style={styles.statsGrid}>
@@ -162,10 +213,41 @@ const StatsScreen: React.FC = () => {
         </View>
 
         <View style={styles.chartSection}>
+          <Text style={styles.sectionTitle}>Weekly Completions</Text>
           <ChartErrorBoundary>
-            <WeeklyChart
-              dailyCompletions={statsData.weeklyStats.dailyCompletions}
-            />
+            {isCalculating ? (
+              <ActivityIndicator color={theme.colors.primary} />
+            ) : (
+              <LineChart
+                data={chartData}
+                width={Dimensions.get("window").width - 64} // from react-native
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=""
+                yAxisInterval={1} // optional, defaults to 1
+                chartConfig={{
+                  backgroundColor: "#ffffff",
+                  backgroundGradientFrom: "#ffffff",
+                  backgroundGradientTo: "#ffffff",
+                  decimalPlaces: 0, // optional, defaults to 2dp
+                  color: (opacity = 1) => `rgba(15, 77, 146, ${opacity})`, // Primary color #0F4D92
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                  propsForDots: {
+                    r: "6",
+                    strokeWidth: "2",
+                    stroke: theme.colors.primary, // Use theme color for dots
+                  },
+                }}
+                bezier // Makes the line smooth
+                style={{
+                  marginVertical: 8,
+                  borderRadius: 16,
+                }}
+              />
+            )}
           </ChartErrorBoundary>
         </View>
         <AchievementsSection unlockedAchievements={unlockedAchievements} />
@@ -177,10 +259,10 @@ const StatsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8", // Softer background color
+    backgroundColor: theme.colors.background, // Use theme background
   },
   scrollContainer: {
-    padding: 20,
+    paddingBottom: 20, // Add padding to bottom
   },
   statsGrid: {
     flexDirection: "row",
@@ -196,125 +278,34 @@ const styles = StyleSheet.create({
   chartSection: {
     backgroundColor: "#ffffff",
     padding: 16,
-    margin: 16,
-    borderRadius: 20, // More rounded corners
+    marginHorizontal: 16, // Use horizontal margin
+    marginTop: 16, // Add top margin
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F0F4F8",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#555",
-  },
-  welcomeText: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#333",
-    padding: 16,
-    textAlign: "center",
-  },
-  summaryContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  summaryCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20, // More rounded corners
-    padding: 16,
-    width: "31%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  summaryValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#0F4D92", // Updated to match theme
-    marginBottom: 8,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
-  streakContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 20, // More rounded corners
-    padding: 16,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    alignItems: "center", // Center chart horizontally
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 16,
     color: "#333",
+    alignSelf: "flex-start", // Align title to the left
+    paddingLeft: 16, // Add padding to align with chart content
   },
-  streakCard: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  streakValue: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#0F4D92", // Updated to match theme
-    marginRight: 16,
-  },
-  streakInfo: {
+  loadingContainer: {
     flex: 1,
-  },
-  streakLabel: {
-    fontSize: 14,
-    color: "#666",
-  },
-  streakHabit: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginTop: 4,
-  },
-  chartPlaceholder: {
-    height: 200,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 20, // More rounded corners
+    backgroundColor: theme.colors.background, // Use theme background
   },
-  placeholderText: {
-    color: "#888",
+  loadingText: {
+    marginTop: 12,
     fontSize: 16,
-  },
-  emptyContainer: {
-    padding: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-  },
-  noDataText: {
-    fontSize: 14,
-    color: "#888",
-    fontStyle: "italic",
+    color: "#555",
   },
 });
 

@@ -91,20 +91,22 @@ interface HabitCardProps {
   habit: Habit;
   onToggleComplete: (habitId: string, completed: boolean) => void;
   onPress?: () => void;
+  selectedDate: string; // Add selectedDate prop
 }
 
 export const HabitCard: React.FC<HabitCardProps> = ({
   habit,
   onToggleComplete,
   onPress,
+  selectedDate, // Use selectedDate prop
 }) => {
-  // Calculate whether habit is completed today
-  const isCompletedToday = React.useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
+  // Calculate whether habit is completed for the selected date
+  const isCompletedForSelectedDate = React.useMemo(() => {
+    // Use selectedDate passed via props
     return habit.completionLogs.some(
-      (log) => log.date.split("T")[0] === today && log.completed
+      (log) => log.date.split("T")[0] === selectedDate && log.completed
     );
-  }, [habit.completionLogs]);
+  }, [habit.completionLogs, selectedDate]); // Add selectedDate dependency
 
   const frequencyInfo = React.useMemo(() => getFrequencyInfo(habit), [habit]);
 
@@ -112,11 +114,12 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   const handleToggle = () => {
     // Trigger nice animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    onToggleComplete(habit.id, !isCompletedToday);
+    // Use the correct completion status for the toggle
+    onToggleComplete(habit.id, !isCompletedForSelectedDate);
   };
 
   // Use the darkenColor function for the base color
-  const baseColor = isCompletedToday
+  const baseColor = isCompletedForSelectedDate // Use isCompletedForSelectedDate
     ? "#666666"
     : darkenColor(habit.color || "#0F4D92"); // Darker grey for completed, darken habit color otherwise
 
@@ -129,7 +132,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         style={[
           styles.card,
           { backgroundColor: baseColor }, // Apply the calculated baseColor
-          isCompletedToday && styles.completedCard,
+          isCompletedForSelectedDate && styles.completedCard, // Use isCompletedForSelectedDate
         ]}
       >
         <View style={styles.contentContainer}>
@@ -204,7 +207,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({
             style={[
               styles.checkButton,
               { borderColor: textColor }, // Use textColor for border
-              isCompletedToday && [
+              isCompletedForSelectedDate && [
+                // Use isCompletedForSelectedDate
                 styles.checkButtonCompleted,
                 { backgroundColor: textColor, borderColor: textColor },
               ], // Use textColor for completed background/border
@@ -212,7 +216,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
             onPress={handleToggle}
           >
             {/* Use baseColor for the check icon color when completed */}
-            {isCompletedToday && (
+            {isCompletedForSelectedDate && ( // Use isCompletedForSelectedDate
               <Text style={[styles.checkIcon, { color: baseColor }]}>✓</Text>
             )}
           </TouchableOpacity>

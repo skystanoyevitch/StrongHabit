@@ -16,6 +16,7 @@ interface HabitListProps {
   onToggleComplete: (habitId: string, completed: boolean) => void;
   onHabitPress?: (habit: Habit) => void;
   onRefresh?: () => void;
+  selectedDate: string; // Add selectedDate prop
 }
 
 export const HabitList: React.FC<HabitListProps> = ({
@@ -24,18 +25,19 @@ export const HabitList: React.FC<HabitListProps> = ({
   onToggleComplete,
   onHabitPress,
   onRefresh,
+  selectedDate, // Use selectedDate prop
 }) => {
   const [refreshing, setRefreshing] = useState(false);
 
-  // Split habits into incomplete and complete for today
+  // Split habits into incomplete and complete for the selected date
   const { incompleteHabits, completedHabits } = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
+    // Use selectedDate passed via props
     return habits.reduce(
       (acc, habit) => {
-        const isCompletedToday = habit.completionLogs.some(
-          (log) => log.date.split("T")[0] === today && log.completed
+        const isCompletedForSelectedDate = habit.completionLogs.some(
+          (log) => log.date.split("T")[0] === selectedDate && log.completed
         );
-        if (isCompletedToday) {
+        if (isCompletedForSelectedDate) {
           acc.completedHabits.push(habit);
         } else {
           acc.incompleteHabits.push(habit);
@@ -44,7 +46,7 @@ export const HabitList: React.FC<HabitListProps> = ({
       },
       { incompleteHabits: [] as Habit[], completedHabits: [] as Habit[] }
     );
-  }, [habits]);
+  }, [habits, selectedDate]); // Add selectedDate dependency
 
   const handleRefresh = useCallback(() => {
     if (onRefresh) {
@@ -86,18 +88,19 @@ export const HabitList: React.FC<HabitListProps> = ({
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => {
           const isFirstCompleted = index === incompleteHabits.length;
+          const sectionTitle = isFirstCompleted ? "Completed" : "Pending"; // More generic title
+          const showHeader =
+            (isFirstCompleted && completedHabits.length > 0) ||
+            (index === 0 && incompleteHabits.length > 0);
+
           return (
             <>
-              {isFirstCompleted &&
-                completedHabits.length > 0 &&
-                renderSectionHeader("Completed Today")}
-              {index === 0 &&
-                incompleteHabits.length > 0 &&
-                renderSectionHeader("Today's Tasks")}
+              {showHeader && renderSectionHeader(sectionTitle)}
               <HabitCard
                 habit={item}
                 onToggleComplete={onToggleComplete}
                 onPress={onHabitPress ? () => onHabitPress(item) : undefined}
+                selectedDate={selectedDate} // Pass selectedDate down
               />
             </>
           );
@@ -155,13 +158,13 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "rgba(15, 77, 146, 0.05)",
-    marginTop: 8,
+    paddingTop: 16,
+    paddingBottom: 8,
+    backgroundColor: "#f8f8f8", // Match background
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0F4D92",
+    color: "#555",
   },
 });

@@ -26,15 +26,14 @@ export const calculateWeeklyStats = (habits: Habit[]): WeeklyStats => {
 
   habits.forEach((habit) => {
     if (!habit.archivedAt) {
-      Object.entries(habit.completionLogs).forEach(([dateStr, completed]) => {
-        const date = new Date(dateStr);
+      habit.completionLogs.forEach((log) => {
+        const date = new Date(log.date);
         if (date >= oneWeekAgo && date <= today) {
           const dayName = days[date.getDay()];
-          if (completed) {
+          if (log.completed) {
             dailyCompletions[dayName] = (dailyCompletions[dayName] || 0) + 1;
             totalCompletions++;
           }
-          totalPossible++;
         }
       });
     }
