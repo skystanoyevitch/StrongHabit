@@ -6,7 +6,15 @@
     "paths": {
       "*": ["*"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": [
+    "src/**/*.ts", // More specific include for src directory
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "App.tsx", // Explicitly include App.tsx if it's at the root
+    "*.ts", // Include other .ts files at the root
+    "*.tsx" // Include other .tsx files at the root
+  ]
 }
