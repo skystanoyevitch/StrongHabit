@@ -208,9 +208,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         style={[
           styles.card,
           { backgroundColor: actualCardBackgroundColor },
-          isCompletedForSelectedDate && {
-            borderColor: accentDerivedColorForWhiteBg, // Use accent color for better contrast
-            borderWidth: 1.5, // Ensure borderWidth is set for the completed state
+          {
+            borderColor: isCompletedForSelectedDate
+              ? theme.colors.disabled // Gray border for completed tasks
+              : accentDerivedColorForWhiteBg, // Accent-derived border for active tasks
+            borderWidth: 1.2, // Apply border width consistently
           },
         ]}
       >
@@ -329,12 +331,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
-    backgroundColor: "#FFFFFF", // Explicitly white, though set by actualCardBackgroundColor
-    // Add shadow for floating effect
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // backgroundColor: "#FFFFFF", // Explicitly white, though set by actualCardBackgroundColor
+    // // Add shadow for floating effect
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
     elevation: 2,
   },
   contentContainer: {
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   title: {
-    fontFamily: theme.fonts.bold, // Use Quicksand Semibold
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 18,
     color: theme.colors.text, // Ensure high contrast
   },
