@@ -15,6 +15,7 @@ import { DancingScript_700Bold } from "@expo-google-fonts/dancing-script";
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { PermanentMarker_400Regular } from "@expo-google-fonts/permanent-marker";
 import ErrorBoundary from "./src/components/ErrorBoundary";
+import { ThemeProvider } from "./src/contexts/ThemeContext";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -47,9 +48,11 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <NavigationContainer>
-        <TabNavigator />
-      </NavigationContainer>
+      <ThemeProvider>
+        <NavigationContainer>
+          <TabNavigator />
+        </NavigationContainer>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
