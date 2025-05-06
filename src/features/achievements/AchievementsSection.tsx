@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { AchievementCard } from "./AchievementCard";
 import { ACHIEVEMENTS } from "./achievementList";
 import { UnlockedAchievement } from "./achievementUtils";
+import { theme } from "../../constants/theme"; // Import theme
 
 interface AchievementsSectionProps {
   unlockedAchievements: UnlockedAchievement[];
@@ -30,8 +31,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionTitle: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
     fontSize: 20,
-    fontWeight: "700",
+    // fontWeight: "700", // fontWeight is part of fontFamily now
     color: "#1F2937",
     marginBottom: 16,
   },
