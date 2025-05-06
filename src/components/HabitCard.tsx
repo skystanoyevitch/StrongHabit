@@ -7,10 +7,10 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  ColorValue, // Import ColorValue
 } from "react-native";
 import { Habit } from "../types/habit";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 // Enable layout animations on Android
 if (
@@ -19,6 +19,46 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+// Helper function to darken a hex color
+// (This is a simple approximation and might not be perceptually perfect)
+const darkenColor = (
+  color: ColorValue | undefined,
+  amount: number = 0.2
+): string => {
+  let col = String(color);
+  // Use a darker default if color is missing or invalid
+  if (!col || !col.startsWith("#")) {
+    return "#0A3A70"; // Darker default blue
+  }
+
+  col = col.slice(1); // Remove #
+
+  // Handle shorthand hex (e.g., #03F)
+  if (col.length === 3) {
+    col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2];
+  }
+
+  if (col.length !== 6) {
+    return "#0A3A70"; // Darker default blue if not 6 digits
+  }
+
+  let r = parseInt(col.substring(0, 2), 16);
+  let g = parseInt(col.substring(2, 4), 16);
+  let b = parseInt(col.substring(4, 6), 16);
+
+  // Darken each component
+  r = Math.max(0, Math.floor(r * (1 - amount)));
+  g = Math.max(0, Math.floor(g * (1 - amount)));
+  b = Math.max(0, Math.floor(b * (1 - amount)));
+
+  // Convert back to hex
+  const rHex = r.toString(16).padStart(2, "0");
+  const gHex = g.toString(16).padStart(2, "0");
+  const bHex = b.toString(16).padStart(2, "0");
+
+  return `#${rHex}${gHex}${bHex}`;
+};
 
 // Helper function to get frequency information
 const getFrequencyInfo = (habit: Habit) => {
@@ -75,60 +115,86 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     onToggleComplete(habit.id, !isCompletedToday);
   };
 
-  const baseColor = isCompletedToday ? "#808080" : habit.color || "#0F4D92";
-  const gradientColors = isCompletedToday
-    ? (["#A0A0A0", "#808080", "#606060"] as const)
-    : ([
-        darkenColor(baseColor, 30),
-        darkenColor(baseColor, 15),
-        baseColor,
-      ] as const);
+  // Use the darkenColor function for the base color
+  const baseColor = isCompletedToday
+    ? "#666666"
+    : darkenColor(habit.color || "#0F4D92"); // Darker grey for completed, darken habit color otherwise
+
+  // Ensure text color provides good contrast (using white as default for dark backgrounds)
+  const textColor = "#FFFFFF"; // White text for contrast
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0.2 }}
-        end={{ x: 1, y: 0.8 }}
-        style={[styles.card, isCompletedToday && styles.completedCard]}
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: baseColor }, // Apply the calculated baseColor
+          isCompletedToday && styles.completedCard,
+        ]}
       >
         <View style={styles.contentContainer}>
           <View style={styles.mainContent}>
-            <Text style={styles.title}>{habit.name}</Text>
+            {/* Apply textColor */}
+            <Text style={[styles.title, { color: textColor }]}>
+              {habit.name}
+            </Text>
             {habit.description && (
-              <Text style={styles.description} numberOfLines={2}>
+              <Text
+                style={[styles.description, { color: textColor }]}
+                numberOfLines={2}
+              >
                 {habit.description}
               </Text>
             )}
 
             <View style={styles.bentoBox}>
-              <View style={styles.frequencySection}>
+              <View
+                style={[
+                  styles.frequencySection,
+                  { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+                ]}
+              >
+                {" "}
+                {/* Slightly less opaque background */}
                 <MaterialCommunityIcons
                   name={frequencyInfo.icon}
                   size={20}
-                  color="#fff"
+                  color={textColor} // Use textColor
                   style={styles.frequencyIcon}
                 />
                 <View style={styles.frequencyTextContainer}>
-                  <Text style={styles.frequencyLabel}>
+                  {/* Apply textColor */}
+                  <Text style={[styles.frequencyLabel, { color: textColor }]}>
                     {frequencyInfo.label}
                   </Text>
-                  <Text style={styles.frequencyDetails}>
+                  <Text style={[styles.frequencyDetails, { color: textColor }]}>
                     {frequencyInfo.details}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.streakSection}>
+              <View
+                style={[
+                  styles.streakSection,
+                  { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+                ]}
+              >
+                {" "}
+                {/* Slightly less opaque background */}
                 <MaterialCommunityIcons
                   name="fire"
                   size={20}
-                  color="#fff"
+                  color={textColor} // Use textColor
                   style={styles.streakIcon}
                 />
                 <View style={styles.streakTextContainer}>
-                  <Text style={styles.streakCount}>{habit.streak} Days</Text>
-                  <Text style={styles.streakLabel}>Current Streak</Text>
+                  {/* Apply textColor */}
+                  <Text style={[styles.streakCount, { color: textColor }]}>
+                    {habit.streak} Days
+                  </Text>
+                  <Text style={[styles.streakLabel, { color: textColor }]}>
+                    Current Streak
+                  </Text>
                 </View>
               </View>
             </View>
@@ -137,36 +203,23 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           <TouchableOpacity
             style={[
               styles.checkButton,
-              isCompletedToday && styles.checkButtonCompleted,
+              { borderColor: textColor }, // Use textColor for border
+              isCompletedToday && [
+                styles.checkButtonCompleted,
+                { backgroundColor: textColor, borderColor: textColor },
+              ], // Use textColor for completed background/border
             ]}
             onPress={handleToggle}
           >
-            {isCompletedToday && <Text style={styles.checkIcon}>✓</Text>}
+            {/* Use baseColor for the check icon color when completed */}
+            {isCompletedToday && (
+              <Text style={[styles.checkIcon, { color: baseColor }]}>✓</Text>
+            )}
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </TouchableOpacity>
   );
-};
-
-// Helper function to lighten a color
-const lightenColor = (color: string, percent: number) => {
-  const num = parseInt(color.replace("#", ""), 16);
-  const amt = Math.round(2.55 * percent);
-  const R = Math.min(255, ((num >> 16) & 0xff) + amt);
-  const G = Math.min(255, ((num >> 8) & 0xff) + amt);
-  const B = Math.min(255, (num & 0xff) + amt);
-  return "#" + (0x1000000 + (R << 16) + (G << 8) + B).toString(16).slice(1);
-};
-
-// Add new helper function to darken colors
-const darkenColor = (color: string, percent: number) => {
-  const num = parseInt(color.replace("#", ""), 16);
-  const amt = Math.round(2.55 * percent);
-  const R = Math.max(0, ((num >> 16) & 0xff) - amt);
-  const G = Math.max(0, ((num >> 8) & 0xff) - amt);
-  const B = Math.max(0, (num & 0xff) - amt);
-  return "#" + (0x1000000 + (R << 16) + (G << 8) + B).toString(16).slice(1);
 };
 
 const styles = StyleSheet.create({
@@ -181,6 +234,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
     transform: [{ translateY: -4 }],
+    // backgroundColor is now applied dynamically
   },
   completedCard: {
     transform: [{ translateY: 0 }],
@@ -188,7 +242,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
-    opacity: 0.8,
+    opacity: 0.85, // Slightly increase opacity for darker completed state
   },
   contentContainer: {
     flexDirection: "row",
@@ -201,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 6,
-    color: "#fff",
+    // color is now applied dynamically via style prop
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
@@ -209,7 +263,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     marginBottom: 12,
-    color: "#fff",
+    // color is now applied dynamically via style prop
     textShadowColor: "rgba(0, 0, 0, 0.1)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 1,
@@ -225,7 +279,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 8,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    // backgroundColor is now applied dynamically via style prop
   },
   streakSection: {
     flex: 1,
@@ -233,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 8,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    // backgroundColor is now applied dynamically via style prop
   },
   frequencyIcon: {
     marginRight: 8,
@@ -250,7 +304,7 @@ const styles = StyleSheet.create({
   frequencyLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#fff",
+    // color is now applied dynamically via style prop
     textShadowColor: "rgba(0, 0, 0, 0.1)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 1,
@@ -258,13 +312,13 @@ const styles = StyleSheet.create({
   frequencyDetails: {
     fontSize: 12,
     marginTop: 2,
-    color: "#fff",
+    // color is now applied dynamically via style prop
     opacity: 0.95,
   },
   streakCount: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#fff",
+    // color is now applied dynamically via style prop
     textShadowColor: "rgba(0, 0, 0, 0.1)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 1,
@@ -272,7 +326,7 @@ const styles = StyleSheet.create({
   streakLabel: {
     fontSize: 12,
     marginTop: 2,
-    color: "#fff",
+    // color is now applied dynamically via style prop
     opacity: 0.95,
   },
   checkButton: {
@@ -280,19 +334,19 @@ const styles = StyleSheet.create({
     width: 28,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: "#fff",
+    // borderColor is now applied dynamically via style prop
     backgroundColor: "transparent",
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 12,
   },
   checkButtonCompleted: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
   },
   checkIcon: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#000",
+    // color is now applied dynamically via style prop
   },
 });
