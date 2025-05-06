@@ -109,7 +109,7 @@ export const HabitList: React.FC<HabitListProps> = ({
           const showHeader = index === 0 && incompleteHabits.length > 0;
           return (
             <>
-              {showHeader && renderSectionHeader("Pending")}
+              {showHeader && renderSectionHeader("Active")}
               <HabitCard
                 habit={item}
                 onToggleComplete={onToggleComplete}
@@ -192,7 +192,6 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 20,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
     color: theme.colors.text, // Use theme text color
     marginBottom: 8,
   },
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
     alignItems: "center", // Center items vertically
   },
   sectionTitle: {
-    fontFamily: theme.fonts.titleMedium, // Use Quicksand Medium
+    fontFamily: theme.fonts.semibold, // Use Quicksand Medium
     fontSize: 16,
     // fontWeight: "600", // fontWeight is part of fontFamily now
     color: theme.colors.text, // Use theme text color
