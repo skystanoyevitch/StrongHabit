@@ -6,6 +6,7 @@ import {
   Alert,
   Text,
   TouchableOpacity,
+  Platform, // Import Platform
 } from "react-native";
 import {
   useFocusEffect,
@@ -22,6 +23,7 @@ import { StorageService } from "../utils/storage";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import Icon from "react-native-vector-icons/Ionicons"; // Import Icon
+import { theme } from "../constants/theme"; // Import theme
 
 // Helper function to get today's date in YYYY-MM-DD format
 const getTodayDateString = () => new Date().toISOString().split("T")[0];
@@ -232,7 +234,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: theme.colors.background, // Use theme background
   },
   dateNavContainer: {
     flexDirection: "row",
@@ -259,15 +261,36 @@ const styles = StyleSheet.create({
     marginTop: 2, // Small space between date and button
   },
   todayButtonText: {
+    fontFamily: theme.fonts.medium, // Use Inter Medium
     fontSize: 12,
-    color: "#5E72E4",
-    fontWeight: "500",
+    color: theme.colors.primary, // Use theme primary color for better contrast
+    // fontWeight: "500", // fontWeight is part of fontFamily now
   },
   title: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
     fontSize: 24,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
     marginBottom: 20,
-    color: "#333",
+    color: theme.colors.text, // Use theme text color
     padding: 16,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background, // Use theme background
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "android" ? 20 : 10, // Adjust top padding for platform status bar
+    paddingBottom: 10,
+    backgroundColor: theme.colors.background, // Match screen background
+  },
+  headerTitle: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
+    fontSize: 26,
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
+    color: theme.colors.text, // Use theme text color
   },
 });
