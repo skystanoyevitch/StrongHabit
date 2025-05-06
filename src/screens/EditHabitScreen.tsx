@@ -18,9 +18,10 @@ import { RootStackParamList } from "../types/navigation";
 import { StorageService } from "../utils/storage";
 import { HabitForm } from "../components/HabitForm";
 import { DayOfWeek, Habit, HabitFrequency } from "../types/habit";
-import { HabitError } from "../types/errors";
+import { HabitError } from "../types/errors"; // Corrected import path
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { theme } from "../constants/theme"; // Import theme
 
 interface FormValues {
   name: string;
@@ -78,11 +79,12 @@ export default function EditHabitScreen(): React.ReactElement {
         Alert.alert("Success", "Habit updated successfully", [
           { text: "OK", onPress: () => navigation.goBack() },
         ]);
-      } catch (error) {
-        console.error("Failed to update habit:", error);
+      } catch (e) {
+        // Changed error variable name to 'e' to avoid conflict with state variable
+        console.error("Failed to update habit:", e);
         const errorMessage =
-          error instanceof HabitError
-            ? error.message
+          e instanceof HabitError
+            ? e.message
             : "Failed to update habit. Please try again.";
         setError(errorMessage);
         Alert.alert("Error", errorMessage);
@@ -140,7 +142,7 @@ export default function EditHabitScreen(): React.ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background, // Use theme background
   },
   errorContainer: {
     padding: 10,
@@ -150,7 +152,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   errorText: {
-    color: "#c62828",
+    fontFamily: theme.fonts.regular, // Use Inter Regular
+    color: theme.colors.error, // Use theme error color
     fontSize: 14,
   },
   headerContainer: {
@@ -169,8 +172,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.text, // Use theme text color
+  },
+  title: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
+    fontSize: 24,
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
+    color: theme.colors.text, // Use theme text color
+    marginBottom: 20,
+    textAlign: "center",
   },
 });
