@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: theme.fonts.titleBold, // Use Quicksand Bold for animated titles
-    fontSize: 32,
-    textAlign: "center",
+    fontSize: 40,
+    textAlign: "left",
     color: theme.colors.text, // Use theme text color
   },
 });
