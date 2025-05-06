@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react"; // Import useContext
 import {
   View,
   ScrollView,
@@ -16,6 +16,7 @@ import {
 } from "../utils/notifications";
 import { DataManager } from "../utils/dataManager";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useThemeContext } from "../contexts/ThemeContext"; // Import useThemeContext
 
 interface SettingsSectionProps {
   title: string;
@@ -34,6 +35,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
 
 const SettingsScreen: React.FC = () => {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
+  const { themeMode, setThemeMode } = useThemeContext(); // Get theme context
   const dataManager = DataManager.getInstance();
 
   useEffect(() => {
@@ -129,6 +131,46 @@ const SettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
+        <SettingsSection title="Appearance">
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => setThemeMode("light")}
+          >
+            <Text style={styles.settingLabel}>Light</Text>
+            <MaterialCommunityIcons
+              name={
+                themeMode === "light" ? "radiobox-marked" : "radiobox-blank"
+              }
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => setThemeMode("dark")}
+          >
+            <Text style={styles.settingLabel}>Dark</Text>
+            <MaterialCommunityIcons
+              name={themeMode === "dark" ? "radiobox-marked" : "radiobox-blank"}
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => setThemeMode("system")}
+          >
+            <Text style={styles.settingLabel}>System</Text>
+            <MaterialCommunityIcons
+              name={
+                themeMode === "system" ? "radiobox-marked" : "radiobox-blank"
+              }
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </SettingsSection>
+
         <SettingsSection title="Notifications">
           <View style={styles.setting}>
             <Text style={styles.settingLabel}>Enable Reminders</Text>
