@@ -11,7 +11,7 @@ import { RootStackParamList } from "../types/navigation";
 import { CalendarList } from "react-native-calendars";
 import { StorageService } from "../utils/storage";
 import { Habit } from "../types/habit";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { theme } from "../constants/theme"; // Import theme
@@ -96,20 +96,10 @@ export default function HabitDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-
-      <AnimatedTitle text="Habit Overview" />
-      <View style={styles.header}>
-        <Text style={styles.title}>{habit.name}</Text>
-        <Text style={styles.description}>{habit.description}</Text>
-      </View>
+      <AnimatedTitle text={habit.name} />
+      {habit.description && (
+        <Text style={styles.habitDescription}>{habit.description}</Text>
+      )}
 
       <View style={styles.statsContainer}>
         {stats && (
@@ -176,28 +166,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background, // Use theme background
   },
-  header: {
-    padding: 20,
-    backgroundColor: theme.colors.surface, // Use theme surface color
-    borderRadius: 20,
-    margin: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  title: {
-    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
-    fontSize: 24,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
-    marginBottom: 8,
-    color: theme.colors.text, // Use theme text color
-  },
-  description: {
+  habitDescription: {
+    // Added style for habit description
     fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 16,
-    color: theme.colors.secondaryText, // Use theme secondary text color
+    color: theme.colors.secondaryText,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    lineHeight: 22, // Improved readability
   },
   statsContainer: {
     flexDirection: "row",
@@ -213,24 +189,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  headerContainer: {
-    alignItems: "center",
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  backButton: {
-    padding: 8,
-    position: "absolute",
-    left: 16,
-    zIndex: 10,
-  },
   statItem: {
     alignItems: "center",
   },
   statValue: {
     fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold for stat values
     fontSize: 24,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
     color: theme.colors.primary, // Use theme primary color for emphasis
   },
   statLabel: {
@@ -256,7 +220,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 18,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
     marginBottom: 16,
     color: theme.colors.text, // Use theme text color
   },
@@ -296,6 +259,5 @@ const styles = StyleSheet.create({
     color: theme.colors.contrastPrimary, // Use contrast color for text on primary/error background
     fontSize: 16,
     marginLeft: 8,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
   },
 });
