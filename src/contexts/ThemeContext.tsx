@@ -11,6 +11,7 @@ import {
   Provider as PaperProvider,
   MD3LightTheme,
   MD3DarkTheme as PaperDarkTheme,
+  MD3Colors, // Added MD3Colors import
 } from "react-native-paper";
 import {
   NavigationContainer,
@@ -30,30 +31,41 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
+// Define the custom parts of the colors separately
+const customDefaultColorsPart = {
+  primary: "#0F4D92",
+  background: "#FFFFFF", // Set to white
+  surface: "#FFFFFF",
+  error: "#FF3B30", // Map notification to error
+  outline: "#e0e0e0", // Map border to outline
+  onSurface: "#333333", // Map text to onSurface
+  // backgroundGradient: ["#F0F8FF", "#FFF0F5"], // Removed
+};
+
 // Merge default themes with custom colors, ensuring MD3 structure
 const CombinedDefaultTheme: MD3Theme = {
   ...MD3LightTheme, // Start with MD3 defaults
   colors: {
     ...MD3LightTheme.colors,
-    primary: "#0F4D92",
-    background: "#F0F4F8",
-    surface: "#FFFFFF",
-    error: "#FF3B30", // Map notification to error
-    outline: "#e0e0e0", // Map border to outline
-    onSurface: "#333333", // Map text to onSurface
+    ...customDefaultColorsPart, // Spread custom colors
   },
+};
+
+const customDarkColorsPart = {
+  primary: "#4dabf7",
+  background: "#121212", // Standard dark theme background
+  surface: "#1e1e1e",
+  error: "#FF456A", // Map notification to error
+  outline: "#333333", // Map border to outline
+  onSurface: "#e0e0e0", // Map text to onSurface
+  // backgroundGradient: ["#000020", "#200020"], // Removed
 };
 
 const CombinedDarkTheme: MD3Theme = {
   ...PaperDarkTheme, // Start with MD3 dark defaults
   colors: {
     ...PaperDarkTheme.colors,
-    primary: "#4dabf7",
-    background: "#121212",
-    surface: "#1e1e1e",
-    error: "#FF456A", // Map notification to error
-    outline: "#333333", // Map border to outline
-    onSurface: "#e0e0e0", // Map text to onSurface
+    ...customDarkColorsPart, // Spread custom colors
   },
 };
 
@@ -111,7 +123,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
           colors: {
             ...NavigationDarkTheme.colors,
             primary: CombinedDarkTheme.colors.primary,
-            background: CombinedDarkTheme.colors.background,
+            background: CombinedDarkTheme.colors.background, // Use theme background
             card: CombinedDarkTheme.colors.surface, // Map surface to card
             text: CombinedDarkTheme.colors.onSurface, // Map onSurface to text
             border: CombinedDarkTheme.colors.outline, // Map outline to border
@@ -123,7 +135,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
           colors: {
             ...NavigationDefaultTheme.colors,
             primary: CombinedDefaultTheme.colors.primary,
-            background: CombinedDefaultTheme.colors.background,
+            background: CombinedDefaultTheme.colors.background, // Use theme background
             card: CombinedDefaultTheme.colors.surface, // Map surface to card
             text: CombinedDefaultTheme.colors.onSurface, // Map onSurface to text
             border: CombinedDefaultTheme.colors.outline, // Map outline to border
