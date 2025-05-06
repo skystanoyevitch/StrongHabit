@@ -273,26 +273,31 @@ const styles = StyleSheet.create({
   card: {
     width: "48%",
     marginBottom: 16,
-    borderRadius: 20, // More rounded corners
+    borderRadius: 24,
+    // borderColor: theme.colors.outline,
+    // borderWidth: 1, // More rounded corners
   },
   chartSection: {
     backgroundColor: "#ffffff",
     padding: 16,
     marginHorizontal: 16, // Use horizontal margin
-    marginTop: 16, // Add top margin
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginVertical: 16, // Add top margin
+    // borderRadius: 24,
+    // borderWidth: 0.5,
+    // borderColor: theme.colors.outline, // Use theme outline color
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
     elevation: 2,
     alignItems: "center", // Center chart horizontally
   },
   sectionTitle: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 18,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
     marginBottom: 16,
-    color: "#333",
+    color: theme.colors.text, // Use theme text color
     alignSelf: "flex-start", // Align title to the left
     paddingLeft: 16, // Add padding to align with chart content
   },
@@ -307,23 +312,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     color: theme.colors.text, // Use theme text color for better contrast
-  },
-  title: {
-    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
-    fontSize: 28,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
-    color: theme.colors.text, // Use theme text color
-    marginTop: 20,
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  chartTitle: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
-    fontSize: 18,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
-    color: theme.colors.text, // Use theme text color
-    textAlign: "center",
-    marginTop: 16,
   },
   errorText: {
     fontFamily: theme.fonts.regular, // Use Inter Regular
