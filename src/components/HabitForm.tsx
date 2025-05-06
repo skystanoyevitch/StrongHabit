@@ -18,6 +18,7 @@ import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "./AnimatedTitle";
 import { DaySelection } from "./DaySelection";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { theme } from "../constants/theme"; // Import theme
 
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
@@ -36,7 +37,7 @@ const initialFormState: HabitFormInput = {
   frequency: "daily",
   selectedDays: [],
   reminderEnabled: false,
-  color: "#007AFF",
+  color: theme.colors.primary, // Default to the primary theme color
 };
 
 interface HabitFormProps {
@@ -145,13 +146,15 @@ export const HabitForm: React.FC<HabitFormProps> = ({
 
   // Available colors
   const colorOptions = [
-    "#007AFF", // Blue
-    "#FF3B30", // Red
-    "#4CD964", // Green
-    "#FF9500", // Orange
-    "#5856D6", // Purple
-    "#FF2D55", // Pink
-  ];
+    "#0F4D92", // Theme primary
+    "#FF2D55", // Theme accent
+    "#4CAF50", // Green
+    "#FFC107", // Amber
+    "#2196F3", // Blue
+    "#9C27B0", // Purple
+    "#E91E63", // Pink
+    "#795548", // Brown
+  ]; // Use a predefined list of colors
 
   // Update the title based on whether we're editing
   const formTitle = isEditing ? "Edit Habit" : "Create New Habit";
@@ -227,6 +230,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             value={formData.name}
             onChangeText={(text) => handleChange("name", text)}
             placeholder="Enter habit name"
+            placeholderTextColor={theme.colors.placeholder} // Use theme placeholder color
             maxLength={60}
           />
           {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
@@ -244,6 +248,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             value={formData.description}
             onChangeText={(text) => handleChange("description", text)}
             placeholder="Enter description"
+            placeholderTextColor={theme.colors.placeholder} // Use theme placeholder color
             multiline
             numberOfLines={3}
             maxLength={200}
@@ -458,7 +463,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
   },
   scrollContainer: {
     paddingLeft: 20,
@@ -468,29 +473,33 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
+    fontFamily: theme.fonts.semibold, // Use Inter Semibold
     fontSize: 16,
-    fontWeight: "500",
+    // fontWeight: "500", // fontWeight is part of fontFamily now
     marginBottom: 8,
-    color: "#333",
+    color: theme.colors.text, // Use theme text color
   },
   input: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: theme.colors.outline, // Use theme outline color
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.colors.surface, // Use theme surface color
+    color: theme.colors.text, // Use theme text color for input
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: "top",
   },
   inputError: {
-    borderColor: "#FF3B30",
+    borderColor: theme.colors.error, // Use theme error color
   },
   errorText: {
-    color: "#FF3B30",
+    fontFamily: theme.fonts.regular, // Use Inter Regular
+    color: theme.colors.error, // Use theme error color
     fontSize: 12,
     marginTop: 4,
   },
@@ -505,21 +514,22 @@ const styles = StyleSheet.create({
   },
   radioOption: {
     borderWidth: 1,
-    borderColor: "#0F4D92",
+    borderColor: theme.colors.primary, // Use theme primary color
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 20,
     marginRight: 12,
   },
   radioSelected: {
-    backgroundColor: "#0F4D92",
+    backgroundColor: theme.colors.primary, // Use theme primary color
   },
   radioText: {
-    color: "#0F4D92",
-    fontWeight: "500",
+    fontFamily: theme.fonts.medium, // Use Inter Medium
+    color: theme.colors.primary, // Use theme primary color
+    // fontWeight: "500", // fontWeight is part of fontFamily now
   },
   radioTextSelected: {
-    color: "#fff", // This will make the text white when selected
+    color: theme.colors.contrastPrimary, // Use contrast color for text on primary background
   },
   colorContainer: {
     flexDirection: "row",
@@ -548,6 +558,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
+    // General button style, used by cancel
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -555,43 +566,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submitButton: {
-    backgroundColor: "#0F4D92",
-    flex: 1,
+    // Specific for submit
+    backgroundColor: theme.colors.primary, // Use theme primary color
+    flex: 1, // Takes remaining space if no cancel button or if specified
   },
   submitButtonText: {
-    color: "#fff",
+    fontFamily: theme.fonts.semibold, // Use Inter Semibold
+    color: theme.colors.contrastPrimary, // Use contrast color
     fontSize: 16,
-    fontWeight: "600",
-  },
-
-  timePickerButton: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#f9f9f9",
-  },
-  timePickerText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  doneButton: {
-    alignSelf: "flex-end",
-    padding: 16,
-  },
-  doneButtonText: {
-    color: "#0F4D92",
-    fontSize: 18,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
   },
   cancelButton: {
-    backgroundColor: "transparent",
+    // Specific for cancel
+    backgroundColor: "transparent", // Or theme.colors.surface if needs a background
     marginRight: 12,
+    // borderWidth: 1, // Optional: if you want a border
+    // borderColor: theme.colors.outline, // Optional: if you want a border
   },
   cancelButtonText: {
-    color: "#666",
+    fontFamily: theme.fonts.medium, // Use Inter Medium
+    color: theme.colors.text, // Use theme text color (or primary for more emphasis)
     fontSize: 16,
-    fontWeight: "500",
+    // fontWeight: "500", // fontWeight is part of fontFamily now
   },
   modalOverlay: {
     flex: 1,
@@ -600,17 +596,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   colorPickerModal: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     borderRadius: 20,
     padding: 20,
     width: "90%",
     maxWidth: 400,
   },
   colorPickerTitle: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
     fontSize: 18,
-    fontWeight: "600",
+    // fontWeight: "600", // fontWeight is part of fontFamily now
     marginBottom: 20,
     textAlign: "center",
+    color: theme.colors.text, // Use theme text color
   },
   colorPickerWrapper: {
     height: 300,
@@ -637,14 +635,33 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 20,
   },
+  timePickerButton: {
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: theme.colors.surface,
+  },
+  timePickerText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontSize: 16,
+    color: theme.colors.text, // Use theme text color
+  },
+  doneButtonText: {
+    // For modal done button
+    fontFamily: theme.fonts.semibold, // Use Inter Semibold
+    color: theme.colors.primary, // Use theme primary color
+    fontSize: 18,
+    // fontWeight: "600", // fontWeight is part of fontFamily now
+  },
   colorPickerPreview: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: theme.colors.outline,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.colors.surface, // Use theme surface color
   },
   colorSwatch: {
     width: 24,
@@ -653,8 +670,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   colorPickerButtonText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text, // Use theme text color
   },
 });
