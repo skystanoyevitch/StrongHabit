@@ -303,9 +303,34 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background, // Use theme background
   },
   loadingText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     marginTop: 12,
     fontSize: 16,
-    color: "#555",
+    color: theme.colors.text, // Use theme text color for better contrast
+  },
+  title: {
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
+    fontSize: 28,
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
+    color: theme.colors.text, // Use theme text color
+    marginTop: 20,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  chartTitle: {
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontSize: 18,
+    // fontWeight: "600", // fontWeight is part of fontFamily now
+    color: theme.colors.text, // Use theme text color
+    textAlign: "center",
+    marginTop: 16,
+  },
+  errorText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontSize: 16,
+    color: theme.colors.error, // Use theme error color for errors
+    textAlign: "center",
+    marginTop: 10,
   },
 });
 
