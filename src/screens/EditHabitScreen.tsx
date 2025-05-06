@@ -19,8 +19,6 @@ import { StorageService } from "../utils/storage";
 import { HabitForm } from "../components/HabitForm";
 import { DayOfWeek, Habit, HabitFrequency } from "../types/habit";
 import { HabitError } from "../types/errors"; // Corrected import path
-import { AnimatedTitle } from "../components/AnimatedTitle";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { theme } from "../constants/theme"; // Import theme
 
 interface FormValues {
@@ -40,18 +38,6 @@ export default function EditHabitScreen(): React.ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const storageService = StorageService.getInstance();
-
-  // const validateForm = (values: FormValues): boolean => {
-  //   if (!values.name.trim()) {
-  //     setError("Name is required");
-  //     return false;
-  //   }
-  //   if (!values.description.trim()) {
-  //     setError("Description is required");
-  //     return false;
-  //   }
-  //   return true;
-  // };
 
   const validateForm = (values: FormValues): boolean => {
     if (!values.name.trim()) {
@@ -107,14 +93,7 @@ export default function EditHabitScreen(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
+      {/* <AnimatedTitle text="Edit Habit" /> */}
 
       {error && (
         <View style={styles.errorContainer}>
@@ -156,16 +135,6 @@ const styles = StyleSheet.create({
     color: theme.colors.error, // Use theme error color
     fontSize: 14,
   },
-  headerContainer: {
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    padding: 8,
-    position: "absolute",
-    left: 16,
-    zIndex: 10,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -176,13 +145,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: theme.colors.text, // Use theme text color
-  },
-  title: {
-    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
-    fontSize: 24,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
-    color: theme.colors.text, // Use theme text color
-    marginBottom: 20,
-    textAlign: "center",
   },
 });
