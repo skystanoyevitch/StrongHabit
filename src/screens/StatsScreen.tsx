@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16, // Use horizontal margin
     marginTop: 16, // Add top margin
-    borderRadius: 20,
+    borderRadius: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
