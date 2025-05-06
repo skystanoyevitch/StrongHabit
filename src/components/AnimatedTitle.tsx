@@ -1,20 +1,12 @@
 import React from "react";
 import { Text, StyleSheet, View } from "react-native";
-import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
+import { theme } from "../constants/theme"; // Import theme
 
 interface AnimatedTitleProps {
   text: string;
 }
 
 export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({ text }) => {
-  const [fontsLoaded] = useFonts({
-    Poppins_600SemiBold,
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>
@@ -31,9 +23,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   title: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold for animated titles
     fontSize: 32,
     textAlign: "center",
-    color: "#333333",
+    color: theme.colors.text, // Use theme text color
   },
 });
