@@ -25,7 +25,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import * as Notifications from "expo-notifications";
 import ErrorBoundary from "./src/components/ErrorBoundary";
-// import { LinearGradient } from "expo-linear-gradient"; // Removed import
+import { theme } from "./src/constants/theme"; // Import theme
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -151,8 +151,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular as a default
     fontSize: 20,
-    fontWeight: "bold",
+    // fontWeight: "bold", // fontWeight is part of fontFamily now
     color: "#007AFF",
   },
   loadingContainer: {
