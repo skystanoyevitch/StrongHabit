@@ -360,9 +360,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   title: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
-    fontSize: 17,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
+    fontFamily: theme.fonts.bold, // Use Quicksand Semibold
+    fontSize: 18,
     color: theme.colors.text, // Ensure high contrast
   },
   chevronIcon: {
