@@ -332,13 +332,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF", // Explicitly white, though set by actualCardBackgroundColor
     // Add shadow for floating effect
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 4, // For Android
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   contentContainer: {
     flexDirection: "row",
