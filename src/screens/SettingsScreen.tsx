@@ -8,6 +8,8 @@ import {
   Switch,
   Linking,
   Alert,
+  Platform,
+  StatusBar,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
@@ -17,6 +19,7 @@ import {
 import { DataManager } from "../utils/dataManager";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useThemeContext } from "../contexts/ThemeContext"; // Import useThemeContext
+import { theme } from "../constants/theme"; // Import theme
 
 interface SettingsSectionProps {
   title: string;
@@ -255,21 +258,22 @@ const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.background, // Use theme background
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   section: {
     marginVertical: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.surface, // Use theme surface color
     borderRadius: 12,
     overflow: "hidden",
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#666",
-    marginHorizontal: 16,
-    marginVertical: 8,
-    textTransform: "uppercase",
+    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontSize: 20,
+    color: theme.colors.text, // Use theme text color
+    marginTop: 24,
+    marginBottom: 12,
+    paddingHorizontal: 16, // Added padding to align with settings items
   },
   setting: {
     flexDirection: "row",
@@ -277,20 +281,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: theme.colors.outline, // Use theme outline color
   },
   settingLabel: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text, // Use theme text color
   },
   comingSoonText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.secondaryText, // Use theme secondary text color
     fontStyle: "italic",
   },
   settingValue: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.secondaryText, // Use theme secondary text color
   },
   versionContainer: {
     alignItems: "center",
@@ -298,8 +305,9 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   versionText: {
+    fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 14,
-    color: "#999",
+    color: theme.colors.secondaryText, // Use theme secondary text color
   },
 });
 
