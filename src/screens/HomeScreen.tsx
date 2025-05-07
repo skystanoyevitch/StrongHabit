@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -6,30 +6,28 @@ import {
   Alert,
   Text,
   TouchableOpacity,
-  Platform, // Import Platform
-  FlatList, // Added FlatList
-  Dimensions, // Added Dimensions
-  NativeSyntheticEvent, // Added for scroll event
-  NativeScrollEvent, // Added for scroll event
-  ActivityIndicator, // Added ActivityIndicator
+  Platform,
+  FlatList,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 import {
   useFocusEffect,
   useNavigation,
   NavigationProp,
 } from "@react-navigation/native";
-// Remove Calendar import
-// import { Calendar, DateData } from "react-native-calendars";
 import { RootStackParamList } from "../types/navigation";
 import { useHabits } from "../hooks/useHabits";
 import { HabitList } from "../components/HabitList";
-import { DayOfWeek, Habit } from "../types/habit"; // Import DayOfWeek
+import { DayOfWeek, Habit } from "../types/habit";
 import { StorageService } from "../utils/storage";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
-// Icon import is needed for Today button
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { theme } from "../constants/theme"; // Import theme
+import { theme } from "../constants/theme";
 
 // Helper function to get today's date in YYYY-MM-DD format
 const getTodayDateString = () => new Date().toISOString().split("T")[0];
@@ -86,69 +84,146 @@ const getDayOfWeek = (dateString: string): DayOfWeek => {
 };
 
 const screenWidth = Dimensions.get("window").width;
-const DATE_ITEM_WIDTH = screenWidth / 3; // Show 3 items, center one is prominent
-const NUM_BUFFER_DAYS = 90; // Number of days to load on each side of the initial date
+// Adjust for horizontal wheel effect
+const ITEM_WIDTH = screenWidth / 4; // Width of each date item
+const NUM_BUFFER_DAYS = 90;
+const PERSPECTIVE = 800;
+const VISIBLE_ITEMS = 3; // Number of items visible in the wheel
 
 // Define the structure for pre-calculated date items
 interface CalendarDateItem {
-  id: string; // The original date string, e.g., "2025-05-07"
+  id: string;
   dayOfMonth: string;
   dayOfWeekShort: string;
+  monthShort: string; // Added to show month
 }
 
-// Define props for MemoizedDateItem
+// Define props for WheeledDateItem component
 interface DateItemProps {
-  item: CalendarDateItem; // Pass the whole pre-calculated item
-  isSelected: boolean;
-  onPressItem: (dateId: string, index: number) => void;
-  itemWidth: number;
+  item: CalendarDateItem;
   index: number;
+  scrollX: Animated.Value; // Changed from scrollY to scrollX
+  itemWidth: number; // Changed from itemHeight to itemWidth
+  onPress: (date: string) => void;
+  isSelected: boolean;
 }
 
-// Create the DateItem component
-const DateItem: React.FC<DateItemProps> = ({
+// WheeledDateItem component with 3D transformations for horizontal scrolling
+const WheeledDateItem: React.FC<DateItemProps> = ({
   item,
-  isSelected,
-  onPressItem,
-  itemWidth,
   index,
+  scrollX,
+  itemWidth,
+  onPress,
+  isSelected,
 }) => {
-  // dayOfMonth and dayOfWeekShort are now directly from item
+  // Memoize the inputRange and outputRange values to prevent recalculations on every render
+  const inputRange = useMemo(() => [
+    (index - 2) * itemWidth,
+    (index - 1) * itemWidth,
+    index * itemWidth,
+    (index + 1) * itemWidth,
+    (index + 2) * itemWidth,
+  ], [index, itemWidth]);
+  
+  // Animated values - memoize to prevent recreation on every render
+  const animatedStyles = useMemo(() => {
+    const scale = scrollX.interpolate({
+      inputRange,
+      outputRange: [0.6, 0.8, 1.0, 0.8, 0.6],
+      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+    });
+    
+    const rotateY = scrollX.interpolate({
+      inputRange,
+      outputRange: ["45deg", "25deg", "0deg", "-25deg", "-45deg"],
+      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+    });
+    
+    const opacity = scrollX.interpolate({
+      inputRange,
+      outputRange: [0.3, 0.5, 1, 0.5, 0.3],
+      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+    });
+
+    return {
+      transform: [
+        { perspective: PERSPECTIVE },
+        { rotateY },
+        { scale },
+      ],
+      opacity,
+    };
+  }, [inputRange, scrollX]);
+
+  // Memoize the onPress handler for the specific item
+  const handlePress = useCallback(() => {
+    onPress(item.id);
+  }, [onPress, item.id]);
+
   return (
-    <TouchableOpacity
-      onPress={() => onPressItem(item.id, index)} // Use item.id
+    <Animated.View
       style={[
-        styles.dateItemContainer,
-        { width: itemWidth },
-        isSelected
-          ? styles.selectedDateItemContainer
-          : styles.nonSelectedDateItemContainer,
+        styles.wheelItem,
+        {
+          width: itemWidth,
+        },
+        animatedStyles,
       ]}
+      // Add removeClippedSubviews for items that are offscreen
+      removeClippedSubviews={Platform.OS === 'android'}
     >
-      <Text
+      <TouchableOpacity
         style={[
-          isSelected
-            ? styles.selectedDateItemTextDayOfWeek
-            : styles.nonSelectedDateItemTextDayOfWeek,
+          styles.wheelItemTouchable,
+          isSelected && styles.wheelItemSelectedCircle,
         ]}
+        onPress={handlePress}
       >
-        {item.dayOfWeekShort}
-      </Text>
-      <Text
-        style={[
-          isSelected
-            ? styles.selectedDateItemTextDayOfMonth
-            : styles.nonSelectedDateItemTextDayOfMonth,
-        ]}
-      >
-        {item.dayOfMonth}
-      </Text>
-    </TouchableOpacity>
+        <Text
+          style={[
+            styles.wheelItemDayOfWeek,
+            isSelected && styles.wheelItemTextSelected,
+          ]}
+        >
+          {item.dayOfWeekShort}
+        </Text>
+        <Text
+          style={[
+            styles.wheelItemDayOfMonth,
+            isSelected && styles.wheelItemTextSelected,
+          ]}
+        >
+          {item.dayOfMonth}
+        </Text>
+        <Text
+          style={[
+            styles.wheelItemMonth,
+            isSelected && styles.wheelItemTextSelected,
+          ]}
+        >
+          {item.monthShort}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
-// Memoize the DateItem component
-const MemoizedDateItem = React.memo(DateItem);
+// Custom comparison function for React.memo
+const areEqual = (prevProps: DateItemProps, nextProps: DateItemProps) => {
+  // Only re-render if these specific props change
+  return (
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.itemWidth === nextProps.itemWidth
+    // We don't compare scrollX because it changes frequently
+    // and we want the animation to update, but not the component itself
+  );
+};
+
+// Create a memoized version of WheeledDateItem
+const MemoizedWheeledDateItem = React.memo(WheeledDateItem, areEqual);
 
 export default function HomeScreen() {
   const { habits, loading, error, refreshHabits } = useHabits();
@@ -157,16 +232,22 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState<string>(
     getTodayDateString()
   );
-  // Update state to hold CalendarDateItem objects
   const [calendarDates, setCalendarDates] = useState<CalendarDateItem[]>([]);
-  const flatListRef = useRef<FlatList<CalendarDateItem>>(null); // Update FlatList type
+  const flatListRef = useRef<FlatList>(null);
+  const scrollX = useRef(new Animated.Value(0)).current; // Changed from scrollY to scrollX
   const initialScrollPerformedRef = useRef(false);
+
+  // Scrolling control flags to prevent automatic scrolling
+  const isManualScrollRef = useRef(false);
+  const preventAutoScrollRef = useRef(false);
 
   // Generate initial list of dates with pre-calculated display values
   useEffect(() => {
     const todayStr = getTodayDateString();
+    // Reduce number of days to improve performance
+    const visibleDays = Math.min(NUM_BUFFER_DAYS, 45); // Reduce total number of days 
     const dates: CalendarDateItem[] = [];
-    for (let i = -NUM_BUFFER_DAYS; i <= NUM_BUFFER_DAYS; i++) {
+    for (let i = -visibleDays; i <= visibleDays; i++) {
       const currentDateString = addDays(todayStr, i);
       const dateObj = new Date(currentDateString + "T00:00:00");
       dates.push({
@@ -176,45 +257,98 @@ export default function HomeScreen() {
           .toLocaleDateString(undefined, { weekday: "short" })
           .substring(0, 3)
           .toUpperCase(),
+        monthShort: dateObj
+          .toLocaleDateString(undefined, { month: "short" })
+          .substring(0, 3)
+          .toUpperCase(),
       });
     }
     setCalendarDates(dates);
   }, []);
 
+  // Ensure today's date is centered on initial load
+  useEffect(() => {
+    if (
+      flatListRef.current &&
+      calendarDates.length > 0 
+    ) {
+      const todayIndex = calendarDates.findIndex((d) => d.id === getTodayDateString());
+      
+      if (todayIndex !== -1) {
+        // Ensure we delay this just slightly to allow the FlatList to fully render
+        setTimeout(() => {
+          if (flatListRef.current) {
+            preventAutoScrollRef.current = true;
+            flatListRef.current.scrollToIndex({
+              index: todayIndex,
+              animated: false,
+              viewPosition: 0.5, // Explicitly ensure center alignment
+            });
+            
+            // Reset the prevention flag after a delay
+            setTimeout(() => {
+              preventAutoScrollRef.current = false;
+            }, 300);
+          }
+        }, 100);
+      }
+    }
+  }, [calendarDates]); // Only run when calendar dates change
+
   // Scroll to selected date when calendarDates are populated or selectedDate changes
+  // Modified to prevent unintended automatic scrolling
   useEffect(() => {
     if (
       flatListRef.current &&
       calendarDates.length > 0 &&
       !initialScrollPerformedRef.current
     ) {
-      const index = calendarDates.findIndex((d) => d.id === selectedDate); // Compare with item.id
+      const index = calendarDates.findIndex((d) => d.id === selectedDate);
       if (index !== -1) {
+        preventAutoScrollRef.current = true; // Prevent handling this as a user scroll
         flatListRef.current.scrollToIndex({
           index,
           animated: false,
-          viewPosition: 0.5, // Center the item
+          viewPosition: 0.5,
         });
         initialScrollPerformedRef.current = true;
+        // Reset the flag after initial scroll
+        setTimeout(() => {
+          preventAutoScrollRef.current = false;
+        }, 500);
       }
     }
   }, [calendarDates, selectedDate]);
 
+  // Modified useFocusEffect to prevent unwanted auto-scrolling
   useFocusEffect(
     React.useCallback(() => {
       refreshHabits();
-      const index = calendarDates.findIndex((d) => d.id === selectedDate); // Compare with item.id
-      if (index !== -1 && flatListRef.current) {
-        setTimeout(
-          () =>
-            flatListRef.current?.scrollToIndex({
-              index,
-              animated: false,
-              viewPosition: 0.5,
-            }),
-          50
-        );
+
+      // Only scroll on focus if explicitly needed (e.g., date changed while away from this screen)
+      if (
+        calendarDates.length > 0 &&
+        flatListRef.current &&
+        initialScrollPerformedRef.current
+      ) {
+        const index = calendarDates.findIndex((d) => d.id === selectedDate);
+        if (index !== -1) {
+          preventAutoScrollRef.current = true;
+          setTimeout(() => {
+            if (flatListRef.current) {
+              flatListRef.current.scrollToIndex({
+                index,
+                animated: false,
+                viewPosition: 0.5,
+              });
+            }
+            setTimeout(() => {
+              preventAutoScrollRef.current = false;
+            }, 500);
+          }, 50);
+        }
       }
+
       return () => {};
     }, [refreshHabits, selectedDate, calendarDates])
   );
@@ -262,55 +396,100 @@ export default function HomeScreen() {
     [navigation]
   );
 
+  // Modified to handle simplified date selection with scroll control
   const handleDateItemPress = useCallback(
-    (dateId: string, index: number) => {
-      // Parameter is now dateId
+    (dateId: string) => {
       setSelectedDate(dateId);
-      flatListRef.current?.scrollToIndex({
-        index,
-        animated: true,
-        viewPosition: 0.5,
-      });
+      const index = calendarDates.findIndex((d) => d.id === dateId);
+      if (index !== -1 && flatListRef.current) {
+        preventAutoScrollRef.current = true; // Flag to prevent handling this as a user scroll
+        flatListRef.current.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+        // Reset the flag after animation should be complete
+        setTimeout(() => {
+          preventAutoScrollRef.current = false;
+        }, 500);
+      }
     },
-    [setSelectedDate]
+    [calendarDates, setSelectedDate]
   );
 
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const centerBasedIndex = Math.round(
-      (offsetX + screenWidth / 2 - DATE_ITEM_WIDTH / 2) / DATE_ITEM_WIDTH
-    );
-    const currentItem = calendarDates[centerBasedIndex]; // This is a CalendarDateItem
-    if (currentItem && currentItem.id !== selectedDate) {
-      // Compare with item.id
-      setSelectedDate(currentItem.id);
+  // Updated scroll handler to respect the control flags
+  const handleScroll = useCallback(
+    Animated.event(
+      [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+      {
+        useNativeDriver: true,
+        listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+          // Only set manual scroll flag when user is actually scrolling
+          if (!preventAutoScrollRef.current) {
+            isManualScrollRef.current = true;
+          }
+        },
+      }
+    ),
+    [] // Empty dependency array to ensure this function is stable
+  );
+
+  // Adjust scroll behavior for wheel effect
+  const handleScrollEnd = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    // Only process scroll end if it was a manual scroll
+    if (isManualScrollRef.current && !preventAutoScrollRef.current) {
+      const offsetX = event.nativeEvent.contentOffset.x; // Changed from offsetY to offsetX
+      const index = Math.round(offsetX / ITEM_WIDTH); // Changed from ITEM_HEIGHT to ITEM_WIDTH
+
+      if (index >= 0 && index < calendarDates.length) {
+        const selectedId = calendarDates[index].id;
+        if (selectedId !== selectedDate) {
+          setSelectedDate(selectedId);
+        }
+
+        // Ensure the wheel aligns perfectly to an item
+        if (flatListRef.current && Math.abs(offsetX - index * ITEM_WIDTH) > 1) {
+          preventAutoScrollRef.current = true;
+          flatListRef.current.scrollToOffset({
+            offset: index * ITEM_WIDTH,
+            animated: true,
+          });
+          // Reset flags after animation completes
+          setTimeout(() => {
+            preventAutoScrollRef.current = false;
+            isManualScrollRef.current = false;
+          }, 300);
+        } else {
+          isManualScrollRef.current = false;
+        }
+      }
     }
-  };
+  }, [calendarDates, selectedDate, ITEM_WIDTH]);
 
   const getItemLayout = useCallback(
-    (data: ArrayLike<CalendarDateItem> | null | undefined, index: number) => ({
-      // Update data type
-      length: DATE_ITEM_WIDTH,
-      offset: DATE_ITEM_WIDTH * index,
+    (_: any, index: number) => ({
+      length: ITEM_WIDTH, // Changed from ITEM_HEIGHT to ITEM_WIDTH
+      offset: ITEM_WIDTH * index, // Changed from ITEM_HEIGHT to ITEM_WIDTH
       index,
     }),
-    []
+    [ITEM_WIDTH]
   );
 
-  const renderDateItem = useCallback(
+  // Render a wheel item
+  const renderWheelItem = useCallback(
     ({ item, index }: { item: CalendarDateItem; index: number }) => {
-      // item is CalendarDateItem
       return (
-        <MemoizedDateItem
-          item={item} // Pass the whole item
-          isSelected={item.id === selectedDate} // Compare with item.id
-          onPressItem={handleDateItemPress}
-          itemWidth={DATE_ITEM_WIDTH}
+        <MemoizedWheeledDateItem
+          item={item}
           index={index}
+          scrollX={scrollX} // Changed from scrollY to scrollX
+          itemWidth={ITEM_WIDTH} // Changed from itemHeight to itemWidth
+          onPress={handleDateItemPress}
+          isSelected={item.id === selectedDate}
         />
       );
     },
-    [selectedDate, handleDateItemPress]
+    [selectedDate, handleDateItemPress, scrollX, ITEM_WIDTH]
   );
 
   const habitsForSelectedDate = habits
@@ -344,10 +523,7 @@ export default function HomeScreen() {
     });
   };
 
-  // Padding to center the first and last items in the FlatList
-  const flatListPadding = (screenWidth - DATE_ITEM_WIDTH) / 2;
-
-  // Calculate initial scroll index safely for the FlatList
+  // Calculate initial scroll index safely for the wheel
   let initialDateViewIndex: number | undefined = undefined;
   if (calendarDates.length > 0) {
     const todayIndex = calendarDates.findIndex(
@@ -356,9 +532,12 @@ export default function HomeScreen() {
     if (todayIndex !== -1) {
       initialDateViewIndex = todayIndex;
     }
-    // If todayIndex is -1 (e.g., date not in list), initialDateViewIndex remains undefined.
-    // FlatList will default to the start if initialScrollIndex is undefined.
   }
+
+  // Memoize the contentContainerStyle to prevent recreation on every render
+  const contentContainerStyle = useMemo(() => ({
+    paddingHorizontal: (screenWidth - ITEM_WIDTH) / 2,
+  }), [screenWidth, ITEM_WIDTH]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -372,12 +551,7 @@ export default function HomeScreen() {
             (d) => d.id === getTodayDateString()
           );
           if (todayIndex !== -1) {
-            setSelectedDate(getTodayDateString());
-            flatListRef.current?.scrollToIndex({
-              index: todayIndex,
-              animated: true,
-              viewPosition: 0.5,
-            });
+            handleDateItemPress(getTodayDateString());
           }
         }}
       >
@@ -389,30 +563,53 @@ export default function HomeScreen() {
         <Text style={styles.todayButtonText}>Today</Text>
       </TouchableOpacity>
 
-      {/* Swipeable Date Picker */}
-      <View style={styles.datePickerContainer}>
+      {/* Horizontal Date Wheel Picker */}
+      <View style={styles.wheelContainer}>
         {calendarDates.length > 0 ? (
-          <FlatList
-            ref={flatListRef}
-            data={calendarDates}
-            renderItem={renderDateItem}
-            keyExtractor={(item: CalendarDateItem) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={DATE_ITEM_WIDTH}
-            decelerationRate="fast"
-            getItemLayout={getItemLayout}
-            initialScrollIndex={initialDateViewIndex} // Use safely calculated index
-            onMomentumScrollEnd={handleScrollEnd}
-            contentContainerStyle={{ paddingHorizontal: flatListPadding }}
-            style={styles.flatListStyle}
-            initialNumToRender={7}
-            windowSize={11}
-            maxToRenderPerBatch={10}
-            updateCellsBatchingPeriod={50}
-          />
+          <>
+            {/* Left indicator arrow */}
+            <View style={styles.scrollIndicator}>
+              <MaterialCommunityIcons
+                name="chevron-left"
+                size={24}
+                color={theme.colors.primary}
+              />
+            </View>
+
+            {/* Wheel FlatList - now horizontal with performance optimizations */}
+            <Animated.FlatList
+              ref={flatListRef as any}
+              data={calendarDates}
+              renderItem={renderWheelItem}
+              keyExtractor={(item) => item.id}
+              horizontal={true} // Changed to horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={ITEM_WIDTH} // Changed from ITEM_HEIGHT to ITEM_WIDTH
+              decelerationRate="fast"
+              getItemLayout={getItemLayout}
+              initialScrollIndex={initialDateViewIndex} 
+              onMomentumScrollEnd={handleScrollEnd}
+              onScroll={handleScroll}
+              contentContainerStyle={contentContainerStyle}
+              style={styles.wheelFlatList}
+              centerContent={true} // Add this to help with centering
+              removeClippedSubviews={true} // Improve memory usage
+              initialNumToRender={5} // Reduce initial render load
+              maxToRenderPerBatch={3} // Reduce batch rendering
+              windowSize={5} // Reduce window size (1 visible screen + 2 screens before/after)
+              updateCellsBatchingPeriod={50} // Batch updates
+            />
+
+            {/* Right indicator arrow */}
+            <View style={[styles.scrollIndicator, styles.scrollIndicatorRight]}>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={theme.colors.primary}
+              />
+            </View>
+          </>
         ) : (
-          // Show a loading indicator while dates are being prepared
           <View style={styles.loadingContainerForDatePicker}>
             <ActivityIndicator color={theme.colors.primary} />
           </View>
@@ -436,91 +633,120 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  datePickerContainer: {
-    height: 80, // Adjusted height to accommodate potentially larger selected item
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outlineVariant, // Use theme color
-    backgroundColor: theme.colors.surface, // Use theme color
-    marginBottom: 8, // Add some space below the date picker
-    justifyContent: "center", // Added for loading indicator centering
+
+  // Wheel container styles - updated for horizontal scrolling
+  wheelContainer: {
+    height: 70, // Fixed height for horizontal wheel
+    flexDirection: "row", // Changed to row for horizontal layout
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.surface,
+    marginBottom: 8,
+    position: "relative",
+    overflow: "hidden",
+    // Removed borderTop and borderBottom
   },
+
+  // Scroll indicators repositioned to sides
+  scrollIndicator: {
+    position: "absolute",
+    left: 4, // Changed from top to left
+    height: "100%", // Changed from width to height
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+
+  scrollIndicatorRight: {
+    left: "auto", // Reset left
+    right: 4, // Position on right side
+  },
+
+  wheelFlatList: {
+    height: "100%", // Changed from width to height
+  },
+
+  wheelContentContainer: {
+    // Ensure padding is exactly right to center items
+    paddingHorizontal: (screenWidth - ITEM_WIDTH) / 2,
+  },
+
+  // Individual wheel item
+  wheelItem: {
+    height: "100%", // Changed from width to height
+    justifyContent: "center",
+    alignItems: "center",
+    // width is set dynamically
+  },
+
+  wheelItemSelected: {
+    // Can add specific styling for selected items if needed
+  },
+
+  wheelItemTouchable: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 15, // Add some horizontal padding for the circle
+  },
+
+  // Added style for selected item circle
+  wheelItemSelectedCircle: {
+    backgroundColor: theme.colors.primary, // Transparent background
+    borderWidth: 0.5, // Border width for circle
+    borderColor: theme.colors.primary, // Theme primary color for border
+    borderRadius: 24, // Large radius to ensure circle shape
+    padding: 4, // Inner padding to give circle some space from content
+  },
+
+  wheelItemDayOfWeek: {
+    fontSize: 10, // Smaller font size for more compact display
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 0, // Tighter spacing
+  },
+
+  wheelItemDayOfMonth: {
+    fontSize: 20, // More prominent day number
+    fontFamily: theme.fonts.semibold,
+    color: theme.colors.onSurface,
+  },
+
+  wheelItemMonth: {
+    fontSize: 10, // Smaller font size
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.onSurfaceVariant,
+    marginTop: 0, // Tighter spacing
+  },
+
+  wheelItemTextSelected: {
+    color: theme.colors.contrastPrimary,
+    fontFamily: theme.fonts.bold,
+  },
+
   loadingContainerForDatePicker: {
-    // Added style for loading indicator
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  flatListStyle: {
-    flexGrow: 0, // Prevent FlatList from taking too much space if not needed
-  },
-  dateItemContainer: {
-    // New base style for each date item container
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  selectedDateItemContainer: {
-    // Style for the selected (central) date item
-    // backgroundColor: theme.colors.primaryContainer, // Optional: subtle background highlight
-    borderBottomWidth: 3,
-    borderBottomColor: theme.colors.primary,
-  },
-  nonSelectedDateItemContainer: {
-    // Style for non-selected (side) date items
-    opacity: 0.6, // Make them less prominent
-  },
-  // Removed old dateItem and selectedDateItem styles as they are replaced
 
-  // Text styles for Day of Week
-  selectedDateItemTextDayOfWeek: {
-    fontSize: 14, // Larger font for selected
-    fontFamily: theme.fonts.semibold,
-    color: theme.colors.primary,
-    marginBottom: 4,
-  },
-  nonSelectedDateItemTextDayOfWeek: {
-    fontSize: 12, // Smaller font for non-selected
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.onSurfaceVariant,
-    marginBottom: 4,
-  },
-
-  // Text styles for Day of Month
-  selectedDateItemTextDayOfMonth: {
-    fontSize: 22, // Larger font for selected
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.primary,
-  },
-  nonSelectedDateItemTextDayOfMonth: {
-    fontSize: 16, // Smaller font for non-selected
-    fontFamily: theme.fonts.semibold,
-    color: theme.colors.onSurface,
-  },
-  // Removed old dateItemDayOfWeek, dateItemDayOfMonth, selectedDateItemText styles
-
-  title: {
-    // Example style if AnimatedTitle doesn't have its own full styling
-    fontFamily: theme.fonts.titleBold,
-    fontSize: 24,
-    marginBottom: 10, // Adjusted margin
-    color: theme.colors.text,
-    paddingHorizontal: 16, // Keep horizontal padding
-    paddingTop: 10, // Add some top padding
-  },
   todayButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 8,
     backgroundColor: theme.colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outlineVariant,
+    // borderBottomWidth: 1,
+    // borderBottomColor: theme.colors.outlineVariant,
   },
+
   todayButtonText: {
     marginLeft: 8,
     fontSize: 16,
     color: theme.colors.primary,
     fontFamily: theme.fonts.semibold,
   },
+
+  // Other existing styles...
 });
