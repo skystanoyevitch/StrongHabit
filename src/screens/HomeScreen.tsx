@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -29,8 +35,14 @@ import { AnimatedTitle } from "../components/AnimatedTitle";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { theme } from "../constants/theme";
 
-// Helper function to get today's date in YYYY-MM-DD format
-const getTodayDateString = () => new Date().toISOString().split("T")[0];
+// Helper function to get today's date in YYYY-MM-DD format - improved to handle timezone issues
+const getTodayDateString = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+};
 
 // Helper function to format date string (YYYY-MM-DD) to a readable format for the title
 const formatDateReadableForTitle = (dateString: string) => {
@@ -118,40 +130,39 @@ const WheeledDateItem: React.FC<DateItemProps> = ({
   isSelected,
 }) => {
   // Memoize the inputRange and outputRange values to prevent recalculations on every render
-  const inputRange = useMemo(() => [
-    (index - 2) * itemWidth,
-    (index - 1) * itemWidth,
-    index * itemWidth,
-    (index + 1) * itemWidth,
-    (index + 2) * itemWidth,
-  ], [index, itemWidth]);
-  
+  const inputRange = useMemo(
+    () => [
+      (index - 2) * itemWidth,
+      (index - 1) * itemWidth,
+      index * itemWidth,
+      (index + 1) * itemWidth,
+      (index + 2) * itemWidth,
+    ],
+    [index, itemWidth]
+  );
+
   // Animated values - memoize to prevent recreation on every render
   const animatedStyles = useMemo(() => {
     const scale = scrollX.interpolate({
       inputRange,
       outputRange: [0.6, 0.8, 1.0, 0.8, 0.6],
-      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+      extrapolate: "clamp", // Prevent extrapolation beyond the input range
     });
-    
+
     const rotateY = scrollX.interpolate({
       inputRange,
       outputRange: ["45deg", "25deg", "0deg", "-25deg", "-45deg"],
-      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+      extrapolate: "clamp", // Prevent extrapolation beyond the input range
     });
-    
+
     const opacity = scrollX.interpolate({
       inputRange,
       outputRange: [0.3, 0.5, 1, 0.5, 0.3],
-      extrapolate: 'clamp', // Prevent extrapolation beyond the input range
+      extrapolate: "clamp", // Prevent extrapolation beyond the input range
     });
 
     return {
-      transform: [
-        { perspective: PERSPECTIVE },
-        { rotateY },
-        { scale },
-      ],
+      transform: [{ perspective: PERSPECTIVE }, { rotateY }, { scale }],
       opacity,
     };
   }, [inputRange, scrollX]);
@@ -171,7 +182,7 @@ const WheeledDateItem: React.FC<DateItemProps> = ({
         animatedStyles,
       ]}
       // Add removeClippedSubviews for items that are offscreen
-      removeClippedSubviews={Platform.OS === 'android'}
+      removeClippedSubviews={Platform.OS === "android"}
     >
       <TouchableOpacity
         style={[
@@ -245,7 +256,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const todayStr = getTodayDateString();
     // Reduce number of days to improve performance
-    const visibleDays = Math.min(NUM_BUFFER_DAYS, 45); // Reduce total number of days 
+    const visibleDays = Math.min(NUM_BUFFER_DAYS, 45); // Reduce total number of days
     const dates: CalendarDateItem[] = [];
     for (let i = -visibleDays; i <= visibleDays; i++) {
       const currentDateString = addDays(todayStr, i);
@@ -268,12 +279,11 @@ export default function HomeScreen() {
 
   // Ensure today's date is centered on initial load
   useEffect(() => {
-    if (
-      flatListRef.current &&
-      calendarDates.length > 0 
-    ) {
-      const todayIndex = calendarDates.findIndex((d) => d.id === getTodayDateString());
-      
+    if (flatListRef.current && calendarDates.length > 0) {
+      const todayIndex = calendarDates.findIndex(
+        (d) => d.id === getTodayDateString()
+      );
+
       if (todayIndex !== -1) {
         // Ensure we delay this just slightly to allow the FlatList to fully render
         setTimeout(() => {
@@ -284,7 +294,7 @@ export default function HomeScreen() {
               animated: false,
               viewPosition: 0.5, // Explicitly ensure center alignment
             });
-            
+
             // Reset the prevention flag after a delay
             setTimeout(() => {
               preventAutoScrollRef.current = false;
@@ -325,32 +335,9 @@ export default function HomeScreen() {
     React.useCallback(() => {
       refreshHabits();
 
-      // Only scroll on focus if explicitly needed (e.g., date changed while away from this screen)
-      if (
-        calendarDates.length > 0 &&
-        flatListRef.current &&
-        initialScrollPerformedRef.current
-      ) {
-        const index = calendarDates.findIndex((d) => d.id === selectedDate);
-        if (index !== -1) {
-          preventAutoScrollRef.current = true;
-          setTimeout(() => {
-            if (flatListRef.current) {
-              flatListRef.current.scrollToIndex({
-                index,
-                animated: false,
-                viewPosition: 0.5,
-              });
-            }
-            setTimeout(() => {
-              preventAutoScrollRef.current = false;
-            }, 500);
-          }, 50);
-        }
-      }
-
+      // Don't automatically scroll on focus - this was causing the scroll back issue
       return () => {};
-    }, [refreshHabits, selectedDate, calendarDates])
+    }, [refreshHabits])
   );
 
   useEffect(() => {
@@ -419,52 +406,56 @@ export default function HomeScreen() {
 
   // Updated scroll handler to respect the control flags
   const handleScroll = useCallback(
-    Animated.event(
-      [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-      {
-        useNativeDriver: true,
-        listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-          // Only set manual scroll flag when user is actually scrolling
-          if (!preventAutoScrollRef.current) {
-            isManualScrollRef.current = true;
-          }
-        },
-      }
-    ),
+    Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+      useNativeDriver: true,
+      listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        // Only set manual scroll flag when user is actually scrolling
+        if (!preventAutoScrollRef.current) {
+          isManualScrollRef.current = true;
+        }
+      },
+    }),
     [] // Empty dependency array to ensure this function is stable
   );
 
   // Adjust scroll behavior for wheel effect
-  const handleScrollEnd = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // Only process scroll end if it was a manual scroll
-    if (isManualScrollRef.current && !preventAutoScrollRef.current) {
-      const offsetX = event.nativeEvent.contentOffset.x; // Changed from offsetY to offsetX
-      const index = Math.round(offsetX / ITEM_WIDTH); // Changed from ITEM_HEIGHT to ITEM_WIDTH
+  const handleScrollEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      // Only process scroll end if it was a manual scroll
+      if (isManualScrollRef.current && !preventAutoScrollRef.current) {
+        const offsetX = event.nativeEvent.contentOffset.x;
+        const index = Math.round(offsetX / ITEM_WIDTH);
 
-      if (index >= 0 && index < calendarDates.length) {
-        const selectedId = calendarDates[index].id;
-        if (selectedId !== selectedDate) {
-          setSelectedDate(selectedId);
-        }
+        if (index >= 0 && index < calendarDates.length) {
+          const selectedId = calendarDates[index].id;
+          if (selectedId !== selectedDate) {
+            setSelectedDate(selectedId);
+          }
 
-        // Ensure the wheel aligns perfectly to an item
-        if (flatListRef.current && Math.abs(offsetX - index * ITEM_WIDTH) > 1) {
-          preventAutoScrollRef.current = true;
-          flatListRef.current.scrollToOffset({
-            offset: index * ITEM_WIDTH,
-            animated: true,
-          });
-          // Reset flags after animation completes
-          setTimeout(() => {
-            preventAutoScrollRef.current = false;
+          // Ensure the wheel aligns perfectly to an item
+          if (
+            flatListRef.current &&
+            Math.abs(offsetX - index * ITEM_WIDTH) > 1
+          ) {
+            preventAutoScrollRef.current = true;
+            flatListRef.current.scrollToOffset({
+              offset: index * ITEM_WIDTH,
+              animated: true,
+            });
+
+            // Reset flags after animation completes
+            setTimeout(() => {
+              preventAutoScrollRef.current = false;
+              isManualScrollRef.current = false;
+            }, 300);
+          } else {
             isManualScrollRef.current = false;
-          }, 300);
-        } else {
-          isManualScrollRef.current = false;
+          }
         }
       }
-    }
-  }, [calendarDates, selectedDate, ITEM_WIDTH]);
+    },
+    [calendarDates, selectedDate, ITEM_WIDTH]
+  );
 
   const getItemLayout = useCallback(
     (_: any, index: number) => ({
@@ -535,9 +526,12 @@ export default function HomeScreen() {
   }
 
   // Memoize the contentContainerStyle to prevent recreation on every render
-  const contentContainerStyle = useMemo(() => ({
-    paddingHorizontal: (screenWidth - ITEM_WIDTH) / 2,
-  }), [screenWidth, ITEM_WIDTH]);
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingHorizontal: (screenWidth - ITEM_WIDTH) / 2,
+    }),
+    [screenWidth, ITEM_WIDTH]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -547,12 +541,42 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={styles.todayButton}
         onPress={() => {
-          const todayIndex = calendarDates.findIndex(
-            (d) => d.id === getTodayDateString()
-          );
-          if (todayIndex !== -1) {
-            handleDateItemPress(getTodayDateString());
-          }
+          // Force recalculation of today's date to ensure it's accurate
+          const todayStr = getTodayDateString();
+          console.log("Today's date:", todayStr); // Debug logging
+
+          // Update selected date first
+          setSelectedDate(todayStr);
+
+          // Wait for state update to complete
+          setTimeout(() => {
+            // Find index of today's date in the calendar dates array
+            const todayIndex = calendarDates.findIndex(
+              (d) => d.id === todayStr
+            );
+            console.log(
+              "Today index:",
+              todayIndex,
+              "Date:",
+              calendarDates[todayIndex]?.id
+            ); // Debug logging
+
+            if (todayIndex !== -1 && flatListRef.current) {
+              // Set flag to prevent interference from other scroll handlers
+              preventAutoScrollRef.current = true;
+
+              // Use scrollToOffset for more precise control
+              flatListRef.current.scrollToOffset({
+                offset: todayIndex * ITEM_WIDTH,
+                animated: true,
+              });
+
+              // Reset prevention flag after animation completes
+              setTimeout(() => {
+                preventAutoScrollRef.current = false;
+              }, 500);
+            }
+          }, 50);
         }}
       >
         <MaterialCommunityIcons
@@ -587,7 +611,7 @@ export default function HomeScreen() {
               snapToInterval={ITEM_WIDTH} // Changed from ITEM_HEIGHT to ITEM_WIDTH
               decelerationRate="fast"
               getItemLayout={getItemLayout}
-              initialScrollIndex={initialDateViewIndex} 
+              initialScrollIndex={initialDateViewIndex}
               onMomentumScrollEnd={handleScrollEnd}
               onScroll={handleScroll}
               contentContainerStyle={contentContainerStyle}
