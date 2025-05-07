@@ -1,5 +1,12 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native"; // Added ScrollView
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useNavigation,
@@ -96,67 +103,72 @@ export default function HabitDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <AnimatedTitle text={habit.name} />
-      {habit.description && (
-        <Text style={styles.habitDescription}>{habit.description}</Text>
-      )}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContentContainer}
+      >
+        <View style={styles.contentWrapper}>
+          <AnimatedTitle text={habit.name} />
+          {habit.description && (
+            <Text style={styles.habitDescription}>{habit.description}</Text>
+          )}
 
-      <View style={styles.statsContainer}>
-        {stats && (
-          <>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.currentStreak}</Text>
-              <Text style={styles.statLabel}>Current Streak</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {Math.round(stats.successRate)}%
-              </Text>
-              <Text style={styles.statLabel}>Success Rate</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.completedDays}</Text>
-              <Text style={styles.statLabel}>Total Completions</Text>
-            </View>
-          </>
-        )}
-      </View>
+          <View style={styles.statsContainer}>
+            {stats && (
+              <>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{stats.currentStreak}</Text>
+                  <Text style={styles.statLabel}>Current Streak</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {Math.round(stats.successRate)}%
+                  </Text>
+                  <Text style={styles.statLabel}>Success Rate</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{stats.completedDays}</Text>
+                  <Text style={styles.statLabel}>Total Completions</Text>
+                </View>
+              </>
+            )}
+          </View>
 
-      <View style={styles.calendarContainer}>
-        <Text style={styles.sectionTitle}>Completion History</Text>
-        <CalendarList
-          pastScrollRange={2}
-          futureScrollRange={0}
-          scrollEnabled={true}
-          showScrollIndicator={true}
-          markedDates={markedDates}
-          removeClippedSubviews={true}
-          maxToRenderPerBatch={1}
-          initialNumToRender={1}
-          windowSize={1}
-          calendarHeight={320}
-          calendarWidth={320}
-          style={{ height: "100%" }}
-        />
-      </View>
+          <View style={styles.calendarContainer}>
+            <Text style={styles.sectionTitle}>Completion History</Text>
+            <CalendarList
+              pastScrollRange={2}
+              futureScrollRange={0}
+              scrollEnabled={false} // Changed from true to false
+              // showScrollIndicator={true} // Removed as it's not scrollable
+              markedDates={markedDates}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={1}
+              initialNumToRender={1}
+              windowSize={1}
+              calendarHeight={320}
+              calendarWidth={320}
+            />
+          </View>
+        </View>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.button, styles.editButton]}
+            onPress={() => navigation.navigate("EditHabit", { habit })}
+          >
+            <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Edit Habit</Text>
+          </TouchableOpacity>
 
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.button, styles.editButton]}
-          onPress={() => navigation.navigate("EditHabit", { habit })}
-        >
-          <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Edit Habit</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.deleteButton]}
-          onPress={handleDelete}
-        >
-          <MaterialCommunityIcons name="delete" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Delete Habit</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={handleDelete}
+          >
+            <MaterialCommunityIcons name="delete" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Delete Habit</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -165,6 +177,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background, // Use theme background
+  },
+  scrollView: {
+    // Added style for ScrollView itself
+    flex: 1,
+  },
+  scrollViewContentContainer: {
+    // Added style for ScrollView's content
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
+  contentWrapper: {
+    // This view primarily groups content; specific flex properties might not be needed here
+    // due to justifyContent on its parent.
   },
   habitDescription: {
     // Added style for habit description
@@ -183,11 +208,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: theme.colors.outline, // Use theme outline color
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 2,
   },
   statItem: {
     alignItems: "center",
@@ -204,7 +231,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   calendarContainer: {
-    flex: 1,
+    // flex: 1, // Removed flex: 1
     backgroundColor: theme.colors.surface, // Use theme surface color
     marginHorizontal: 16,
     marginBottom: 16,
@@ -228,17 +255,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     padding: 16,
     backgroundColor: theme.colors.surface, // Use theme surface color
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    // borderTopLeftRadius: 20, // Removed
+    // borderTopRightRadius: 20, // Removed
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: -2 }, // Removed
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 2,
+    // position: "absolute", // Removed
+    // bottom: 0, // Removed
+    // left: 0, // Removed
+    // right: 0, // Removed
+    marginTop: 16, // Added to ensure spacing from calendar if calendar's marginBottom is removed/changed
+    marginBottom: 16, // Added for spacing at the bottom of the scroll content
   },
   button: {
     flexDirection: "row",
