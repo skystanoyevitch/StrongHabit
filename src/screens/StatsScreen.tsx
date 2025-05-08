@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,28 +6,36 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
-  Dimensions, // Import Dimensions
+  Dimensions,
+  TouchableOpacity,
+  Modal,
+  Image,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { LineChart } from "react-native-chart-kit"; // Import LineChart
+import { LineChart } from "react-native-chart-kit";
 import { useHabits } from "../hooks/useHabits";
 import { Habit } from "../types/habit";
 import { StatsData } from "../types/stats";
 import { calculateWeeklyStats } from "../utils/statsUtils";
 import { StatsCard } from "../components/StatsCard";
-// Remove WeeklyChart import
-// import { WeeklyChart } from "../components/WeeklyChart";
 import { AchievementsSection } from "../features/achievements/AchievementsSection";
 import { sharedStyles } from "../styles/shared";
-import { theme } from "../constants/theme"; // Import theme
+import { theme } from "../constants/theme";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   checkAchievements,
   UnlockedAchievement,
+  sortAchievements,
 } from "../features/achievements/achievementUtils";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import ChartErrorBoundary from "../components/ChartErrorBoundry";
 
+// Key for storing already displayed achievements
+const VIEWED_ACHIEVEMENTS_KEY = "@viewed_achievements";
+
+// Initial stats state
 const initialStats: StatsData = {
   totalHabits: 0,
   activeHabits: 0,
@@ -56,7 +64,41 @@ const StatsScreen: React.FC = () => {
         data: [0, 0, 0, 0, 0, 0, 0],
       },
     ],
-  }); // State for chart data
+  });
+
+  // Add state for new achievement notification
+  const [newAchievements, setNewAchievements] = useState<UnlockedAchievement[]>(
+    []
+  );
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
+  const [viewedAchievements, setViewedAchievements] = useState<string[]>([]);
+
+  // Get previously viewed achievements from storage
+  useEffect(() => {
+    const loadViewedAchievements = async () => {
+      try {
+        const viewed = await AsyncStorage.getItem(VIEWED_ACHIEVEMENTS_KEY);
+        if (viewed) {
+          setViewedAchievements(JSON.parse(viewed));
+        }
+      } catch (error) {
+        console.error("Failed to load viewed achievements:", error);
+      }
+    };
+
+    loadViewedAchievements();
+  }, []);
+
+  // Recent unlocked achievements for the highlight section
+  const recentAchievements = useMemo(() => {
+    return [...unlockedAchievements]
+      .sort(
+        (a, b) =>
+          new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
+      )
+      .slice(0, 3); // Take only the 3 most recent
+  }, [unlockedAchievements]);
 
   const calculateStats = useCallback(() => {
     setIsCalculating(true);
@@ -116,6 +158,29 @@ const StatsScreen: React.FC = () => {
         new Map(allUnlockedAchievements.map((a) => [a.id, a])).values()
       );
 
+      // Check for new achievements
+      const newlyUnlocked = uniqueAchievements.filter(
+        (achievement) => !viewedAchievements.includes(achievement.id)
+      );
+
+      if (newlyUnlocked.length > 0) {
+        setNewAchievements(newlyUnlocked);
+        setShowAchievementModal(true);
+
+        // Save newly viewed achievements
+        const updatedViewed = [
+          ...viewedAchievements,
+          ...newlyUnlocked.map((a) => a.id),
+        ];
+        setViewedAchievements(updatedViewed);
+        AsyncStorage.setItem(
+          VIEWED_ACHIEVEMENTS_KEY,
+          JSON.stringify(updatedViewed)
+        ).catch((err) =>
+          console.error("Failed to save viewed achievements:", err)
+        );
+      }
+
       setUnlockedAchievements(uniqueAchievements);
 
       setStatsData({
@@ -153,7 +218,6 @@ const StatsScreen: React.FC = () => {
         datasets: [
           {
             data: completionsData,
-            // strokeWidth: 2, // Removed this as it causes type error
           },
         ],
       });
@@ -162,31 +226,102 @@ const StatsScreen: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [habits]); // Remove statsData dependency as it causes infinite loop
+  }, [habits, viewedAchievements]);
+
+  // Handle next achievement in modal
+  const handleNextAchievement = () => {
+    if (currentAchievementIndex < newAchievements.length - 1) {
+      setCurrentAchievementIndex(currentAchievementIndex + 1);
+    } else {
+      setShowAchievementModal(false);
+      setCurrentAchievementIndex(0);
+    }
+  };
 
   useEffect(() => {
-    // Recalculate only when habits change or screen focuses
     if (habits && isFocused) {
       calculateStats();
-    } else if (!isFocused) {
-      // Optional: Reset stats or show a placeholder when screen is not focused
-      // setStatsData(initialStats);
-      // setChartData({ labels: [], datasets: [{ data: [] }] });
     }
-    // Remove calculateStats from dependency array if it causes issues,
-    // ensure all its own dependencies (like habits) are correctly listed in its useCallback hook.
-  }, [habits, isFocused]); // Keep calculateStats out if it causes loops, rely on habits/isFocused
+  }, [habits, isFocused, calculateStats]);
 
   if (loading && habits === null) {
-    // Adjust loading condition
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} /> // Use
-        theme color
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading your habit data...</Text>
       </View>
     );
   }
+
+  // Achievement celebration modal
+  const renderAchievementModal = () => {
+    if (!showAchievementModal || newAchievements.length === 0) return null;
+
+    const achievement = newAchievements[currentAchievementIndex];
+    const iconBgColor =
+      achievement.type === "streak"
+        ? "#FDBA74"
+        : achievement.type === "completion"
+        ? "#93C5FD"
+        : "#A7F3D0";
+    const iconColor =
+      achievement.type === "streak"
+        ? "#EA580C"
+        : achievement.type === "completion"
+        ? "#1D4ED8"
+        : "#047857";
+
+    return (
+      <Modal
+        visible={showAchievementModal}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.achievementModal}>
+            <View style={styles.confettiContainer}>
+              <Text style={styles.confetti}>🎉</Text>
+              <Text style={styles.confetti}>🏆</Text>
+              <Text style={styles.confetti}>✨</Text>
+            </View>
+
+            <Text style={styles.achievementTitle}>Achievement Unlocked!</Text>
+
+            <View
+              style={[
+                styles.achievementIconContainer,
+                { backgroundColor: iconBgColor },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={achievement.icon as any}
+                size={60}
+                color={iconColor}
+              />
+            </View>
+
+            <Text style={styles.modalAchievementTitle}>
+              {achievement.title}
+            </Text>
+            <Text style={styles.modalAchievementDesc}>
+              {achievement.description}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNextAchievement}
+            >
+              <Text style={styles.nextButtonText}>
+                {currentAchievementIndex < newAchievements.length - 1
+                  ? "Next"
+                  : "Close"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -212,6 +347,53 @@ const StatsScreen: React.FC = () => {
           />
         </View>
 
+        {/* Recent Achievements Section */}
+        {recentAchievements.length > 0 && (
+          <View style={styles.recentAchievementsSection}>
+            <Text style={styles.recentAchievementsTitle}>
+              Recent Achievements
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recentAchievementsList}
+            >
+              {recentAchievements.map((achievement) => (
+                <View key={achievement.id} style={styles.recentAchievementCard}>
+                  <View
+                    style={[
+                      styles.recentAchievementIcon,
+                      {
+                        backgroundColor:
+                          achievement.type === "streak"
+                            ? "#FDBA74"
+                            : achievement.type === "completion"
+                            ? "#93C5FD"
+                            : "#A7F3D0",
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={achievement.icon as any}
+                      size={30}
+                      color={
+                        achievement.type === "streak"
+                          ? "#EA580C"
+                          : achievement.type === "completion"
+                          ? "#1D4ED8"
+                          : "#047857"
+                      }
+                    />
+                  </View>
+                  <Text style={styles.recentAchievementTitle} numberOfLines={2}>
+                    {achievement.title}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         <View style={styles.chartSection}>
           <Text style={styles.sectionTitle}>Weekly Completions</Text>
           <ChartErrorBoundary>
@@ -220,17 +402,17 @@ const StatsScreen: React.FC = () => {
             ) : (
               <LineChart
                 data={chartData}
-                width={Dimensions.get("window").width - 64} // from react-native
+                width={Dimensions.get("window").width - 64}
                 height={220}
                 yAxisLabel=""
                 yAxisSuffix=""
-                yAxisInterval={1} // optional, defaults to 1
+                yAxisInterval={1}
                 chartConfig={{
                   backgroundColor: "#ffffff",
                   backgroundGradientFrom: "#ffffff",
                   backgroundGradientTo: "#ffffff",
-                  decimalPlaces: 0, // optional, defaults to 2dp
-                  color: (opacity = 1) => `rgba(15, 77, 146, ${opacity})`, // Primary color #0F4D92
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(15, 77, 146, ${opacity})`,
                   labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                   style: {
                     borderRadius: 16,
@@ -238,10 +420,10 @@ const StatsScreen: React.FC = () => {
                   propsForDots: {
                     r: "6",
                     strokeWidth: "2",
-                    stroke: theme.colors.primary, // Use theme color for dots
+                    stroke: theme.colors.primary,
                   },
                 }}
-                bezier // Makes the line smooth
+                bezier
                 style={{
                   marginVertical: 8,
                   borderRadius: 16,
@@ -250,19 +432,25 @@ const StatsScreen: React.FC = () => {
             )}
           </ChartErrorBoundary>
         </View>
+
+        {/* Render the main achievements section */}
         <AchievementsSection unlockedAchievements={unlockedAchievements} />
+
+        {/* Achievement celebration modal */}
+        {renderAchievementModal()}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  // Keep existing styles
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background, // Use theme background
+    backgroundColor: theme.colors.background,
   },
   scrollContainer: {
-    paddingBottom: 20, // Add padding to bottom
+    paddingBottom: 20,
   },
   statsGrid: {
     flexDirection: "row",
@@ -274,51 +462,148 @@ const styles = StyleSheet.create({
     width: "48%",
     marginBottom: 16,
     borderRadius: 24,
-    // borderColor: theme.colors.outline,
-    // borderWidth: 1, // More rounded corners
   },
   chartSection: {
     backgroundColor: "#ffffff",
     padding: 16,
-    marginHorizontal: 16, // Use horizontal margin
-    marginVertical: 16, // Add top margin
-    // borderRadius: 24,
-    // borderWidth: 0.5,
-    // borderColor: theme.colors.outline, // Use theme outline color
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
+    marginHorizontal: 16,
+    marginVertical: 16,
     elevation: 2,
-    alignItems: "center", // Center chart horizontally
+    alignItems: "center",
   },
   sectionTitle: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
     marginBottom: 16,
-    color: theme.colors.text, // Use theme text color
-    alignSelf: "flex-start", // Align title to the left
-    paddingLeft: 16, // Add padding to align with chart content
+    color: theme.colors.text,
+    alignSelf: "flex-start",
+    paddingLeft: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: theme.colors.background, // Use theme background
+    backgroundColor: theme.colors.background,
   },
   loadingText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     marginTop: 12,
     fontSize: 16,
-    color: theme.colors.text, // Use theme text color for better contrast
+    color: theme.colors.text,
   },
   errorText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 16,
-    color: theme.colors.error, // Use theme error color for errors
+    color: theme.colors.error,
     textAlign: "center",
     marginTop: 10,
+  },
+
+  // New styles for recent achievements
+  recentAchievementsSection: {
+    marginHorizontal: 16,
+    marginTop: 8,
+  },
+  recentAchievementsTitle: {
+    fontFamily: theme.fonts.titleSemibold,
+    fontSize: 18,
+    marginBottom: 10,
+    color: theme.colors.text,
+  },
+  recentAchievementsList: {
+    paddingVertical: 8,
+  },
+  recentAchievementCard: {
+    width: 100,
+    height: 120,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginRight: 12,
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  recentAchievementIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  recentAchievementTitle: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 12,
+    textAlign: "center",
+    color: "#4B5563",
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  achievementModal: {
+    width: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+  },
+  confettiContainer: {
+    position: "absolute",
+    top: -20,
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-around",
+  },
+  confetti: {
+    fontSize: 30,
+  },
+  achievementTitle: {
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 20,
+    color: theme.colors.primary,
+    marginBottom: 20,
+  },
+  achievementIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalAchievementTitle: {
+    fontFamily: theme.fonts.titleSemibold,
+    fontSize: 18,
+    color: "#1F2937",
+    marginBottom: 8,
+  },
+  modalAchievementDesc: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 16,
+    color: "#4B5563",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  nextButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  nextButtonText: {
+    fontFamily: theme.fonts.semibold,
+    color: "#fff",
+    fontSize: 16,
   },
 });
 
