@@ -3,7 +3,7 @@ export interface HabitLog {
   completed: boolean;
 }
 
-export type HabitFrequency = "daily" | "weekly";
+export type HabitFrequency = "daily" | "weekly" | "monthly";
 
 export type DayOfWeek =
   | "sunday"
@@ -20,6 +20,7 @@ export interface Habit {
   description: string;
   frequency: HabitFrequency;
   selectedDays?: DayOfWeek[];
+  monthlyDays?: number[];
   createdAt: string;
   updatedAt?: string;
   archivedAt?: string | null;
