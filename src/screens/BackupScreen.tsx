@@ -211,113 +211,119 @@ const BackupScreen: React.FC = () => {
     else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const renderBackupItem = ({
-    item,
-    index,
-  }: {
+  // Separate component for each backup item to properly use hooks
+  const BackupItem = React.memo(
+    ({ item, index }: { item: BackupUtils.BackupMetadata; index: number }) => {
+      // Staggered animation for list items
+      const itemFadeAnim = useRef(new Animated.Value(0)).current;
+      const itemTranslateYAnim = useRef(new Animated.Value(20)).current;
+
+      useEffect(() => {
+        Animated.parallel([
+          Animated.timing(itemFadeAnim, {
+            toValue: 1,
+            duration: 400,
+            delay: index * 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(itemTranslateYAnim, {
+            toValue: 0,
+            duration: 400,
+            delay: index * 100,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, [index]);
+
+      // Display appropriate icons based on the filename
+      const isAutoBackup = item.fileName.includes("auto-");
+      const isExportBackup = item.fileName.includes("export-");
+
+      let backupTypeIcon: "file-document" | "clock-outline" | "export" =
+        "file-document";
+      let backupTypeColor = theme.colors.primary;
+
+      if (isAutoBackup) {
+        backupTypeIcon = "clock-outline";
+        backupTypeColor = theme.colors.success;
+      } else if (isExportBackup) {
+        backupTypeIcon = "export";
+        backupTypeColor = theme.colors.accent;
+      }
+
+      return (
+        <Animated.View
+          style={[
+            styles.backupItemContainer,
+            {
+              opacity: itemFadeAnim,
+              transform: [{ translateY: itemTranslateYAnim }],
+            },
+          ]}
+        >
+          <View style={styles.backupItem}>
+            <View style={styles.backupIconContainer}>
+              <MaterialCommunityIcons
+                name={backupTypeIcon}
+                size={24}
+                color={backupTypeColor}
+              />
+            </View>
+
+            <View style={styles.backupInfo}>
+              <Text style={styles.backupName} numberOfLines={1}>
+                {item.fileName.replace(/^(auto|export)-/, "")}
+              </Text>
+
+              <View style={styles.backupDetails}>
+                <Text style={styles.backupDate}>
+                  {formatDate(item.createdAt)}
+                </Text>
+                <Text style={styles.backupMetaInfo}>
+                  {item.habitCount} {item.habitCount === 1 ? "habit" : "habits"}{" "}
+                  · {formatSize(item.size)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.backupActions}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonRestore]}
+                onPress={() => handleRestoreBackup(item)}
+              >
+                <MaterialCommunityIcons name="restore" size={18} color="#fff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonShare]}
+                onPress={() => handleShareBackup(item.fileName)}
+              >
+                <MaterialCommunityIcons
+                  name="share-variant"
+                  size={18}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonDelete]}
+                onPress={() => handleDeleteBackup(item)}
+              >
+                <MaterialCommunityIcons name="delete" size={18} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+      );
+    }
+  );
+
+  // Simplified renderItem function that uses the proper component
+  const renderBackupItem = (props: {
     item: BackupUtils.BackupMetadata;
     index: number;
   }) => {
-    // Staggered animation for list items
-    const itemFadeAnim = useRef(new Animated.Value(0)).current;
-    const itemTranslateYAnim = useRef(new Animated.Value(20)).current;
-
-    useEffect(() => {
-      Animated.parallel([
-        Animated.timing(itemFadeAnim, {
-          toValue: 1,
-          duration: 400,
-          delay: index * 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(itemTranslateYAnim, {
-          toValue: 0,
-          duration: 400,
-          delay: index * 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, []);
-
-    // Display appropriate icons based on the filename
-    const isAutoBackup = item.fileName.includes("auto-");
-    const isExportBackup = item.fileName.includes("export-");
-
-    let backupTypeIcon = "file-document";
-    let backupTypeColor = theme.colors.primary;
-
-    if (isAutoBackup) {
-      backupTypeIcon = "clock-outline";
-      backupTypeColor = theme.colors.success;
-    } else if (isExportBackup) {
-      backupTypeIcon = "export";
-      backupTypeColor = theme.colors.accent;
-    }
-
-    return (
-      <Animated.View
-        style={[
-          styles.backupItemContainer,
-          {
-            opacity: itemFadeAnim,
-            transform: [{ translateY: itemTranslateYAnim }],
-          },
-        ]}
-      >
-        <View style={styles.backupItem}>
-          <View style={styles.backupIconContainer}>
-            <MaterialCommunityIcons
-              name={backupTypeIcon}
-              size={24}
-              color={backupTypeColor}
-            />
-          </View>
-
-          <View style={styles.backupInfo}>
-            <Text style={styles.backupName} numberOfLines={1}>
-              {item.fileName.replace(/^(auto|export)-/, "")}
-            </Text>
-
-            <View style={styles.backupDetails}>
-              <Text style={styles.backupDate}>
-                {formatDate(item.createdAt)}
-              </Text>
-              <Text style={styles.backupMetaInfo}>
-                {item.habitCount} {item.habitCount === 1 ? "habit" : "habits"} ·{" "}
-                {formatSize(item.size)}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.backupActions}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.actionButtonRestore]}
-              onPress={() => handleRestoreBackup(item)}
-            >
-              <MaterialCommunityIcons name="restore" size={18} color="#fff" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.actionButtonShare]}
-              onPress={() => handleShareBackup(item.fileName)}
-            >
-              <MaterialCommunityIcons
-                name="share-variant"
-                size={18}
-                color="#fff"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.actionButtonDelete]}
-              onPress={() => handleDeleteBackup(item)}
-            >
-              <MaterialCommunityIcons name="delete" size={18} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Animated.View>
-    );
+    return <BackupItem item={props.item} index={props.index} />;
   };
 
   return (
