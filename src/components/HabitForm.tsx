@@ -17,6 +17,7 @@ import { Habit, DayOfWeek } from "../types/habit";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "./AnimatedTitle";
 import { DaySelection } from "./DaySelection";
+import { MonthlySelection } from "./MonthlySelection";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { theme } from "../constants/theme"; // Import theme
 
@@ -28,6 +29,7 @@ type HabitFormInput = Omit<
   reminderEnabled: boolean;
   color: string;
   selectedDays: DayOfWeek[];
+  monthlyDays?: number[];
 };
 
 // Define initial form state
@@ -36,6 +38,7 @@ const initialFormState: HabitFormInput = {
   description: "",
   frequency: "daily",
   selectedDays: [],
+  monthlyDays: [],
   reminderEnabled: false,
   color: theme.colors.primary, // Default to the primary theme color
 };
@@ -108,6 +111,14 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     // Frequency validation
     if (formData.frequency === "weekly" && formData.selectedDays.length === 0) {
       newErrors.selectedDays = "Please select at least one day";
+    }
+
+    // Monthly frequency validation
+    if (
+      formData.frequency === "monthly" &&
+      (!formData.monthlyDays || formData.monthlyDays.length === 0)
+    ) {
+      newErrors.monthlyDays = "Please select at least one day of the month";
     }
 
     // Set errors and return validation result
@@ -294,6 +305,22 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                 Weekly
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.radioOption,
+                formData.frequency === "monthly" && styles.radioSelected,
+              ]}
+              onPress={() => handleChange("frequency", "monthly")}
+            >
+              <Text
+                style={[
+                  styles.radioText,
+                  formData.frequency === "monthly" && styles.radioTextSelected,
+                ]}
+              >
+                Monthly
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -308,6 +335,25 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                   ? formData.selectedDays.filter((d) => d !== day)
                   : [...formData.selectedDays, day];
                 handleChange("selectedDays", newSelectedDays);
+              }}
+            />
+            {errors.selectedDays && (
+              <Text style={styles.errorText}>{errors.selectedDays}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Monthly Day Selection */}
+        {formData.frequency === "monthly" && (
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Select Days</Text>
+            <MonthlySelection
+              selectedDays={formData.monthlyDays || []}
+              onDaySelect={(day) => {
+                const newSelectedDays = formData.monthlyDays?.includes(day)
+                  ? formData.monthlyDays.filter((d) => d !== day)
+                  : [...(formData.monthlyDays || []), day];
+                handleChange("monthlyDays", newSelectedDays);
               }}
             />
             {errors.selectedDays && (
