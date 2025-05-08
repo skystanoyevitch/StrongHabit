@@ -34,6 +34,7 @@ import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { theme } from "../constants/theme";
+import AnimatedRN, { FadeInDown, FadeIn } from "react-native-reanimated";
 
 // Helper function to get today's date in YYYY-MM-DD format - improved to handle timezone issues
 const getTodayDateString = () => {
@@ -552,7 +553,23 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AnimatedTitle text={getTitleText()} />
+      {/* New Beautiful Header with Icon */}
+      <AnimatedRN.View
+        entering={FadeInDown.duration(600).springify()}
+        style={styles.headerContainer}
+      >
+        <View style={styles.iconContainer}>
+          <MaterialCommunityIcons
+            name="home-variant"
+            size={36}
+            color={theme.colors.primary}
+          />
+        </View>
+        <Text style={styles.headerTitle}>My Habits</Text>
+        <Text style={styles.headerSubtitle}>
+          Track your daily progress and build consistency
+        </Text>
+      </AnimatedRN.View>
 
       {/* Today Button */}
       <TouchableOpacity
@@ -814,4 +831,39 @@ const styles = StyleSheet.create({
   },
 
   // Other existing styles...
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: theme.colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 24,
+    color: theme.colors.text,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  headerSubtitle: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: theme.colors.secondaryText,
+    marginBottom: 16,
+    textAlign: "center",
+    maxWidth: "90%",
+  },
 });
