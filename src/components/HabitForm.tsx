@@ -19,7 +19,8 @@ import { AnimatedTitle } from "./AnimatedTitle";
 import { DaySelection } from "./DaySelection";
 import { MonthlySelection } from "./MonthlySelection";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { theme } from "../constants/theme"; // Import theme
+import { theme } from "../constants/theme";
+import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
@@ -65,6 +66,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
   >({});
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Form field update handler
   const handleChange = (field: keyof HabitFormInput, value: any) => {
@@ -135,26 +137,6 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     }
   };
 
-  // Color selection component
-  const ColorOption = ({
-    color,
-    selected,
-    onSelect,
-  }: {
-    color: string;
-    selected: boolean;
-    onSelect: () => void;
-  }) => (
-    <TouchableOpacity
-      style={[
-        styles.colorOption,
-        { backgroundColor: color },
-        selected && styles.selectedColorOption,
-      ]}
-      onPress={onSelect}
-    />
-  );
-
   // Available colors
   const colorOptions = [
     "#0F4D92", // Theme primary
@@ -165,113 +147,108 @@ export const HabitForm: React.FC<HabitFormProps> = ({
     "#9C27B0", // Purple
     "#E91E63", // Pink
     "#795548", // Brown
-  ]; // Use a predefined list of colors
+  ];
 
   // Update the title based on whether we're editing
   const formTitle = isEditing ? "Edit Habit" : "Create a New Habit";
   // Update submit button text
   const submitButtonText = isEditing ? "Update Habit" : "Create Habit";
 
-  // Color Selection Section (replace the existing color selection section)
-  const renderColorPicker = () => (
-    <Modal
-      visible={showColorPicker}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => setShowColorPicker(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.colorPickerModal}>
-          <Text style={styles.colorPickerTitle}>Choose Your Color</Text>
-          <View style={styles.colorPickerWrapper}>
-            <ColorPicker
-              color={formData.color}
-              onColorChange={(color) => handleChange("color", color)}
-              thumbSize={40}
-              sliderSize={40}
-              noSnap={true}
-              row={false}
-            />
-          </View>
-          <View style={styles.predefinedColors}>
-            {colorOptions.map((color) => (
-              <TouchableOpacity
-                key={color}
-                style={[
-                  styles.predefinedColor,
-                  { backgroundColor: color },
-                  formData.color === color && styles.selectedPredefinedColor,
-                ]}
-                onPress={() => handleChange("color", color)}
-              />
-            ))}
-          </View>
-          <View style={styles.colorPickerActions}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={() => setShowColorPicker(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#0F4D92" }]}
-              onPress={() => setShowColorPicker(false)}
-            >
-              <Text style={styles.submitButtonText}>Select</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <AnimatedTitle text={formTitle} />
-
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Name Input */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Habit Name *</Text>
-          <TextInput
-            style={[styles.input, errors.name && styles.inputError]}
-            value={formData.name}
-            onChangeText={(text) => handleChange("name", text)}
-            placeholder="Enter habit name"
-            placeholderTextColor={theme.colors.placeholder} // Use theme placeholder color
-            maxLength={60}
-          />
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(100)}
+          style={styles.formGroup}
+        >
+          <Text style={styles.label}>
+            <MaterialCommunityIcons
+              name="format-title"
+              size={18}
+              color={theme.colors.primary}
+            />{" "}
+            Habit Name *
+          </Text>
+          <View
+            style={[
+              styles.inputContainer,
+              focusedField === "name" && styles.inputContainerFocused,
+              errors.name && styles.inputContainerError,
+            ]}
+          >
+            <TextInput
+              style={styles.input}
+              value={formData.name}
+              onChangeText={(text) => handleChange("name", text)}
+              placeholder="Enter habit name"
+              placeholderTextColor={theme.colors.placeholder}
+              maxLength={60}
+              onFocus={() => setFocusedField("name")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
           {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-        </View>
+        </Animated.View>
 
         {/* Description Input */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Description (Optional)</Text>
-          <TextInput
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(200)}
+          style={styles.formGroup}
+        >
+          <Text style={styles.label}>
+            <MaterialCommunityIcons
+              name="text"
+              size={18}
+              color={theme.colors.primary}
+            />{" "}
+            Description (Optional)
+          </Text>
+          <View
             style={[
-              styles.input,
-              styles.textArea,
-              errors.description && styles.inputError,
+              styles.inputContainer,
+              styles.textAreaContainer,
+              focusedField === "description" && styles.inputContainerFocused,
+              errors.description && styles.inputContainerError,
             ]}
-            value={formData.description}
-            onChangeText={(text) => handleChange("description", text)}
-            placeholder="Enter description"
-            placeholderTextColor={theme.colors.placeholder} // Use theme placeholder color
-            multiline
-            numberOfLines={3}
-            maxLength={200}
-          />
+          >
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={formData.description}
+              onChangeText={(text) => handleChange("description", text)}
+              placeholder="Why is this habit important to you?"
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+              numberOfLines={3}
+              maxLength={200}
+              onFocus={() => setFocusedField("description")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
           {errors.description && (
             <Text style={styles.errorText}>{errors.description}</Text>
           )}
-        </View>
+        </Animated.View>
 
         {/* Frequency Selection */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Frequency</Text>
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(300)}
+          style={styles.formGroup}
+        >
+          <Text style={styles.label}>
+            <MaterialCommunityIcons
+              name="calendar-refresh"
+              size={18}
+              color={theme.colors.primary}
+            />{" "}
+            Frequency
+          </Text>
           <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[
@@ -280,6 +257,15 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               ]}
               onPress={() => handleChange("frequency", "daily")}
             >
+              <MaterialCommunityIcons
+                name="calendar-today"
+                size={20}
+                color={
+                  formData.frequency === "daily"
+                    ? theme.colors.contrastPrimary
+                    : theme.colors.primary
+                }
+              />
               <Text
                 style={[
                   styles.radioText,
@@ -289,6 +275,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                 Daily
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.radioOption,
@@ -296,6 +283,15 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               ]}
               onPress={() => handleChange("frequency", "weekly")}
             >
+              <MaterialCommunityIcons
+                name="calendar-week"
+                size={20}
+                color={
+                  formData.frequency === "weekly"
+                    ? theme.colors.contrastPrimary
+                    : theme.colors.primary
+                }
+              />
               <Text
                 style={[
                   styles.radioText,
@@ -305,6 +301,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                 Weekly
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.radioOption,
@@ -312,6 +309,15 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               ]}
               onPress={() => handleChange("frequency", "monthly")}
             >
+              <MaterialCommunityIcons
+                name="calendar-month"
+                size={20}
+                color={
+                  formData.frequency === "monthly"
+                    ? theme.colors.contrastPrimary
+                    : theme.colors.primary
+                }
+              />
               <Text
                 style={[
                   styles.radioText,
@@ -322,12 +328,22 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Day Selection */}
         {formData.frequency === "weekly" && (
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Select Days</Text>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.formGroup}
+          >
+            <Text style={styles.label}>
+              <MaterialCommunityIcons
+                name="calendar-week"
+                size={18}
+                color={theme.colors.primary}
+              />{" "}
+              Select Days
+            </Text>
             <DaySelection
               selectedDays={formData.selectedDays}
               onDaySelect={(day) => {
@@ -340,54 +356,98 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             {errors.selectedDays && (
               <Text style={styles.errorText}>{errors.selectedDays}</Text>
             )}
-          </View>
+          </Animated.View>
         )}
 
         {/* Monthly Day Selection */}
         {formData.frequency === "monthly" && (
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Select Days</Text>
-            <MonthlySelection
-              selectedDays={formData.monthlyDays || []}
-              onDaySelect={(day) => {
-                const newSelectedDays = formData.monthlyDays?.includes(day)
-                  ? formData.monthlyDays.filter((d) => d !== day)
-                  : [...(formData.monthlyDays || []), day];
-                handleChange("monthlyDays", newSelectedDays);
-              }}
-            />
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.formGroup}
+          >
+            <Text style={styles.label}>
+              <MaterialCommunityIcons
+                name="calendar-month"
+                size={18}
+                color={theme.colors.primary}
+              />{" "}
+              Select Days
+            </Text>
+            <View style={styles.monthlySelectionContainer}>
+              <MonthlySelection
+                selectedDays={formData.monthlyDays || []}
+                onDaySelect={(day) => {
+                  const newSelectedDays = formData.monthlyDays?.includes(day)
+                    ? formData.monthlyDays.filter((d) => d !== day)
+                    : [...(formData.monthlyDays || []), day];
+                  handleChange("monthlyDays", newSelectedDays);
+                }}
+              />
+            </View>
             {errors.selectedDays && (
               <Text style={styles.errorText}>{errors.selectedDays}</Text>
             )}
-          </View>
+          </Animated.View>
         )}
 
         {/* Reminder Toggle */}
-        <View style={styles.formGroup}>
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(400)}
+          style={styles.formGroup}
+        >
           <View style={styles.switchContainer}>
-            <Text style={styles.label}>Set Reminder</Text>
+            <View style={styles.switchLabelContainer}>
+              <MaterialCommunityIcons
+                name="bell"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.label}>Set Reminder</Text>
+            </View>
             <Switch
               value={formData.reminderEnabled}
               onValueChange={(value) => handleChange("reminderEnabled", value)}
-              trackColor={{ false: "#ccc", true: "#007AFF" }}
-              thumbColor={formData.reminder ? "#fff" : "#f4f3f4"}
+              trackColor={{ false: "#ccc", true: theme.colors.primary + "80" }}
+              thumbColor={
+                formData.reminderEnabled ? theme.colors.primary : "#f4f3f4"
+              }
             />
           </View>
-        </View>
+        </Animated.View>
 
         {/* Time Picker (only show when reminderEnabled is true) */}
         {formData.reminderEnabled && (
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Reminder Time</Text>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.formGroup}
+          >
+            <Text style={styles.label}>
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={18}
+                color={theme.colors.primary}
+              />{" "}
+              Reminder Time
+            </Text>
             <TouchableOpacity
               style={styles.timePickerButton}
               onPress={() => setShowTimePicker(true)}
             >
+              <MaterialCommunityIcons
+                name="clock"
+                size={22}
+                color={theme.colors.primary}
+              />
               <Text style={styles.timePickerText}>
                 {formData.reminderTime
                   ? `${formData.reminderTime}`
                   : "Set time (tap to select)"}
               </Text>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={22}
+                color={theme.colors.secondaryText}
+              />
             </TouchableOpacity>
 
             {showTimePicker && (
@@ -414,12 +474,22 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                 }}
               />
             )}
-          </View>
+          </Animated.View>
         )}
 
         {/* Color Selection */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Color</Text>
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(500)}
+          style={styles.formGroup}
+        >
+          <Text style={styles.label}>
+            <MaterialCommunityIcons
+              name="palette"
+              size={18}
+              color={theme.colors.primary}
+            />{" "}
+            Color
+          </Text>
           <TouchableOpacity
             style={styles.colorPickerPreview}
             onPress={() => setShowColorPicker(true)}
@@ -428,9 +498,13 @@ export const HabitForm: React.FC<HabitFormProps> = ({
               style={[styles.colorSwatch, { backgroundColor: formData.color }]}
             />
             <Text style={styles.colorPickerButtonText}>Select Color</Text>
-            <MaterialCommunityIcons name="palette" size={24} color="#0F4D92" />
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={22}
+              color={theme.colors.secondaryText}
+            />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {/* Color Picker Modal */}
         <Modal
@@ -452,6 +526,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                   row={false}
                 />
               </View>
+              <Text style={styles.presetColorsHeading}>Preset Colors</Text>
               <View style={styles.predefinedColors}>
                 {colorOptions.map((color) => (
                   <TouchableOpacity
@@ -474,7 +549,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.button, { backgroundColor: "#0F4D92" }]}
+                  style={[styles.button, { backgroundColor: formData.color }]}
                   onPress={() => setShowColorPicker(false)}
                 >
                   <Text style={styles.submitButtonText}>Select</Text>
@@ -485,22 +560,39 @@ export const HabitForm: React.FC<HabitFormProps> = ({
         </Modal>
 
         {/* Form Actions */}
-        <View style={styles.buttonContainer}>
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(600)}
+          style={styles.buttonContainer}
+        >
           {onCancel && (
             <TouchableOpacity
               style={[styles.button, styles.cancelButton]}
               onPress={onCancel}
             >
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color={theme.colors.text}
+              />
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
+            style={[
+              styles.button,
+              styles.submitButton,
+              { backgroundColor: formData.color },
+            ]}
             onPress={handleSubmit}
           >
+            <MaterialCommunityIcons
+              name={isEditing ? "check" : "plus"}
+              size={20}
+              color={theme.colors.contrastPrimary}
+            />
             <Text style={styles.submitButtonText}>{submitButtonText}</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -509,131 +601,148 @@ export const HabitForm: React.FC<HabitFormProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    backgroundColor: theme.colors.surface,
   },
   scrollContainer: {
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontFamily: theme.fonts.titleMedium, // Use Quicksand Medium
+    fontFamily: theme.fonts.titleMedium,
     fontSize: 16,
-    // fontWeight: "500", // fontWeight is part of fontFamily now
-    marginBottom: 8,
-    color: theme.colors.text, // Use theme text color
+    marginBottom: 10,
+    color: theme.colors.secondaryText,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  inputContainerFocused: {
+    borderColor: theme.colors.primary,
+    borderWidth: 1.5,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inputContainerError: {
+    borderColor: theme.colors.error,
   },
   input: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
-    borderWidth: 0.5,
-    borderColor: theme.colors.outline, // Use theme outline color
-    borderRadius: 24,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    fontFamily: theme.fonts.regular,
+    flex: 1,
+    paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: theme.colors.surface, // Use theme surface color
-    color: theme.colors.text, // Use theme text color for input
+    color: theme.colors.text,
+  },
+  textAreaContainer: {
+    minHeight: 100,
   },
   textArea: {
-    minHeight: 80,
+    height: 100,
     textAlignVertical: "top",
   },
-  inputError: {
-    borderColor: theme.colors.error, // Use theme error color
-  },
   errorText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
-    color: theme.colors.error, // Use theme error color
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.error,
     fontSize: 12,
     marginTop: 4,
+    marginLeft: 12,
   },
   switchContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 12,
+    padding: 12,
+  },
+  switchLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   radioGroup: {
     flexDirection: "row",
     marginBottom: 10,
+    justifyContent: "space-between",
   },
   radioOption: {
-    borderWidth: 0.5,
-    borderColor: theme.colors.primary, // Use theme primary color
-    borderRadius: 24,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    marginRight: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flex: 1,
+    marginHorizontal: 4,
+    gap: 6,
   },
   radioSelected: {
-    backgroundColor: theme.colors.primary, // Use theme primary color
+    backgroundColor: theme.colors.primary,
   },
   radioText: {
-    fontFamily: theme.fonts.medium, // Use Inter Medium
-    color: theme.colors.primary, // Use theme primary color
-    // fontWeight: "500", // fontWeight is part of fontFamily now
+    fontFamily: theme.fonts.medium,
+    color: theme.colors.primary,
+    fontSize: 14,
   },
   radioTextSelected: {
-    color: theme.colors.contrastPrimary, // Use contrast color for text on primary background
+    color: theme.colors.contrastPrimary,
   },
-  colorContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 8,
-  },
-  colorOption: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 12,
-    marginBottom: 12,
-  },
-  selectedColorOption: {
-    borderWidth: 3,
-    borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+  monthlySelectionContainer: {
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 12,
+    padding: 10,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 30,
+    gap: 12,
   },
   button: {
-    // General button style, used by cancel
-    borderRadius: 24,
-    paddingVertical: 12,
+    borderRadius: 12,
+    paddingVertical: 14,
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
   },
   submitButton: {
-    // Specific for submit
-    backgroundColor: theme.colors.primary, // Use theme primary color
-    flex: 1, // Takes remaining space if no cancel button or if specified
+    backgroundColor: theme.colors.primary,
+    flex: 1,
   },
   submitButtonText: {
-    fontFamily: theme.fonts.semibold, // Use Inter Semibold
-    color: theme.colors.contrastPrimary, // Use contrast color
+    fontFamily: theme.fonts.semibold,
+    color: theme.colors.contrastPrimary,
     fontSize: 16,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
   },
   cancelButton: {
-    // Specific for cancel
-    backgroundColor: "transparent", // Or theme.colors.surface if needs a background
-    marginRight: 12,
-    // borderWidth: 1, // Optional: if you want a border
-    // borderColor: theme.colors.outline, // Optional: if you want a border
+    backgroundColor: theme.colors.surfaceVariant,
   },
   cancelButtonText: {
-    fontFamily: theme.fonts.medium, // Use Inter Medium
-    color: theme.colors.text, // Use theme text color (or primary for more emphasis)
+    fontFamily: theme.fonts.medium,
+    color: theme.colors.text,
     fontSize: 16,
-    // fontWeight: "500", // fontWeight is part of fontFamily now
   },
   modalOverlay: {
     flex: 1,
@@ -642,23 +751,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   colorPickerModal: {
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    backgroundColor: theme.colors.surface,
     borderRadius: 24,
-    padding: 20,
+    padding: 24,
     width: "90%",
     maxWidth: 400,
   },
   colorPickerTitle: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
-    fontSize: 18,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
+    fontFamily: theme.fonts.titleSemibold,
+    fontSize: 20,
     marginBottom: 20,
     textAlign: "center",
-    color: theme.colors.text, // Use theme text color
+    color: theme.colors.text,
   },
   colorPickerWrapper: {
     height: 300,
     marginBottom: 20,
+  },
+  presetColorsHeading: {
+    fontFamily: theme.fonts.medium,
+    fontSize: 14,
+    color: theme.colors.secondaryText,
+    marginBottom: 10,
   },
   predefinedColors: {
     flexDirection: "row",
@@ -674,40 +788,43 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   selectedPredefinedColor: {
-    borderColor: "#007AFF",
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   colorPickerActions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 30,
+    gap: 12,
   },
   timePickerButton: {
     borderWidth: 1,
     borderColor: theme.colors.outline,
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 12,
+    padding: 14,
     backgroundColor: theme.colors.surface,
+    flexDirection: "row",
+    alignItems: "center",
   },
   timePickerText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 16,
-    color: theme.colors.text, // Use theme text color
-  },
-  doneButtonText: {
-    // For modal done button
-    fontFamily: theme.fonts.semibold, // Use Inter Semibold
-    color: theme.colors.primary, // Use theme primary color
-    fontSize: 18,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
+    color: theme.colors.text,
+    flex: 1,
+    marginLeft: 8,
   },
   colorPickerPreview: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderColor: theme.colors.outline,
-    borderRadius: 24,
-    padding: 12,
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    borderRadius: 12,
+    padding: 14,
+    backgroundColor: theme.colors.surface,
   },
   colorSwatch: {
     width: 24,
@@ -716,9 +833,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   colorPickerButtonText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     flex: 1,
     fontSize: 16,
-    color: theme.colors.text, // Use theme text color
+    color: theme.colors.secondaryText,
   },
 });
