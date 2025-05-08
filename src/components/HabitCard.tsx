@@ -181,10 +181,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   // Get base card color from habit color or default
   const cardColor = habit.color || theme.colors.primary;
 
-  // Use lighter version for background if completed
+  // Create a pastel/tinted version of the color for the background
+  // Use a more significant lightening for a pastel effect (0.6 instead of 0.5)
   const cardBackgroundColor = isCompletedForSelectedDate
-    ? lightenColor(cardColor, 0.5) // Lighter shade for completed
-    : cardColor;
+    ? lightenColor(cardColor, 0.7) // Even lighter shade for completed habits
+    : lightenColor(cardColor, 0.6); // Pastel/tint for normal state
 
   // Determine text color based on background color contrast
   const cardTextColor = getContrastTextColor(cardBackgroundColor);
