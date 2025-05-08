@@ -26,6 +26,8 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import * as Notifications from "expo-notifications";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 import { theme } from "./src/constants/theme"; // Import theme
+import * as BackupUtils from "./src/utils/backupUtils"; // Import backup utilities
+import { StorageService } from "./src/utils/storage"; // Import StorageService
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -56,11 +58,16 @@ function AppContent() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        // Initialize notifications or other async tasks
-        await setupNotifications(); // Changed from initializeNotifications
-        // Artificially delay for two seconds to simulate a slow loading
-        // experience. Please remove this if not needed.
-        // await new Promise(resolve => setTimeout(resolve, 2000));
+        // Initialize notifications
+        await setupNotifications();
+
+        // Initialize storage service
+        const storageService = StorageService.getInstance();
+        await storageService.initialize();
+
+        // Initialize backup system and run auto backup check
+        await BackupUtils.initializeBackupSystem();
+        await BackupUtils.runAutoBackupIfNeeded();
       } catch (e) {
         console.warn(e);
       } finally {
