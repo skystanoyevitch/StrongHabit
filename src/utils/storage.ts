@@ -204,13 +204,16 @@ export class StorageService {
       if (habit.reminderEnabled && habit.reminderTime) {
         const [hours, minutes] = habit.reminderTime.split(":").map(Number);
 
-        // Schedule the reminder
+        // Schedule the reminder with appropriate frequency parameters
         const notificationId = await scheduleHabitReminder({
           habitId: newHabit.id,
           title: `Reminder: ${habit.name}`,
           body: `Time to complete your habit: ${habit.name}`,
           hour: hours || 9,
           minute: minutes || 0,
+          frequency: habit.frequency,
+          selectedDays: habit.selectedDays,
+          monthlyDays: habit.monthlyDays,
         });
 
         if (notificationId) {
@@ -259,6 +262,9 @@ export class StorageService {
           body: `Time to complete your habit: ${habit.name}`,
           hour: hours || 9,
           minute: minutes || 0,
+          frequency: habit.frequency,
+          selectedDays: habit.selectedDays,
+          monthlyDays: habit.monthlyDays,
         });
 
         if (notificationId) {
