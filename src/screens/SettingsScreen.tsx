@@ -23,6 +23,7 @@ import { theme } from "../constants/theme"; // Import theme
 import { useNavigation } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
 import * as BackupUtils from "../utils/backupUtils";
+import Animated, { FadeInDown } from "react-native-reanimated"; // Import animations
 
 // Define the navigation param list for Settings stack
 type SettingsStackParamList = {
@@ -155,7 +156,24 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
+      <Animated.View
+        entering={FadeInDown.duration(600).springify()}
+        style={styles.headerContainer}
+      >
+        <View style={styles.iconContainer}>
+          <MaterialCommunityIcons
+            name="cog"
+            size={36}
+            color={theme.colors.primary}
+          />
+        </View>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerSubtitle}>
+          Customize your app experience and manage your data
+        </Text>
+      </Animated.View>
+
+      <ScrollView style={styles.scrollContainer}>
         <SettingsSection title="Appearance">
           <TouchableOpacity
             style={styles.setting}
@@ -167,7 +185,7 @@ const SettingsScreen: React.FC = () => {
                 themeMode === "light" ? "radiobox-marked" : "radiobox-blank"
               }
               size={24}
-              color="#666"
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -178,7 +196,7 @@ const SettingsScreen: React.FC = () => {
             <MaterialCommunityIcons
               name={themeMode === "dark" ? "radiobox-marked" : "radiobox-blank"}
               size={24}
-              color="#666"
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -191,7 +209,7 @@ const SettingsScreen: React.FC = () => {
                 themeMode === "system" ? "radiobox-marked" : "radiobox-blank"
               }
               size={24}
-              color="#666"
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
         </SettingsSection>
@@ -349,22 +367,66 @@ const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background, // Use theme background
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    backgroundColor: theme.colors.background,
+  },
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: theme.colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 24,
+    color: theme.colors.text,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  headerSubtitle: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: theme.colors.secondaryText,
+    marginBottom: 16,
+    textAlign: "center",
+    maxWidth: "90%",
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 12,
   },
   section: {
-    marginVertical: 16,
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    marginVertical: 8,
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   sectionTitle: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
-    fontSize: 20,
-    color: theme.colors.text, // Use theme text color
-    marginTop: 24,
-    marginBottom: 12,
-    paddingHorizontal: 16, // Added padding to align with settings items
+    fontFamily: theme.fonts.semibold,
+    fontSize: 18,
+    color: theme.colors.text,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.colors.outline,
   },
   setting: {
     flexDirection: "row",
@@ -372,33 +434,34 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.outline, // Use theme outline color
+    borderBottomColor: theme.colors.outline,
   },
   settingLabel: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 16,
-    color: theme.colors.text, // Use theme text color
+    color: theme.colors.text,
   },
   settingDescription: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 12,
-    color: theme.colors.secondaryText, // Use theme secondary text color
+    color: theme.colors.secondaryText,
     marginTop: 4,
   },
   settingValue: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 16,
-    color: theme.colors.secondaryText, // Use theme secondary text color
+    color: theme.colors.secondaryText,
   },
   versionContainer: {
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 16,
+    marginBottom: 24,
+    padding: 12,
   },
   versionText: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 14,
-    color: theme.colors.secondaryText, // Use theme secondary text color
+    color: theme.colors.secondaryText,
   },
 });
 
