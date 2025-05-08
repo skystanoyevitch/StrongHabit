@@ -31,8 +31,18 @@
     "web": {},
     "plugins": [
       "expo-font",
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
+
     "extra": {
       "eas": {
         "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076",
