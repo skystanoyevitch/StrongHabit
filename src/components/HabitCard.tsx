@@ -86,7 +86,7 @@ const calculateContrastRatio = (color1: string, color2: string): number => {
 
 // Helper function to get frequency information
 const getFrequencyInfo = (habit: Habit) => {
-  const { frequency, selectedDays } = habit;
+  const { frequency, selectedDays, monthlyDays } = habit;
   switch (frequency) {
     case "daily":
       return {
@@ -101,7 +101,16 @@ const getFrequencyInfo = (habit: Habit) => {
         label: "Weekly",
         details: `${daysCount} ${daysCount === 1 ? "day" : "days"} per week`,
       };
-    default: // Could be 'monthly' or other types if added
+    case "monthly":
+      const monthlyDaysCount = monthlyDays?.length ?? 0;
+      return {
+        icon: "calendar-month" as const,
+        label: "Monthly",
+        details: `${monthlyDaysCount} ${
+          monthlyDaysCount === 1 ? "day" : "days"
+        } per month`,
+      };
+    default:
       return {
         icon: "calendar-blank" as const, // Generic calendar icon
         label:
