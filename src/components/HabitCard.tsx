@@ -188,13 +188,15 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   // Get base card color from habit color or default
   const cardColor = habit.color || theme.colors.primary;
 
-  // Create very light pastel backgrounds where color is just visible
+  // For completed habits, use a grey color instead of a light version of the selected color
   const cardBackgroundColor = isCompletedForSelectedDate
-    ? lightenColor(cardColor, 0.9) // Very light shade for completed habits
-    : lightenColor(cardColor, 0.85); // Light pastel where color is just visible
+    ? "#E5E5E5" // Grey background for completed habits
+    : lightenColor(cardColor, 0.85); // Light pastel for incomplete habits
 
   // Determine text color based on background color contrast
-  const cardTextColor = getContrastTextColor(cardBackgroundColor);
+  const cardTextColor = isCompletedForSelectedDate
+    ? "#888888" // Grey text for completed habits
+    : getContrastTextColor(cardBackgroundColor);
 
   const handleToggleCompletion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
