@@ -188,15 +188,24 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   // Get base card color from habit color or default
   const cardColor = habit.color || theme.colors.primary;
 
-  // For completed habits, use a grey color instead of a light version of the selected color
+  // For completed habits, use a gradient from light grey to white instead of a flat color
   const cardBackgroundColor = isCompletedForSelectedDate
-    ? "#E5E5E5" // Grey background for completed habits
+    ? "#f5f5f5" // Light grey for completed habits
     : lightenColor(cardColor, 0.85); // Light pastel for incomplete habits
 
   // Determine text color based on background color contrast
   const cardTextColor = isCompletedForSelectedDate
-    ? "#888888" // Grey text for completed habits
+    ? "#757575" // Darker grey text for completed habits
     : getContrastTextColor(cardBackgroundColor);
+
+  // Define gradient colors for a subtle gradient effect on the card background
+  const gradientStartColor = isCompletedForSelectedDate
+    ? "#f0f0f0"
+    : lightenColor(cardColor, 0.9);
+
+  const gradientEndColor = isCompletedForSelectedDate
+    ? "#ffffff"
+    : lightenColor(cardColor, 0.7);
 
   const handleToggleCompletion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -211,56 +220,116 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     }
   };
 
-  // For the checkmark button
+  // For the checkmark button - make it more visually appealing
   const checkButtonColor = isCompletedForSelectedDate
-    ? darkenColor(cardColor, 0.1) // Slightly darker than the card for visibility
+    ? cardColor // Use the original card color for completed status
     : lightenColor(cardColor, 0.3); // Lighter than card if not completed
 
   const checkmarkIconColor = getContrastTextColor(checkButtonColor);
 
   return (
-    <TouchableOpacity onPress={handleCardPress} activeOpacity={0.8}>
+    <TouchableOpacity
+      onPress={handleCardPress}
+      activeOpacity={0.95}
+      style={styles.cardTouchable}
+    >
       <View
         style={[
           styles.card,
-          { backgroundColor: cardBackgroundColor },
-          // Removed border styles
+          {
+            backgroundColor: cardBackgroundColor,
+            borderLeftColor: cardColor,
+            borderLeftWidth: 4,
+          },
         ]}
       >
         <View style={styles.contentContainer}>
           <View style={styles.mainContent}>
             <View style={styles.titleContainer}>
-              <Text style={[styles.title, { color: cardTextColor }]}>
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    color: cardTextColor,
+                    opacity: isCompletedForSelectedDate ? 0.8 : 1,
+                  },
+                ]}
+              >
                 {habit.name}
               </Text>
+
+              {habit.streak > 0 && (
+                <View
+                  style={[
+                    styles.streakBadge,
+                    {
+                      backgroundColor: isCompletedForSelectedDate
+                        ? "#bdbdbd"
+                        : cardColor,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="fire"
+                    size={12}
+                    color="#ffffff"
+                  />
+                  <Text style={styles.streakText}>{habit.streak}</Text>
+                </View>
+              )}
             </View>
 
             <>
               {habit.description && (
                 <Text
-                  style={[styles.description, { color: cardTextColor }]}
+                  style={[
+                    styles.description,
+                    {
+                      color: cardTextColor,
+                      opacity: isCompletedForSelectedDate ? 0.7 : 0.85,
+                    },
+                  ]}
                   numberOfLines={2}
                 >
                   {habit.description}
                 </Text>
               )}
 
+              <View style={styles.separator} />
+
               <View style={styles.detailsContainer}>
                 <View style={styles.detailItem}>
                   <MaterialCommunityIcons
                     name={frequencyInfo.icon}
-                    size={20}
+                    size={18}
                     color={cardTextColor}
-                    style={styles.detailIcon}
+                    style={[
+                      styles.detailIcon,
+                      {
+                        opacity: isCompletedForSelectedDate ? 0.7 : 0.9,
+                      },
+                    ]}
                   />
                   <View>
                     <Text
-                      style={[styles.detailLabel, { color: cardTextColor }]}
+                      style={[
+                        styles.detailLabel,
+                        {
+                          color: cardTextColor,
+                          opacity: isCompletedForSelectedDate ? 0.8 : 1,
+                        },
+                      ]}
                     >
                       {frequencyInfo.label}
                     </Text>
                     <Text
-                      style={[styles.detailValue, { color: cardTextColor }]}
+                      style={[
+                        styles.detailValue,
+                        {
+                          color: cardTextColor,
+                          opacity: isCompletedForSelectedDate ? 0.6 : 0.8,
+                        },
+                      ]}
                     >
                       {frequencyInfo.details}
                     </Text>
@@ -270,20 +339,37 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 <View style={styles.detailItem}>
                   <MaterialCommunityIcons
                     name="fire"
-                    size={20}
+                    size={18}
                     color={cardTextColor}
-                    style={styles.detailIcon}
+                    style={[
+                      styles.detailIcon,
+                      {
+                        opacity: isCompletedForSelectedDate ? 0.7 : 0.9,
+                      },
+                    ]}
                   />
                   <View>
                     <Text
-                      style={[styles.detailLabel, { color: cardTextColor }]}
+                      style={[
+                        styles.detailLabel,
+                        {
+                          color: cardTextColor,
+                          opacity: isCompletedForSelectedDate ? 0.8 : 1,
+                        },
+                      ]}
                     >
                       Current Streak
                     </Text>
                     <Text
-                      style={[styles.detailValue, { color: cardTextColor }]}
+                      style={[
+                        styles.detailValue,
+                        {
+                          color: cardTextColor,
+                          opacity: isCompletedForSelectedDate ? 0.6 : 0.8,
+                        },
+                      ]}
                     >
-                      {habit.streak} Days
+                      {habit.streak} {habit.streak === 1 ? "Day" : "Days"}
                     </Text>
                   </View>
                 </View>
@@ -296,14 +382,19 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               styles.checkButton,
               {
                 backgroundColor: checkButtonColor,
+                transform: [{ scale: isCompletedForSelectedDate ? 1 : 0.95 }],
               },
             ]}
             onPress={handleToggleCompletion}
           >
-            {isCompletedForSelectedDate && (
-              <Text style={[styles.checkIcon, { color: checkmarkIconColor }]}>
-                ✓
-              </Text>
+            {isCompletedForSelectedDate ? (
+              <MaterialCommunityIcons
+                name="check-bold"
+                size={20}
+                color={checkmarkIconColor}
+              />
+            ) : (
+              <View style={styles.emptyCheckCircle} />
             )}
           </TouchableOpacity>
         </View>
@@ -314,15 +405,21 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
+    borderLeftWidth: 4, // Border accent is set dynamically
+  },
+  cardTouchable: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    transform: [{ translateY: 0 }], // Base for animation
   },
   contentContainer: {
     flexDirection: "row",
@@ -334,55 +431,87 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   title: {
     fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
-    opacity: 0.9, // Slightly softer title for easier reading
+    // flex: 1, // Allow title to wrap and take available space
   },
   description: {
     fontFamily: theme.fonts.regular,
     fontSize: 14,
-    marginBottom: 10,
-    opacity: 0.75, // Softer description text for better visual hierarchy
+    marginBottom: 12,
+    lineHeight: 20, // Improved line spacing
   },
   detailsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginTop: 8,
-    gap: 12,
+    gap: 16, // Increased spacing between detail sections
   },
   detailItem: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start", // Align to top
     flexShrink: 1,
+    maxWidth: '45%', // Prevent from taking too much space
   },
   detailIcon: {
-    marginRight: 6,
+    marginRight: 8,
+    marginTop: 2, // Better align with text
   },
   detailLabel: {
     fontFamily: theme.fonts.semibold,
     fontSize: 13,
-    opacity: 0.85, // Softer label text but still readable
   },
   detailValue: {
     fontFamily: theme.fonts.regular,
     fontSize: 12,
-    opacity: 0.7, // More subtle value text for visual comfort
     marginTop: 2,
   },
   checkButton: {
-    height: 30,
-    width: 30,
-    borderRadius: 15,
+    height: 36,
+    width: 36,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  checkIcon: {
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    marginLeft: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  streakText: {
+    color: '#ffffff',
     fontFamily: theme.fonts.bold,
-    fontSize: 18,
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)', // More subtle separator
+    marginVertical: 10,
+  },
+  emptyCheckCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.8)',
   },
 });
