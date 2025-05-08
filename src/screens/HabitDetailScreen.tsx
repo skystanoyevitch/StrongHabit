@@ -22,6 +22,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialC
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
 import { theme } from "../constants/theme"; // Import theme
+import { HabitAchievements } from "../features/achievements/HabitAchievements"; // Import HabitAchievements component
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -134,13 +135,17 @@ export default function HabitDetailScreen() {
             )}
           </View>
 
+          {/* Add the HabitAchievements component here */}
+          <View style={styles.achievementsContainer}>
+            <HabitAchievements habit={habit} />
+          </View>
+
           <View style={styles.calendarContainer}>
             <Text style={styles.sectionTitle}>Completion History</Text>
             <CalendarList
               pastScrollRange={2}
               futureScrollRange={0}
               scrollEnabled={false} // Changed from true to false
-              // showScrollIndicator={true} // Removed as it's not scrollable
               markedDates={markedDates}
               removeClippedSubviews={true}
               maxToRenderPerBatch={1}
@@ -229,6 +234,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.secondaryText, // Use theme secondary text color
     marginTop: 4,
+  },
+  achievementsContainer: {
+    backgroundColor: theme.colors.surface, // Use theme surface color
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    overflow: "hidden",
   },
   calendarContainer: {
     // flex: 1, // Removed flex: 1
