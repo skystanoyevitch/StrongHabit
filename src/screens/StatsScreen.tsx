@@ -23,6 +23,11 @@ import { sharedStyles } from "../styles/shared";
 import { theme } from "../constants/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, {
+  FadeInDown,
+  FadeIn,
+  FadeInRight,
+} from "react-native-reanimated";
 
 import {
   checkAchievements,
@@ -326,40 +331,75 @@ const StatsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <AnimatedTitle text="Your Progress Dashboard" />
+        {/* Improved Header with Icon similar to AddHabitScreen */}
+        <Animated.View
+          entering={FadeInDown.duration(600).springify()}
+          style={styles.headerContainer}
+        >
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons
+              name="chart-line-variant"
+              size={36}
+              color={theme.colors.primary}
+            />
+          </View>
+          <Text style={styles.headerTitle}>Your Progress Dashboard</Text>
+          <Text style={styles.headerSubtitle}>
+            Track your habit consistency and achievements over time
+          </Text>
+        </Animated.View>
 
-        <View style={styles.statsGrid}>
+        {/* Animated Stats Cards */}
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(600).springify()}
+          style={styles.statsGrid}
+        >
           <StatsCard
             title="Active Habits"
             value={statsData.activeHabits}
+            icon="checkbox-marked-circle-outline"
             style={styles.card}
           />
           <StatsCard
             title="Completion Rate"
             value={`${Math.round(statsData.completionRate)}%`}
+            icon="percent-outline"
             style={styles.card}
           />
           <StatsCard
             title="Longest Streak"
             value={statsData.longestStreak}
             subtitle={statsData.habitWithLongestStreak}
+            icon="fire"
             style={styles.card}
           />
-        </View>
+        </Animated.View>
 
-        {/* Recent Achievements Section */}
+        {/* Recent Achievements Section - Animated */}
         {recentAchievements.length > 0 && (
-          <View style={styles.recentAchievementsSection}>
-            <Text style={styles.recentAchievementsTitle}>
-              Recent Achievements
-            </Text>
+          <Animated.View
+            entering={FadeInDown.delay(200).duration(600).springify()}
+            style={styles.recentAchievementsSection}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <MaterialCommunityIcons
+                name="trophy-outline"
+                size={22}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>Recent Achievements</Text>
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.recentAchievementsList}
             >
-              {recentAchievements.map((achievement) => (
-                <View key={achievement.id} style={styles.recentAchievementCard}>
+              {recentAchievements.map((achievement, index) => (
+                <Animated.View
+                  key={achievement.id}
+                  entering={FadeInRight.delay(100 * index).duration(400)}
+                  style={styles.recentAchievementCard}
+                >
                   <View
                     style={[
                       styles.recentAchievementIcon,
@@ -388,53 +428,68 @@ const StatsScreen: React.FC = () => {
                   <Text style={styles.recentAchievementTitle} numberOfLines={2}>
                     {achievement.title}
                   </Text>
-                </View>
+                </Animated.View>
               ))}
             </ScrollView>
-          </View>
+          </Animated.View>
         )}
 
-        <View style={styles.chartSection}>
-          <Text style={styles.sectionTitle}>Weekly Completions</Text>
-          <ChartErrorBoundary>
-            {isCalculating ? (
-              <ActivityIndicator color={theme.colors.primary} />
-            ) : (
-              <LineChart
-                data={chartData}
-                width={Dimensions.get("window").width - 64}
-                height={220}
-                yAxisLabel=""
-                yAxisSuffix=""
-                yAxisInterval={1}
-                chartConfig={{
-                  backgroundColor: "#ffffff",
-                  backgroundGradientFrom: "#ffffff",
-                  backgroundGradientTo: "#ffffff",
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(15, 77, 146, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  style: {
-                    borderRadius: 16,
-                  },
-                  propsForDots: {
-                    r: "6",
-                    strokeWidth: "2",
-                    stroke: theme.colors.primary,
-                  },
-                }}
-                bezier
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 16,
-                }}
-              />
-            )}
-          </ChartErrorBoundary>
-        </View>
+        {/* Chart Section - Animated */}
+        <Animated.View
+          entering={FadeInDown.delay(300).duration(600).springify()}
+          style={styles.chartContainer}
+        >
+          <View style={styles.sectionHeaderRow}>
+            <MaterialCommunityIcons
+              name="chart-line"
+              size={22}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.sectionTitle}>Weekly Completions</Text>
+          </View>
+          <View style={styles.chartSection}>
+            <ChartErrorBoundary>
+              {isCalculating ? (
+                <ActivityIndicator color={theme.colors.primary} />
+              ) : (
+                <LineChart
+                  data={chartData}
+                  width={Dimensions.get("window").width - 64}
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  yAxisInterval={1}
+                  chartConfig={{
+                    backgroundColor: "#ffffff",
+                    backgroundGradientFrom: "#ffffff",
+                    backgroundGradientTo: "#ffffff",
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(15, 77, 146, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "6",
+                      strokeWidth: "2",
+                      stroke: theme.colors.primary,
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              )}
+            </ChartErrorBoundary>
+          </View>
+        </Animated.View>
 
-        {/* Render the main achievements section */}
-        <AchievementsSection unlockedAchievements={unlockedAchievements} />
+        {/* Achievements Section - Animated */}
+        <Animated.View
+          entering={FadeInDown.delay(400).duration(600).springify()}
+          style={styles.achievementsContainer}
+        >
+          <AchievementsSection unlockedAchievements={unlockedAchievements} />
+        </Animated.View>
 
         {/* Achievement celebration modal */}
         {renderAchievementModal()}
@@ -444,13 +499,12 @@ const StatsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // Keep existing styles
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
   scrollContainer: {
-    paddingBottom: 20,
+    paddingBottom: 32,
   },
   statsGrid: {
     flexDirection: "row",
@@ -461,23 +515,33 @@ const styles = StyleSheet.create({
   card: {
     width: "48%",
     marginBottom: 16,
-    borderRadius: 24,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  chartContainer: {
+    marginVertical: 12,
+    marginHorizontal: 16,
   },
   chartSection: {
     backgroundColor: "#ffffff",
     padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 16,
-    elevation: 2,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
     alignItems: "center",
   },
   sectionTitle: {
     fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
-    marginBottom: 16,
+    marginLeft: 8,
     color: theme.colors.text,
-    alignSelf: "flex-start",
-    paddingLeft: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -499,42 +563,40 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  // New styles for recent achievements
+  // Updated styles for recent achievements
   recentAchievementsSection: {
     marginHorizontal: 16,
-    marginTop: 8,
-  },
-  recentAchievementsTitle: {
-    fontFamily: theme.fonts.titleSemibold,
-    fontSize: 18,
-    marginBottom: 10,
-    color: theme.colors.text,
+    marginVertical: 12,
   },
   recentAchievementsList: {
     paddingVertical: 8,
   },
   recentAchievementCard: {
-    width: 100,
-    height: 120,
+    width: 110,
+    height: 140,
     backgroundColor: "#fff",
     borderRadius: 16,
     marginRight: 12,
-    padding: 8,
+    padding: 12,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  recentAchievementIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
-  },
-  recentAchievementIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
   },
   recentAchievementTitle: {
     fontFamily: theme.fonts.medium,
@@ -543,7 +605,7 @@ const styles = StyleSheet.create({
     color: "#4B5563",
   },
 
-  // Modal styles
+  // Enhanced modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -556,6 +618,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   confettiContainer: {
     position: "absolute",
@@ -569,7 +636,7 @@ const styles = StyleSheet.create({
   },
   achievementTitle: {
     fontFamily: theme.fonts.titleBold,
-    fontSize: 20,
+    fontSize: 22,
     color: theme.colors.primary,
     marginBottom: 20,
   },
@@ -580,30 +647,93 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   modalAchievementTitle: {
     fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
     color: "#1F2937",
     marginBottom: 8,
+    textAlign: "center",
   },
   modalAchievementDesc: {
     fontFamily: theme.fonts.regular,
     fontSize: 16,
     color: "#4B5563",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
   nextButton: {
     backgroundColor: theme.colors.primary,
-    paddingHorizontal: 32,
+    paddingHorizontal: 36,
     paddingVertical: 12,
     borderRadius: 24,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   nextButtonText: {
     fontFamily: theme.fonts.semibold,
     color: "#fff",
     fontSize: 16,
+  },
+
+  // Enhanced header styles to match AddHabitScreen
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: theme.colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 24,
+    color: theme.colors.text,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  headerSubtitle: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 14,
+    color: theme.colors.secondaryText,
+    marginBottom: 16,
+    textAlign: "center",
+    maxWidth: "90%",
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  achievementsContainer: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
   },
 });
 
