@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-} from "react-native"; // Added ScrollView
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useNavigation,
@@ -18,11 +18,11 @@ import { RootStackParamList } from "../types/navigation";
 import { CalendarList } from "react-native-calendars";
 import { StorageService } from "../utils/storage";
 import { Habit } from "../types/habit";
-import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { sharedStyles } from "../styles/shared";
 import { AnimatedTitle } from "../components/AnimatedTitle";
-import { theme } from "../constants/theme"; // Import theme
-import { HabitAchievements } from "../features/achievements/HabitAchievements"; // Import HabitAchievements component
+import { theme } from "../constants/theme";
+import { HabitAchievements } from "../features/achievements/HabitAchievements";
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -59,14 +59,14 @@ export default function HabitDetailScreen() {
       const dateString = log.date.split("T")[0]; // Extract YYYY-MM-DD part
       marked[dateString] = {
         selected: true,
-        selectedColor: log.completed ? "#0F4D92" : "white",
-        dotColor: log.completed ? "#0F4D92" : "#FF5252",
+        selectedColor: log.completed ? theme.colors.primary : "white",
+        dotColor: log.completed ? theme.colors.primary : theme.colors.error,
         marked: !log.completed,
         ...(!log.completed && {
           customStyles: {
             container: {
               borderWidth: 1,
-              borderColor: "#FF5252",
+              borderColor: theme.colors.error,
             },
           },
         }),
@@ -137,6 +137,7 @@ export default function HabitDetailScreen() {
 
           {/* Add the HabitAchievements component here */}
           <View style={styles.achievementsContainer}>
+            <Text style={styles.sectionTitle}>Achievements</Text>
             <HabitAchievements habit={habit} />
           </View>
 
@@ -145,7 +146,7 @@ export default function HabitDetailScreen() {
             <CalendarList
               pastScrollRange={2}
               futureScrollRange={0}
-              scrollEnabled={false} // Changed from true to false
+              scrollEnabled={false}
               markedDates={markedDates}
               removeClippedSubviews={true}
               maxToRenderPerBatch={1}
@@ -153,6 +154,24 @@ export default function HabitDetailScreen() {
               windowSize={1}
               calendarHeight={320}
               calendarWidth={320}
+              theme={{
+                calendarBackground: theme.colors.surface,
+                textSectionTitleColor: theme.colors.text,
+                textSectionTitleDisabledColor: theme.colors.placeholder,
+                selectedDayBackgroundColor: theme.colors.primary,
+                selectedDayTextColor: theme.colors.contrastPrimary,
+                todayTextColor: theme.colors.primary,
+                dayTextColor: theme.colors.text,
+                textDisabledColor: theme.colors.disabled,
+                dotColor: theme.colors.primary,
+                selectedDotColor: theme.colors.contrastPrimary,
+                arrowColor: theme.colors.primary,
+                monthTextColor: theme.colors.text,
+                indicatorColor: theme.colors.primary,
+                textDayFontFamily: theme.fonts.regular,
+                textMonthFontFamily: theme.fonts.titleSemibold,
+                textDayHeaderFontFamily: theme.fonts.semibold,
+              }}
             />
           </View>
         </View>
@@ -161,7 +180,11 @@ export default function HabitDetailScreen() {
             style={[styles.button, styles.editButton]}
             onPress={() => navigation.navigate("EditHabit", { habit })}
           >
-            <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
+            <MaterialCommunityIcons
+              name="pencil"
+              size={24}
+              color={theme.colors.contrastPrimary}
+            />
             <Text style={styles.buttonText}>Edit Habit</Text>
           </TouchableOpacity>
 
@@ -169,7 +192,11 @@ export default function HabitDetailScreen() {
             style={[styles.button, styles.deleteButton]}
             onPress={handleDelete}
           >
-            <MaterialCommunityIcons name="delete" size={24} color="#fff" />
+            <MaterialCommunityIcons
+              name="delete"
+              size={24}
+              color={theme.colors.contrastPrimary}
+            />
             <Text style={styles.buttonText}>Delete Habit</Text>
           </TouchableOpacity>
         </View>
@@ -181,111 +208,85 @@ export default function HabitDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background, // Use theme background
+    backgroundColor: theme.colors.background,
   },
   scrollView: {
-    // Added style for ScrollView itself
     flex: 1,
   },
   scrollViewContentContainer: {
-    // Added style for ScrollView's content
     flexGrow: 1,
-    justifyContent: "space-between",
+    paddingBottom: 16,
   },
   contentWrapper: {
-    // This view primarily groups content; specific flex properties might not be needed here
-    // due to justifyContent on its parent.
+    paddingHorizontal: 0,
   },
   habitDescription: {
-    // Added style for habit description
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 16,
     color: theme.colors.secondaryText,
     marginHorizontal: 16,
     marginBottom: 16,
-    lineHeight: 22, // Improved readability
+    lineHeight: 22,
   },
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 16,
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    backgroundColor: theme.colors.surface,
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 0.5,
-    borderColor: theme.colors.outline, // Use theme outline color
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    // elevation: 2,
+    borderColor: theme.colors.outline,
   },
   statItem: {
     alignItems: "center",
   },
   statValue: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold for stat values
+    fontFamily: theme.fonts.titleSemibold,
     fontSize: 24,
-    color: theme.colors.primary, // Use theme primary color for emphasis
+    color: theme.colors.primary,
+    fontWeight: "600",
   },
   statLabel: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 14,
-    color: theme.colors.secondaryText, // Use theme secondary text color
+    color: theme.colors.secondaryText,
     marginTop: 4,
   },
   achievementsContainer: {
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    backgroundColor: theme.colors.surface,
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: theme.colors.outline,
   },
   calendarContainer: {
-    // flex: 1, // Removed flex: 1
-    backgroundColor: theme.colors.surface, // Use theme surface color
+    backgroundColor: theme.colors.surface,
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: theme.colors.outline,
   },
   sectionTitle: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
     marginBottom: 16,
-    color: theme.colors.text, // Use theme text color
+    color: theme.colors.text,
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 16,
-    backgroundColor: theme.colors.surface, // Use theme surface color
-    // borderTopLeftRadius: 20, // Removed
-    // borderTopRightRadius: 20, // Removed
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: -2 }, // Removed
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    // elevation: 2,
-    // position: "absolute", // Removed
-    // bottom: 0, // Removed
-    // left: 0, // Removed
-    // right: 0, // Removed
-    marginTop: 16, // Added to ensure spacing from calendar if calendar's marginBottom is removed/changed
-    marginBottom: 16, // Added for spacing at the bottom of the scroll content
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: theme.colors.surface,
+    marginTop: 8,
+    borderTopWidth: 0.5,
+    borderColor: theme.colors.outline,
   },
   button: {
     flexDirection: "row",
@@ -296,14 +297,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   editButton: {
-    backgroundColor: theme.colors.primary, // Use theme primary color
+    backgroundColor: theme.colors.primary,
   },
   deleteButton: {
-    backgroundColor: theme.colors.error, // Use theme error color
+    backgroundColor: theme.colors.error,
   },
   buttonText: {
-    fontFamily: theme.fonts.semibold, // Use Inter Semibold
-    color: theme.colors.contrastPrimary, // Use contrast color for text on primary/error background
+    fontFamily: theme.fonts.semibold,
+    color: theme.colors.contrastPrimary,
     fontSize: 16,
     marginLeft: 8,
   },
