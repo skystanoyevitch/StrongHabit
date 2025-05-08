@@ -221,7 +221,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
             borderColor: isCompletedForSelectedDate
               ? theme.colors.disabled // Gray border for completed tasks
               : accentDerivedColorForWhiteBg, // Accent-derived border for active tasks
-            borderWidth: 1.2, // Apply border width consistently
+            borderWidth: 0.5, // Apply border width consistently
           },
         ]}
       >
@@ -346,7 +346,6 @@ const styles = StyleSheet.create({
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.1,
     // shadowRadius: 4,
-    elevation: 2,
   },
   contentContainer: {
     flexDirection: "row",
