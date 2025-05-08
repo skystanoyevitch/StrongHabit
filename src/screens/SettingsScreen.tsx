@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react"; // Import useContext
+import React, { useEffect, useContext, useState } from "react"; // Added useState import
 import {
   View,
   ScrollView,
@@ -20,6 +20,17 @@ import { DataManager } from "../utils/dataManager";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useThemeContext } from "../contexts/ThemeContext"; // Import useThemeContext
 import { theme } from "../constants/theme"; // Import theme
+import { useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
+import * as BackupUtils from "../utils/backupUtils";
+
+// Define the navigation param list for Settings stack
+type SettingsStackParamList = {
+  SettingsScreen: undefined;
+  Backup: undefined;
+  AutoBackupSettings: undefined;
+  CloudBackup: undefined;
+};
 
 interface SettingsSectionProps {
   title: string;
@@ -39,10 +50,21 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
 const SettingsScreen: React.FC = () => {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
   const { themeMode, setThemeMode } = useThemeContext(); // Get theme context
+  const navigation = useNavigation<NavigationProp<SettingsStackParamList>>();
   const dataManager = DataManager.getInstance();
 
   useEffect(() => {
     loadSettings();
+
+    // Initialize backup system when settings screen loads
+    BackupUtils.initializeBackupSystem().catch((error) => {
+      console.error("Failed to initialize backup system:", error);
+    });
+
+    // Check for auto backup needs
+    BackupUtils.runAutoBackupIfNeeded().catch((error) => {
+      console.error("Auto backup check failed:", error);
+    });
   }, []);
 
   const loadSettings = async () => {
@@ -184,26 +206,113 @@ const SettingsScreen: React.FC = () => {
           </View>
         </SettingsSection>
 
-        <SettingsSection title="Data">
-          <View style={styles.setting}>
+        <SettingsSection title="Data Management">
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => navigation.navigate("Backup")}
+          >
             <View>
-              <Text style={styles.settingLabel}>Export Data</Text>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
+              <Text style={styles.settingLabel}>Backups</Text>
+              <Text style={styles.settingDescription}>
+                Create and manage backups of your habit data
+              </Text>
             </View>
-            <MaterialCommunityIcons name="export" size={24} color="#999" />
-          </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
 
-          <View style={styles.setting}>
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => navigation.navigate("AutoBackupSettings")}
+          >
             <View>
-              <Text style={styles.settingLabel}>Backup Data</Text>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
+              <Text style={styles.settingLabel}>Automatic Backups</Text>
+              <Text style={styles.settingDescription}>
+                Configure automatic backup schedule
+              </Text>
+            </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color="#666"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => navigation.navigate("CloudBackup")}
+          >
+            <View>
+              <Text style={styles.settingLabel}>Cloud Backup</Text>
+              <Text style={styles.settingDescription}>
+                Sync your data to cloud storage services
+              </Text>
             </View>
             <MaterialCommunityIcons
               name="cloud-upload"
               size={24}
-              color="#999"
+              color="#666"
             />
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={async () => {
+              try {
+                const result = await BackupUtils.importBackup();
+                if (result) {
+                  Alert.alert("Success", "Data imported successfully");
+                }
+              } catch (error) {
+                Alert.alert("Error", "Failed to import data");
+                console.error(error);
+              }
+            }}
+          >
+            <View>
+              <Text style={styles.settingLabel}>Import Data</Text>
+              <Text style={styles.settingDescription}>
+                Restore habits from an external backup
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="file-import" size={24} color="#666" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={async () => {
+              Alert.alert(
+                "Create Data Export",
+                "This will create a backup file and share it with other apps",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Export",
+                    onPress: async () => {
+                      try {
+                        const backup = await BackupUtils.createBackup("export");
+                        await BackupUtils.shareBackup(backup.fileName);
+                      } catch (error) {
+                        Alert.alert("Error", "Failed to export data");
+                        console.error(error);
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <View>
+              <Text style={styles.settingLabel}>Export Data</Text>
+              <Text style={styles.settingDescription}>
+                Share your habit data with other apps
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="export" size={24} color="#666" />
+          </TouchableOpacity>
         </SettingsSection>
 
         <SettingsSection title="App Info">
@@ -227,24 +336,6 @@ const SettingsScreen: React.FC = () => {
               color="#666"
             />
           </TouchableOpacity>
-        </SettingsSection>
-
-        <SettingsSection title="Data Management">
-          <View style={styles.setting}>
-            <View>
-              <Text style={styles.settingLabel}>Restore from Backup</Text>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
-            </View>
-            <MaterialCommunityIcons name="restore" size={24} color="#999" />
-          </View>
-
-          <View style={styles.setting}>
-            <View>
-              <Text style={styles.settingLabel}>Cleanup Old Data</Text>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
-            </View>
-            <MaterialCommunityIcons name="trash-can" size={24} color="#999" />
-          </View>
         </SettingsSection>
 
         <View style={styles.versionContainer}>
@@ -288,11 +379,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text, // Use theme text color
   },
-  comingSoonText: {
+  settingDescription: {
     fontFamily: theme.fonts.regular, // Use Inter Regular
     fontSize: 12,
     color: theme.colors.secondaryText, // Use theme secondary text color
-    fontStyle: "italic",
+    marginTop: 4,
   },
   settingValue: {
     fontFamily: theme.fonts.regular, // Use Inter Regular
@@ -302,7 +393,7 @@ const styles = StyleSheet.create({
   versionContainer: {
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 0,
+    marginBottom: 20,
   },
   versionText: {
     fontFamily: theme.fonts.regular, // Use Inter Regular
