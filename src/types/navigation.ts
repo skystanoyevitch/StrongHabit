@@ -5,6 +5,7 @@ export type RootTabParamList = {
   Home: undefined;
   AddHabits: undefined;
   Stats: undefined;
+  Settings: undefined;
 };
 
 export type RootTabScreenProps<T extends keyof RootTabParamList> =
@@ -16,4 +17,8 @@ export type RootStackParamList = {
   EditHabit: { habit: Habit };
   AddHabit: undefined;
   Stats: undefined;
+  Settings: undefined;
+  Backup: undefined;
+  AutoBackupSettings: undefined;
+  CloudBackupScreen: undefined;
 };
