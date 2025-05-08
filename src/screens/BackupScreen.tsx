@@ -338,8 +338,16 @@ const BackupScreen: React.FC = () => {
           { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] },
         ]}
       >
-        <Text style={styles.description}>
-          Create, restore, and manage backups of your habit data
+        <View style={styles.iconContainer}>
+          <MaterialCommunityIcons
+            name="backup-restore"
+            size={36}
+            color={theme.colors.primary}
+          />
+        </View>
+        <Text style={styles.headerTitle}>Backups</Text>
+        <Text style={styles.headerSubtitle}>
+          Create and manage backups of your habit data
         </Text>
 
         <TouchableOpacity
@@ -622,6 +630,27 @@ const styles = StyleSheet.create({
   },
   actionButtonDelete: {
     backgroundColor: theme.colors.error,
+  },
+  headerContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  iconContainer: {
+    backgroundColor: theme.colors.surface,
+    padding: 10,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: theme.colors.text,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: theme.colors.secondaryText,
+    textAlign: "center",
+    marginHorizontal: 20,
   },
 });
 
