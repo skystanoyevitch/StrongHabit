@@ -12,8 +12,9 @@ export interface NotificationSchedule {
   body: string;
   hour: number;
   minute: number;
-  frequency: "daily" | "weekly";
+  frequency: "daily" | "weekly" | "monthly";
   selectedDays?: DayOfWeek[];
+  monthlyDays?: number[];
 }
 
 export const setupNotifications = async (): Promise<boolean> => {
@@ -104,6 +105,32 @@ export async function scheduleHabitReminder(schedule: NotificationSchedule) {
         scheduledTime.getDate() +
           (daysUntilNext <= 0 ? 7 + daysUntilNext : daysUntilNext)
       );
+    }
+    // If monthly frequency, find the next selected day of the month
+    else if (schedule.frequency === "monthly" && schedule.monthlyDays?.length) {
+      const todayDate = scheduledTime.getDate();
+      const currentMonth = scheduledTime.getMonth();
+      const currentYear = scheduledTime.getFullYear();
+
+      // Find the next day of the month
+      const nextMonthlyDay = schedule.monthlyDays
+        .sort((a, b) => a - b) // Sort days in ascending order
+        .find((day) => day > todayDate);
+
+      if (nextMonthlyDay) {
+        // There's a day later this month
+        scheduledTime.setDate(nextMonthlyDay);
+      } else {
+        // No days left this month, move to the first selected day next month
+        scheduledTime.setMonth(currentMonth + 1);
+        scheduledTime.setDate(schedule.monthlyDays[0]);
+      }
+
+      // If time has already passed for today's date
+      if (nextMonthlyDay === todayDate && scheduledTime <= new Date()) {
+        // If selected day is today but the time has passed, move to next month
+        scheduledTime.setMonth(currentMonth + 1);
+      }
     } else if (scheduledTime <= new Date()) {
       // For daily habits, if time has passed, schedule for tomorrow
       scheduledTime.setDate(scheduledTime.getDate() + 1);
