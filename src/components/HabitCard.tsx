@@ -59,7 +59,7 @@ const lightenColor = (
 ): string => {
   let col = String(color);
   if (!col || !col.startsWith("#")) {
-    return "#7AB5FF"; // Lighter default blue if color is invalid
+    return "#F0F5FF"; // Very light default blue if color is invalid
   }
   col = col.slice(1); // Remove #
   if (col.length === 3) {
@@ -67,17 +67,24 @@ const lightenColor = (
     col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2];
   }
   if (col.length !== 6) {
-    return "#7AB5FF"; // Return default if not a valid 6-digit hex after expansion
+    return "#F0F5FF"; // Return default if not a valid 6-digit hex after expansion
   }
+
+  // Convert to RGB
   let r = parseInt(col.substring(0, 2), 16);
   let g = parseInt(col.substring(2, 4), 16);
   let b = parseInt(col.substring(4, 6), 16);
-  r = Math.min(255, Math.floor(r + (255 - r) * amount));
-  g = Math.min(255, Math.floor(g + (255 - g) * amount));
-  b = Math.min(255, Math.floor(b + (255 - b) * amount));
+
+  // Create a much lighter pastel - higher values (0.9) make it very light but still maintain color identity
+  r = Math.min(255, Math.round(r + (255 - r) * (amount * 0.9)));
+  g = Math.min(255, Math.round(g + (255 - g) * (amount * 0.9)));
+  b = Math.min(255, Math.round(b + (255 - b) * (amount * 0.9)));
+
+  // Convert back to hex
   const rHex = r.toString(16).padStart(2, "0");
   const gHex = g.toString(16).padStart(2, "0");
   const bHex = b.toString(16).padStart(2, "0");
+
   return `#${rHex}${gHex}${bHex}`;
 };
 
@@ -181,11 +188,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   // Get base card color from habit color or default
   const cardColor = habit.color || theme.colors.primary;
 
-  // Create a pastel/tinted version of the color for the background
-  // Use a more significant lightening for a pastel effect (0.6 instead of 0.5)
+  // Create very light pastel backgrounds where color is just visible
   const cardBackgroundColor = isCompletedForSelectedDate
-    ? lightenColor(cardColor, 0.7) // Even lighter shade for completed habits
-    : lightenColor(cardColor, 0.6); // Pastel/tint for normal state
+    ? lightenColor(cardColor, 0.9) // Very light shade for completed habits
+    : lightenColor(cardColor, 0.85); // Light pastel where color is just visible
 
   // Determine text color based on background color contrast
   const cardTextColor = getContrastTextColor(cardBackgroundColor);
