@@ -16,6 +16,7 @@
       "bundleIdentifier": "com.skystanoyevitch.stronghabit",
       "buildNumber": "1.0.7",
       "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -24,10 +25,14 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.skystanoyevitch.stronghabit"
     },
     "web": {},
-    "plugins": ["expo-font"],
+    "plugins": [
+      "expo-font",
+      "@react-native-firebase/app"
+    ],
     "extra": {
       "eas": {
         "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076",
