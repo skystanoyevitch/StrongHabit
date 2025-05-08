@@ -747,10 +747,10 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: 24, // Large radius to ensure circle shape
     padding: 4, // Inner padding to give circle some space from content
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
+    // shadowColor: theme.colors.primary,
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.4,
+    // shadowRadius: 2,
     elevation: 2,
   },
 
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
 
   todayButtonText: {
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 14,
     color: theme.colors.primary,
     fontFamily: theme.fonts.semibold,
   },
