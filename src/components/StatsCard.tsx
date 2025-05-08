@@ -26,33 +26,28 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff", // Light background color
-    borderRadius: 24,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
     borderWidth: 0.5,
-    borderColor: theme.colors.outline, // More rounded corners
+    borderColor: theme.colors.outline,
     padding: 16,
-    // shadowColor: "#000", // Darker shadow color
-    // shadowOffset: { width: 2, height: 4 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 6,
     elevation: 2,
   },
   title: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontFamily: theme.fonts.titleSemibold,
     fontSize: 16,
-    color: "#000",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   value: {
-    fontFamily: theme.fonts.titleBold, // Use Quicksand Bold
-    fontSize: 30,
-    // fontWeight: "700", // fontWeight is part of fontFamily now
-    color: "#0F4D92", // Updated to theme color
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 28,
+    color: theme.colors.primary,
     marginBottom: 4,
   },
   subtitle: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 14,
-    color: "#888",
+    color: theme.colors.secondaryText,
   },
 });
