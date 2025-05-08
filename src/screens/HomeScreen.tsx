@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
 
   // Enhanced style for selected item circle with gradient-like effect
   wheelItemSelectedCircle: {
-    backgroundColor: theme.colors.primary, // Primary background
+    // backgroundColor: "trasparent", // Primary background
     borderWidth: 0,
     borderRadius: 24, // Large radius to ensure circle shape
     padding: 4, // Inner padding to give circle some space from content
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
   },
 
   wheelItemTextSelected: {
-    color: theme.colors.contrastPrimary,
+    color: theme.colors.primary,
     fontFamily: theme.fonts.bold,
   },
 
@@ -800,6 +800,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+    borderWidth: 0.5,
+    borderColor: theme.colors.primary,
+    alignSelf: "center",
+    paddingHorizontal: 16,
   },
 
   todayButtonText: {
