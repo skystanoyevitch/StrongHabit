@@ -337,12 +337,13 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
+    opacity: 0.9, // Slightly softer title for easier reading
   },
   description: {
     fontFamily: theme.fonts.regular,
     fontSize: 14,
     marginBottom: 10,
-    opacity: 0.9,
+    opacity: 0.75, // Softer description text for better visual hierarchy
   },
   detailsContainer: {
     flexDirection: "row",
@@ -362,12 +363,12 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontFamily: theme.fonts.semibold,
     fontSize: 13,
-    opacity: 0.9,
+    opacity: 0.85, // Softer label text but still readable
   },
   detailValue: {
     fontFamily: theme.fonts.regular,
     fontSize: 12,
-    opacity: 0.8,
+    opacity: 0.7, // More subtle value text for visual comfort
     marginTop: 2,
   },
   checkButton: {
