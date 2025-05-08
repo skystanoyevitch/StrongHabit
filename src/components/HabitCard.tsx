@@ -52,6 +52,35 @@ const darkenColor = (
   return `#${rHex}${gHex}${bHex}`;
 };
 
+// Helper function to lighten a hex color
+const lightenColor = (
+  color: ColorValue | undefined,
+  amount: number = 0.2
+): string => {
+  let col = String(color);
+  if (!col || !col.startsWith("#")) {
+    return "#7AB5FF"; // Lighter default blue if color is invalid
+  }
+  col = col.slice(1); // Remove #
+  if (col.length === 3) {
+    // Expand shorthand hex
+    col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2];
+  }
+  if (col.length !== 6) {
+    return "#7AB5FF"; // Return default if not a valid 6-digit hex after expansion
+  }
+  let r = parseInt(col.substring(0, 2), 16);
+  let g = parseInt(col.substring(2, 4), 16);
+  let b = parseInt(col.substring(4, 6), 16);
+  r = Math.min(255, Math.floor(r + (255 - r) * amount));
+  g = Math.min(255, Math.floor(g + (255 - g) * amount));
+  b = Math.min(255, Math.floor(b + (255 - b) * amount));
+  const rHex = r.toString(16).padStart(2, "0");
+  const gHex = g.toString(16).padStart(2, "0");
+  const bHex = b.toString(16).padStart(2, "0");
+  return `#${rHex}${gHex}${bHex}`;
+};
+
 // Helper function to calculate luminance (WCAG formula)
 const calculateLuminance = (hexColor: string): number => {
   const hex = hexColor.replace("#", "");
@@ -149,105 +178,54 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   const frequencyInfo = React.useMemo(() => getFrequencyInfo(habit), [habit]);
 
-  // const baseBackgroundColor = React.useMemo(() => { // No longer needed for card background
-  //   // Use the habit's color, or a default from the theme, and convert it to a pastel shade
-  //   return toPastelColor(habit.color || theme.colors.primary);
-  // }, [habit.color]);
+  // Get base card color from habit color or default
+  const cardColor = habit.color || theme.colors.primary;
 
-  // const completedBackgroundColor = "#D3D3D3"; // No longer needed for card background
+  // Use lighter version for background if completed
+  const cardBackgroundColor = isCompletedForSelectedDate
+    ? lightenColor(cardColor, 0.5) // Lighter shade for completed
+    : cardColor;
 
-  const actualCardBackgroundColor = "#FFFFFF"; // Card background is now always white
+  // Determine text color based on background color contrast
+  const cardTextColor = getContrastTextColor(cardBackgroundColor);
 
   const handleToggleCompletion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const newCompletedStatus = !isCompletedForSelectedDate;
     onToggleComplete(habit.id, newCompletedStatus);
-    // setIsContentVisible(!newCompletedStatus); // Removed: content visibility no longer tied to completion
   };
 
   const handleCardPress = () => {
-    // if (isCompletedForSelectedDate) { // Removed: completed card no longer toggles content
-    //   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    //   setIsContentVisible((prev) => !prev);
-    // } else if (onPress) {
-    //   onPress();
-    // }
     if (onPress) {
       // Press action is now always the default onPress (e.g., navigate to details)
       onPress();
     }
   };
 
-  const cardTextColor = getContrastTextColor(actualCardBackgroundColor); // Will be dark text on white
-  const originalHabitAccentColor = habit.color || theme.colors.primary;
+  // For the checkmark button
+  const checkButtonColor = isCompletedForSelectedDate
+    ? darkenColor(cardColor, 0.1) // Slightly darker than the card for visibility
+    : lightenColor(cardColor, 0.3); // Lighter than card if not completed
 
-  // Calculate a color derived from the habit's accent color that ensures visibility on a white background
-  let accentDerivedColorForWhiteBg = originalHabitAccentColor;
-  const accentContrastWithWhite = calculateContrastRatio(
-    originalHabitAccentColor,
-    "#FFFFFF"
-  );
-
-  if (accentContrastWithWhite < 3.0) {
-    // WCAG AA minimum for UI components/graphical objects
-    const darkerAccent = darkenColor(originalHabitAccentColor, 0.4); // Try darkening
-    const darkerAccentContrastWithWhite = calculateContrastRatio(
-      darkerAccent,
-      "#FFFFFF"
-    );
-
-    if (darkerAccentContrastWithWhite >= 3.0) {
-      accentDerivedColorForWhiteBg = darkerAccent;
-    } else {
-      // Fallback to a theme color known for good contrast on surfaces
-      accentDerivedColorForWhiteBg = DefaultTheme.colors.onSurface;
-    }
-  }
-
-  const colorIndicatorBackgroundColor = accentDerivedColorForWhiteBg;
-  const determinedIconColor = accentDerivedColorForWhiteBg; // For detail icons
-
-  const checkmarkIconColor = getContrastTextColor(originalHabitAccentColor); // For the checkmark on the colored button
-
-  // const shouldShowContent = !isCompletedForSelectedDate || isContentVisible; // Simplified: content is always shown
+  const checkmarkIconColor = getContrastTextColor(checkButtonColor);
 
   return (
     <TouchableOpacity onPress={handleCardPress} activeOpacity={0.8}>
       <View
         style={[
           styles.card,
-          { backgroundColor: actualCardBackgroundColor },
-          {
-            borderColor: isCompletedForSelectedDate
-              ? theme.colors.disabled // Gray border for completed tasks
-              : accentDerivedColorForWhiteBg, // Accent-derived border for active tasks
-            borderWidth: 0.5, // Apply border width consistently
-          },
+          { backgroundColor: cardBackgroundColor },
+          // Removed border styles
         ]}
       >
         <View style={styles.contentContainer}>
           <View style={styles.mainContent}>
             <View style={styles.titleContainer}>
-              <View
-                style={[
-                  styles.colorIndicator,
-                  { backgroundColor: colorIndicatorBackgroundColor },
-                ]}
-              />
               <Text style={[styles.title, { color: cardTextColor }]}>
                 {habit.name}
               </Text>
-              {/* {isCompletedForSelectedDate && ( // Removed chevron icon
-                <MaterialCommunityIcons
-                  name={isContentVisible ? "chevron-up" : "chevron-down"}
-                  size={24}
-                  color={cardTextColor}
-                  style={styles.chevronIcon}
-                />
-              )} */}
             </View>
 
-            {/* {shouldShowContent && ( // Content is now always shown */}
             <>
               {habit.description && (
                 <Text
@@ -263,7 +241,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                   <MaterialCommunityIcons
                     name={frequencyInfo.icon}
                     size={20}
-                    color={determinedIconColor}
+                    color={cardTextColor}
                     style={styles.detailIcon}
                   />
                   <View>
@@ -284,7 +262,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                   <MaterialCommunityIcons
                     name="fire"
                     size={20}
-                    color={determinedIconColor}
+                    color={cardTextColor}
                     style={styles.detailIcon}
                   />
                   <View>
@@ -302,25 +280,16 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 </View>
               </View>
             </>
-            {/* )} */}
           </View>
 
           <TouchableOpacity
             style={[
               styles.checkButton,
               {
-                // When not completed, border uses derived color for contrast on white.
-                // When completed, border uses original accent color (matching background).
-                borderColor: isCompletedForSelectedDate
-                  ? originalHabitAccentColor
-                  : accentDerivedColorForWhiteBg,
-                // When completed, background is original accent color. Otherwise, transparent.
-                backgroundColor: isCompletedForSelectedDate
-                  ? originalHabitAccentColor
-                  : "transparent",
+                backgroundColor: checkButtonColor,
               },
             ]}
-            onPress={handleToggleCompletion} // Changed from handleToggle
+            onPress={handleToggleCompletion}
           >
             {isCompletedForSelectedDate && (
               <Text style={[styles.checkIcon, { color: checkmarkIconColor }]}>
@@ -340,12 +309,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
-    // backgroundColor: "#FFFFFF", // Explicitly white, though set by actualCardBackgroundColor
-    // // Add shadow for floating effect
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   contentContainer: {
     flexDirection: "row",
@@ -356,74 +324,55 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: "row",
-    alignItems: "center", // Align items vertically
+    alignItems: "center",
     marginBottom: 4,
   },
-  colorIndicator: {
-    // Added style for the color indicator
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
   title: {
-    fontFamily: theme.fonts.titleSemibold, // Use Quicksand Semibold
+    fontFamily: theme.fonts.titleSemibold,
     fontSize: 18,
-    color: theme.colors.text, // Ensure high contrast
-  },
-  chevronIcon: {
-    // Added style
-    marginLeft: 8,
   },
   description: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 14,
     marginBottom: 10,
-    opacity: 0.8,
-    color: theme.colors.text, // Ensure high contrast
+    opacity: 0.9,
   },
   detailsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start", // Align items to the start if they have different text lines
+    alignItems: "flex-start",
     marginTop: 8,
-    gap: 12, // Gap between detail items
+    gap: 12,
   },
   detailItem: {
     flexDirection: "row",
     alignItems: "center",
-    flexShrink: 1, // Allow items to shrink if space is limited
+    flexShrink: 1,
   },
   detailIcon: {
     marginRight: 6,
   },
   detailLabel: {
-    fontFamily: theme.fonts.semibold, // Use Inter Semibold
+    fontFamily: theme.fonts.semibold,
     fontSize: 13,
-    // fontWeight: "600", // fontWeight is part of fontFamily now
     opacity: 0.9,
-    color: theme.colors.text, // Ensure high contrast
   },
   detailValue: {
-    fontFamily: theme.fonts.regular, // Use Inter Regular
+    fontFamily: theme.fonts.regular,
     fontSize: 12,
-    opacity: 0.7,
+    opacity: 0.8,
     marginTop: 2,
-    color: theme.colors.text, // Ensure high contrast
   },
   checkButton: {
     height: 30,
     width: 30,
-    borderRadius: 15, // Circular
-    borderWidth: 1.5,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 16, // Spacing from main content
+    marginLeft: 16,
   },
   checkIcon: {
-    fontFamily: theme.fonts.bold, // Use Inter Bold for checkmark
+    fontFamily: theme.fonts.bold,
     fontSize: 18,
-    // fontWeight: "bold", // fontWeight is part of fontFamily now
-    // Color is dynamically set based on contrast with button background
   },
 });
