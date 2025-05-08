@@ -491,6 +491,11 @@ export default function HomeScreen() {
         const selectedDayOfWeek = getDayOfWeek(selectedDate);
         return habit.selectedDays?.includes(selectedDayOfWeek) ?? false;
       }
+      if (habit.frequency === "monthly") {
+        // For monthly habits, check if the current day of month is in the selected days
+        const dayOfMonth = new Date(selectedDate + "T00:00:00").getDate();
+        return habit.monthlyDays?.includes(dayOfMonth) ?? false;
+      }
       return false;
     })
     .map((habit) => {
