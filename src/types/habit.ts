@@ -1,3 +1,5 @@
+import { HabitCategoryType } from "../constants/habitColors";
+
 export interface HabitLog {
   date: string;
   completed: boolean;
@@ -29,6 +31,7 @@ export interface Habit {
   notificationId?: string;
   reminder?: boolean;
   color?: string;
+  category?: HabitCategoryType; // New field for habit category
   streak: number;
   completionLogs: Array<{
     date: string;
