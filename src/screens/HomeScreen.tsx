@@ -161,8 +161,20 @@ const WheeledDateItem: React.FC<DateItemProps> = ({
       extrapolate: "clamp", // Prevent extrapolation beyond the input range
     });
 
+    // Add translateY animation for a subtle floating effect
+    const translateY = scrollX.interpolate({
+      inputRange,
+      outputRange: [4, 2, 0, 2, 4],
+      extrapolate: "clamp",
+    });
+
     return {
-      transform: [{ perspective: PERSPECTIVE }, { rotateY }, { scale }],
+      transform: [
+        { perspective: PERSPECTIVE },
+        { rotateY },
+        { scale },
+        { translateY },
+      ],
       opacity,
     };
   }, [inputRange, scrollX]);
@@ -673,7 +685,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     position: "relative",
     overflow: "hidden",
-    // Removed borderTop and borderBottom
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderRadius: 8,
+    marginHorizontal: 12,
   },
 
   // Scroll indicators repositioned to sides
@@ -684,6 +702,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.5)", // Semi-transparent background
   },
 
   scrollIndicatorRight: {
@@ -720,13 +741,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15, // Add some horizontal padding for the circle
   },
 
-  // Added style for selected item circle
+  // Enhanced style for selected item circle with gradient-like effect
   wheelItemSelectedCircle: {
-    backgroundColor: theme.colors.primary, // Transparent background
-    borderWidth: 0.5, // Border width for circle
-    borderColor: theme.colors.primary, // Theme primary color for border
+    backgroundColor: theme.colors.primary, // Primary background
+    borderWidth: 0,
     borderRadius: 24, // Large radius to ensure circle shape
     padding: 4, // Inner padding to give circle some space from content
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 2,
   },
 
   wheelItemDayOfWeek: {
@@ -764,10 +789,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingVertical: 10,
     backgroundColor: theme.colors.surface,
-    // borderBottomWidth: 1,
-    // borderBottomColor: theme.colors.outlineVariant,
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 8,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
 
   todayButtonText: {
