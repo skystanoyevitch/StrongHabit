@@ -7,7 +7,7 @@ export interface UnlockedAchievement extends Achievement {
 }
 
 // Helper to determine if a completion happened at a consistent time
-const getConsistentTimePeriod = (
+export const getConsistentTimePeriod = (
   completionLogs: Habit["completionLogs"]
 ): number => {
   if (completionLogs.length < 2) return 0;
