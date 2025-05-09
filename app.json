@@ -35,6 +35,7 @@
       },
       "package": "com.skystanoyevitch.stronghabit",
       "versionCode": 7,
+      "googleServicesFile": "./assets/firebase/google-services.json",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
