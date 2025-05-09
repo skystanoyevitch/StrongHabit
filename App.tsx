@@ -1,6 +1,6 @@
 import "react-native-gesture-handler";
 import "react-native-reanimated";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, useThemeContext } from "./src/contexts/ThemeContext";
@@ -28,6 +28,9 @@ import ErrorBoundary from "./src/components/ErrorBoundary";
 import { theme } from "./src/constants/theme"; // Import theme
 import * as BackupUtils from "./src/utils/backupUtils"; // Import backup utilities
 import { StorageService } from "./src/utils/storage"; // Import StorageService
+import OnboardingScreen, {
+  hasCompletedOnboarding,
+} from "./src/features/onboarding/OnboardingScreen";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -42,6 +45,7 @@ SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
   const { paperTheme: theme, navigationTheme } = useThemeContext(); // Get theme and navigationTheme
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
 
   // Load fonts
   const [fontsLoaded, fontError] = useFonts({
@@ -68,6 +72,10 @@ function AppContent() {
         // Initialize backup system and run auto backup check
         await BackupUtils.initializeBackupSystem();
         await BackupUtils.runAutoBackupIfNeeded();
+
+        // Check if onboarding has been completed
+        const completedOnboarding = await hasCompletedOnboarding();
+        setShowOnboarding(!completedOnboarding);
       } catch (e) {
         console.warn(e);
       } finally {
@@ -89,13 +97,10 @@ function AppContent() {
     }
   }, [fontError]);
 
-  if (!fontsLoaded) {
-    // Changed condition: removed isThemeLoading
-    // Show a loading indicator or return null while fonts/theme are loading
-    // You can use the same splash screen or a custom loading component
+  if (!fontsLoaded || showOnboarding === null) {
+    // Show a loading indicator while determining onboarding state
     return (
       <View style={styles.loadingContainer}>
-        {/* Use theme color for ActivityIndicator if theme is available, otherwise default */}
         <ActivityIndicator
           size="large"
           color={theme ? theme.colors.primary : undefined}
@@ -104,11 +109,14 @@ function AppContent() {
     );
   }
 
+  // Show onboarding if needed
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return (
     <ErrorBoundary>
       <NavigationContainer theme={navigationTheme}>
-        {" "}
-        {/* Pass navigationTheme to NavigationContainer */}
         <TabNavigator />
       </NavigationContainer>
     </ErrorBoundary>
@@ -130,7 +138,7 @@ function MainAppWrapper() {
     // <LinearGradient colors={gradientColors} style={{ flex: 1 }}>
     <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
       <AppContent />
-      <StatusBar style="auto" />{" "}
+      <StatusBar style="auto" />
       {/* Explicitly set StatusBar style or use theme */}
     </View>
     // </LinearGradient>
