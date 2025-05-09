@@ -31,6 +31,7 @@ type SettingsStackParamList = {
   Backup: undefined;
   AutoBackupSettings: undefined;
   CloudBackup: undefined;
+  TimezoneSettings: undefined;
 };
 
 interface SettingsSectionProps {
@@ -240,6 +241,20 @@ const SettingsScreen: React.FC = () => {
               size={24}
               color="#666"
             />
+          </TouchableOpacity>
+
+          {/* Add timezone settings option */}
+          <TouchableOpacity
+            style={styles.setting}
+            onPress={() => navigation.navigate("TimezoneSettings")}
+          >
+            <View>
+              <Text style={styles.settingLabel}>Timezone Settings</Text>
+              <Text style={styles.settingDescription}>
+                Adjust timezone for accurate streak calculations
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="earth" size={24} color="#666" />
           </TouchableOpacity>
 
           <TouchableOpacity
