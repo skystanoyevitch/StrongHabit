@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Habit, HabitLog } from "../types/habit";
 import { scheduleHabitReminder, cancelHabitReminder } from "./notifications";
+import { getTodayDateString, getYesterdayDateString } from "./dateUtils";
 
 const STORAGE_KEY = "HABITFLOW_DATA_V1";
 
@@ -72,8 +73,8 @@ export class StorageService {
         });
       }
 
-      // Update streak count
-      this.updateStreak(habit);
+      // Update streak count with timezone awareness
+      await this.updateStreak(habit);
 
       // Save updated data
       storageData.lastUpdated = new Date().toISOString();
@@ -96,8 +97,8 @@ export class StorageService {
   //   return this.updateHabitCompletion(habitId, dateStr, true);
   // }
 
-  // Helper method to update streak (add this to the StorageService class)
-  private updateStreak(habit: Habit): void {
+  // Updated private method to handle streaks with timezone awareness
+  private async updateStreak(habit: Habit): Promise<void> {
     if (habit.completionLogs.length === 0) {
       habit.streak = 0;
       return;
@@ -108,11 +109,9 @@ export class StorageService {
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
-    // Get current date without time
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000)
-      .toISOString()
-      .split("T")[0];
+    // Get today and yesterday with timezone awareness
+    const today = await getTodayDateString();
+    const yesterday = await getYesterdayDateString();
 
     // Check if the most recent log is from today or yesterday and was completed
     const mostRecentLog = sortedLogs[0];
