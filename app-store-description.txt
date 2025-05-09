@@ -1,22 +1,31 @@
-StrongHabit - Build Stronger Habits
+StrongHabit - Build Better Habits Every Day
 
-Track, maintain, and build lasting habits with StrongHabit. Simple, beautiful, and effective habit tracking that helps you achieve your goals.
+Track, maintain, and build lasting habits with StrongHabit. Simple, beautiful, and effective habit tracking that helps you achieve your goals and transform your life one day at a time.
 
 KEY FEATURES:
-• Easy habit tracking
-• Daily and weekly goals
-• Progress statistics
-• Customizable reminders
-• Clean, intuitive interface
-• Track your streaks
-• Achievement system
+• Easy habit tracking with daily, weekly, and monthly options
+• Customizable color-coding for different habit categories
+• Detailed progress statistics and streak tracking
+• Smart reminders that adapt to your schedule
+• Beautiful, intuitive interface with dark and light modes
+• Achievement system to keep you motivated
+• Secure local data storage with backup options
+• No account required - start tracking immediately
 
 Perfect for:
-• Building new habits
-• Breaking bad habits
-• Personal development
-• Health & fitness goals
-• Productivity tracking
-• Mindfulness practice
+• Building positive daily routines
+• Breaking unwanted habits
+• Health & fitness tracking
+• Meditation and mindfulness
+• Reading and learning goals
+• Work and productivity improvement
+• Personal development journeys
 
-Download StrongHabit today and start building Stronger habits!
+What makes StrongHabit different:
+• Focus on simplicity - create and track habits in seconds
+• Smart streak calculations that account for timezones
+• Beautiful visualizations of your progress
+• Achievement system that celebrates your consistency
+• Privacy-focused with all data stored locally on your device
+
+Download StrongHabit today and start building stronger habits that last!
