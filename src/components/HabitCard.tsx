@@ -23,6 +23,11 @@ import {
   generateAccessibleColorPalette,
   getLuminance,
 } from "../utils/colorUtils";
+import {
+  getHabitAccessibilityLabel,
+  getAccessibilityHint,
+  getAccessibilityProps,
+} from "../utils/accessibilityUtils";
 
 // Enable layout animations on Android
 if (
@@ -184,6 +189,15 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       onPress={handleCardPress}
       activeOpacity={0.95}
       style={styles.cardTouchable}
+      {...getAccessibilityProps(
+        getHabitAccessibilityLabel(
+          habit.name,
+          habit.streak,
+          isCompletedForSelectedDate
+        ),
+        getAccessibilityHint("open habit details"),
+        "button"
+      )}
     >
       <View
         style={[
@@ -323,6 +337,20 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               },
             ]}
             onPress={handleToggleCompletion}
+            {...getAccessibilityProps(
+              `${
+                isCompletedForSelectedDate
+                  ? "Mark as not completed"
+                  : "Mark as completed"
+              }`,
+              getAccessibilityHint(
+                isCompletedForSelectedDate
+                  ? "mark as not completed"
+                  : "mark as completed"
+              ),
+              "checkbox"
+            )}
+            accessibilityState={{ checked: isCompletedForSelectedDate }}
           >
             {isCompletedForSelectedDate ? (
               <MaterialCommunityIcons
