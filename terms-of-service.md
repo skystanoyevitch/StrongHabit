@@ -73,13 +73,13 @@ As a user of StrongHabit, you agree to:
 
 ## 12. Governing Law
 
-These Terms shall be governed by and construed in accordance with the laws of [YOUR_JURISDICTION], without regard to its conflict of law provisions. <!-- TODO: Replace placeholder jurisdiction -->
+These Terms shall be governed by and construed in accordance with the laws of California, United States, without regard to its conflict of law provisions.
 
 ## 13. Contact Information
 
 If you have any questions about these Terms, please contact us at:
 
-Email: [YOUR_CONTACT_EMAIL@example.com] <!-- TODO: Replace placeholder email -->
+Email: skystanoyevitch@proton.me
 
 ---
 
