@@ -1,0 +1,82 @@
+{
+  "expo": {
+    "name": "Strong Habit",
+    "slug": "StrongHabit",
+    "version": "1.0.7",
+    "orientation": "portrait",
+    "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "description": "Build better habits everyday with this simple, beautiful habit tracking app.",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "primaryColor": "#007AFF",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.skystanoyevitch.stronghabit",
+      "buildNumber": "1.0.7",
+      "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "NSCalendarsUsageDescription": "This app uses your calendar to track habit completion dates.",
+        "NSRemindersUsageDescription": "This app uses reminders to help you maintain your habits."
+      },
+      "jsEngine": "hermes"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png"
+      },
+      "package": "com.skystanoyevitch.stronghabit",
+      "versionCode": 7,
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "SCHEDULE_EXACT_ALARM"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/ios/AppIcon.appiconset/AppIcon-20~ipad.png"
+    },
+    "plugins": [
+      "expo-font",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#007AFF",
+          "icon": "./assets/ios/AppIcon.appiconset/AppIcon-40@2x.png"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076",
+        "build": {
+          "experimental": {}
+        }
+      }
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}

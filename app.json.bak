@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "Strong Habit",
+    "slug": "StrongHabit",
+    "version": "1.0.7",
+    "orientation": "portrait",
+    "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "description": "Build better habits everyday with this simple, beautiful habit tracking app.",
+    "githubUrl": "https://github.com/skystanoyevitch/StrongHabit",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "privacy": "unlisted",
+    "primaryColor": "#007AFF",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.skystanoyevitch.stronghabit",
+      "buildNumber": "1.0.7",
+      "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "jsEngine": "hermes"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.skystanoyevitch.stronghabit"
+    },
+    "web": {},
+    "plugins": [
+      "expo-font",
+      "@react-native-firebase/app",
+
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "6d38b31c-f6a7-45f5-ac6b-e0d2b2da2076",
+        "build": {
+          "experimental": {}
+        }
+      }
+    }
+  }
+}
