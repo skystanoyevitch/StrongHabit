@@ -330,123 +330,125 @@ const BackupScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <StatusBar barStyle="dark-content" />
+      <BackButton />
+      <View style={{ marginTop: 70 }}>
+        <AnimatedTitle text="Backups" />
 
-      <AnimatedTitle text="Backups" />
-
-      <Animated.View
-        style={[
-          styles.header,
-          { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] },
-        ]}
-      >
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name="backup-restore"
-            size={36}
-            color={theme.colors.primary}
-          />
-        </View>
-        <Text style={styles.headerTitle}>Backups</Text>
-        <Text style={styles.headerSubtitle}>
-          Create and manage backups of your habit data
-        </Text>
-
-        <TouchableOpacity
-          style={[styles.createButton, creating && styles.disabledButton]}
-          onPress={handleCreateBackup}
-          disabled={creating}
-        >
-          {creating ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <MaterialCommunityIcons
-                name="backup-restore"
-                size={20}
-                color="#fff"
-              />
-              <Text style={styles.createButtonText}>Create Backup</Text>
-            </>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.importButton}
-          onPress={async () => {
-            try {
-              const result = await BackupUtils.importBackup();
-              if (result) {
-                Alert.alert("Success", "Backup imported successfully");
-                loadBackups(); // Refresh the list after import
-              }
-            } catch (error) {
-              Alert.alert("Error", "Failed to import backup");
-              console.error(error);
-            }
-          }}
-        >
-          <MaterialCommunityIcons
-            name="file-import"
-            size={20}
-            color={theme.colors.primary}
-          />
-          <Text style={styles.importButtonText}>Import Backup</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.cloudButton}
-          onPress={() => navigation.navigate("CloudBackupScreen")}
-        >
-          <MaterialCommunityIcons
-            name="cloud"
-            size={20}
-            color={theme.colors.accent}
-          />
-          <Text style={styles.cloudButtonText}>Cloud Backup</Text>
-        </TouchableOpacity>
-      </Animated.View>
-
-      <View style={styles.divider} />
-
-      {loading && !refreshing ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Loading backups...</Text>
-        </View>
-      ) : backups.length === 0 ? (
         <Animated.View
           style={[
-            styles.emptyContainer,
+            styles.header,
             { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] },
           ]}
         >
-          <MaterialCommunityIcons
-            name="cloud-off-outline"
-            size={70}
-            color={theme.colors.outline}
-          />
-          <Text style={styles.emptyTitle}>No Backups Found</Text>
-          <Text style={styles.emptyText}>
-            Create your first backup to secure your habit data
-          </Text>
-        </Animated.View>
-      ) : (
-        <FlatList
-          data={backups}
-          renderItem={renderBackupItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              colors={[theme.colors.primary]}
-              tintColor={theme.colors.primary}
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons
+              name="backup-restore"
+              size={36}
+              color={theme.colors.primary}
             />
-          }
-        />
-      )}
+          </View>
+          <Text style={styles.headerTitle}>Backups</Text>
+          <Text style={styles.headerSubtitle}>
+            Create and manage backups of your habit data
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.createButton, creating && styles.disabledButton]}
+            onPress={handleCreateBackup}
+            disabled={creating}
+          >
+            {creating ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="backup-restore"
+                  size={20}
+                  color="#fff"
+                />
+                <Text style={styles.createButtonText}>Create Backup</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.importButton}
+            onPress={async () => {
+              try {
+                const result = await BackupUtils.importBackup();
+                if (result) {
+                  Alert.alert("Success", "Backup imported successfully");
+                  loadBackups(); // Refresh the list after import
+                }
+              } catch (error) {
+                Alert.alert("Error", "Failed to import backup");
+                console.error(error);
+              }
+            }}
+          >
+            <MaterialCommunityIcons
+              name="file-import"
+              size={20}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.importButtonText}>Import Backup</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.cloudButton}
+            onPress={() => navigation.navigate("CloudBackupScreen")}
+          >
+            <MaterialCommunityIcons
+              name="cloud"
+              size={20}
+              color={theme.colors.accent}
+            />
+            <Text style={styles.cloudButtonText}>Cloud Backup</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        <View style={styles.divider} />
+
+        {loading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>Loading backups...</Text>
+          </View>
+        ) : backups.length === 0 ? (
+          <Animated.View
+            style={[
+              styles.emptyContainer,
+              { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="cloud-off-outline"
+              size={70}
+              color={theme.colors.outline}
+            />
+            <Text style={styles.emptyTitle}>No Backups Found</Text>
+            <Text style={styles.emptyText}>
+              Create your first backup to secure your habit data
+            </Text>
+          </Animated.View>
+        ) : (
+          <FlatList
+            data={backups}
+            renderItem={renderBackupItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.colors.primary]}
+                tintColor={theme.colors.primary}
+              />
+            }
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 };

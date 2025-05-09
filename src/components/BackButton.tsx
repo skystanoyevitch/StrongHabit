@@ -33,8 +33,8 @@ export const BackButton: React.FC<BackButtonProps> = ({ onPress, style }) => {
 
 const styles = StyleSheet.create({
   backButton: {
-    position: "absolute",
-    top: 10,
+    // position: "static",
+    top: 10, // Changed from 10 to 20
     left: 10,
     backgroundColor: theme.colors.surface,
     borderRadius: 20,
@@ -48,5 +48,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
     zIndex: 10,
+    marginBottom: 20,
   },
 });

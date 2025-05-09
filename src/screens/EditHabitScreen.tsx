@@ -122,7 +122,7 @@ export default function EditHabitScreen(): React.ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background, // Use theme background
+    backgroundColor: theme.colors.background,
   },
   errorContainer: {
     padding: 10,
