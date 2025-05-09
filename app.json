@@ -7,8 +7,8 @@
     "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
-    "scheme": "stronghabit",
     "description": "Build better habits everyday with this simple, beautiful habit tracking app.",
+    "scheme": "stronghabit",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"

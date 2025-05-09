@@ -88,11 +88,11 @@ android {
 
     namespace "com.stronghabit"
     defaultConfig {
-        applicationId "com.skystanoyevitch.stronghabit"  // Match the bundle ID in app.json
+        applicationId "com.stronghabit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7  // Match the versionCode in app.json
-        versionName "1.0.8"  // Match the version in app.json
+        versionCode 1
+        versionName "1.0"
     }
     signingConfigs {
         debug {

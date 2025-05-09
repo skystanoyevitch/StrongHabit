@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>stronghabit</string>
           <string>com.skystanoyevitch.stronghabit</string>
         </array>
       </dict>
