@@ -418,7 +418,10 @@ const BackupScreen: React.FC = () => {
           <Animated.View
             style={[
               styles.emptyContainer,
-              { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] },
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: translateYAnim }],
+              },
             ]}
           >
             <MaterialCommunityIcons
