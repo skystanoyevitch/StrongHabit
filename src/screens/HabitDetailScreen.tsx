@@ -24,6 +24,7 @@ import { AnimatedTitle } from "../components/AnimatedTitle";
 import { theme } from "../constants/theme";
 import { HabitAchievements } from "../features/achievements/HabitAchievements";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { BackButton } from "../components/BackButton";
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -105,16 +106,7 @@ export default function HabitDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={24}
-          color={theme.colors.primary}
-        />
-      </TouchableOpacity>
+      <BackButton />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContentContainer}

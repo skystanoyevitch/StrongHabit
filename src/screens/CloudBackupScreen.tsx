@@ -14,10 +14,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as BackupUtils from "../utils/backupUtils";
 import { theme } from "../constants/theme";
 import { AnimatedTitle } from "../components/AnimatedTitle";
+import { BackButton } from "../components/BackButton";
 
 // Define our cloud provider types
 type CloudProvider = "google-drive" | "dropbox" | "icloud" | "none";
@@ -283,6 +284,7 @@ const CloudBackupScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <BackButton />
       <AnimatedTitle text="Cloud Backup" />
 
       <ScrollView

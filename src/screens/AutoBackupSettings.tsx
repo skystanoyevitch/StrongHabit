@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as BackupUtils from "../utils/backupUtils";
 import { theme } from "../constants/theme";
 import { AnimatedTitle } from "../components/AnimatedTitle";
+import { BackButton } from "../components/BackButton";
 
 type FrequencyOption = "daily" | "weekly" | "monthly";
 type RetentionOption = 3 | 5 | 10 | 20;
@@ -101,6 +102,7 @@ const AutoBackupSettings: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <BackButton />
       <ScrollView style={styles.scrollView}>
         <AnimatedTitle text="Auto Backup Settings" />
 

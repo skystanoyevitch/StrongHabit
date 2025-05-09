@@ -20,6 +20,7 @@ import { HabitForm } from "../components/HabitForm";
 import { DayOfWeek, Habit, HabitFrequency } from "../types/habit";
 import { HabitError } from "../types/errors"; // Corrected import path
 import { theme } from "../constants/theme"; // Import theme
+import { BackButton } from "../components/BackButton"; // Import BackButton component
 
 interface FormValues {
   name: string;
@@ -93,7 +94,7 @@ export default function EditHabitScreen(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <AnimatedTitle text="Edit Habit" /> */}
+      <BackButton />
 
       {error && (
         <View style={styles.errorContainer}>

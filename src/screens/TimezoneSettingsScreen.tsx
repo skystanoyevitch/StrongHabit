@@ -15,6 +15,7 @@ import { theme } from "../constants/theme";
 import { getAccessibilityProps } from "../utils/accessibilityUtils";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
+import { BackButton } from "../components/BackButton";
 
 type TimezoneSettingsScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
@@ -102,6 +103,7 @@ export default function TimezoneSettingsScreen({
 
   return (
     <SafeAreaView style={styles.container}>
+      <BackButton />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Timezone Settings</Text>
         <Text style={styles.description}>

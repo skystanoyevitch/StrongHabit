@@ -19,6 +19,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as BackupUtils from "../utils/backupUtils";
 import { theme } from "../constants/theme";
 import { AnimatedTitle } from "../components/AnimatedTitle";
+import { BackButton } from "../components/BackButton"; // Import BackButton component
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/navigation";
 
