@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "description": "Build better habits everyday with this simple, beautiful habit tracking app.",
     "splash": {
       "resizeMode": "contain",
