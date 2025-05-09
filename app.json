@@ -18,7 +18,7 @@
       "bundleIdentifier": "com.skystanoyevitch.stronghabit",
       "buildNumber": "1.0.8",
       "icon": "./assets/ios/AppIcon.appiconset/AppIcon~ios-marketing.png",
-      "googleServicesFile": "./GoogleService-Info.plist",
+      "googleServicesFile": ".assets/GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": ["remote-notification"],
