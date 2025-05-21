@@ -35,6 +35,7 @@ import { AnimatedTitle } from "../components/AnimatedTitle";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { theme } from "../constants/theme";
 import AnimatedRN, { FadeInDown, FadeIn } from "react-native-reanimated";
+import { useScreenTracking, useAnalytics } from "../hooks/useAnalytics";
 
 // Helper function to get today's date in YYYY-MM-DD format - improved to handle timezone issues
 const getTodayDateString = () => {
@@ -260,6 +261,38 @@ export default function HomeScreen() {
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current; // Changed from scrollY to scrollX
   const initialScrollPerformedRef = useRef(false);
+  const analytics = useAnalytics();
+
+  // Track screen view
+  useScreenTracking("HomeScreen");
+
+  // Track user properties
+  useEffect(() => {
+    if (habits && habits.length > 0) {
+      const longestStreak = Math.max(...habits.map((h) => h.streak || 0));
+
+      // Determine most consistent category
+      const categoryCounts: Record<string, number> = {};
+      habits.forEach((habit) => {
+        if (habit.category) {
+          categoryCounts[habit.category] =
+            (categoryCounts[habit.category] || 0) + 1;
+        }
+      });
+
+      const mostConsistentCategory =
+        Object.entries(categoryCounts).length > 0
+          ? Object.entries(categoryCounts).sort(([, a], [, b]) => b - a)[0][0]
+          : "uncategorized";
+
+      analytics.setUserProperties(
+        habits.length,
+        longestStreak,
+        mostConsistentCategory,
+        0 // We'll update this when we have achievement data
+      );
+    }
+  }, [habits]);
 
   // Scrolling control flags to prevent automatic scrolling
   const isManualScrollRef = useRef(false);
