@@ -28,6 +28,7 @@ import Animated, {
   FadeIn,
   FadeInRight,
 } from "react-native-reanimated";
+import { useScreenTracking, useAnalytics } from "../hooks/useAnalytics";
 
 import {
   checkAchievements,
@@ -70,6 +71,10 @@ const StatsScreen: React.FC = () => {
       },
     ],
   });
+  const analytics = useAnalytics();
+
+  // Track screen view
+  useScreenTracking("StatsScreen");
 
   // Add state for new achievement notification
   const [newAchievements, setNewAchievements] = useState<UnlockedAchievement[]>(
@@ -109,6 +114,9 @@ const StatsScreen: React.FC = () => {
     setIsCalculating(true);
 
     try {
+      // Track stats view in analytics
+      analytics.trackStatsViewed("overview");
+
       // Calculate active habits
       const activeHabits = habits.filter(
         (habit: Habit) => !habit.archivedAt
