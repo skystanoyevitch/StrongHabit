@@ -7,17 +7,35 @@ import { Habit } from "../types/habit";
 import { theme } from "../constants/theme";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useScreenTracking, useAnalytics } from "../hooks/useAnalytics";
 
 export default function AddHabitScreen() {
   const navigation = useNavigation();
   const storageService = StorageService.getInstance();
+  const analytics = useAnalytics();
+
+  // Track screen view
+  useScreenTracking("AddHabitScreen");
 
   // Handle form submission
   const handleSubmit = async (
     habitData: Omit<Habit, "id" | "createdAt" | "streak" | "completionLogs">
   ) => {
     try {
-      await storageService.addHabit(habitData);
+      const newHabit = await storageService.addHabit(habitData);
+
+      // Track habit creation in analytics
+      analytics.trackHabitCreated(
+        newHabit.id,
+        newHabit.name,
+        newHabit.category || "uncategorized",
+        newHabit.frequency === "daily"
+          ? 7
+          : newHabit.frequency === "weekly"
+          ? newHabit.selectedDays?.length || 0
+          : newHabit.monthlyDays?.length || 0
+      );
+
       Alert.alert(
         "Habit Created",
         "Your new habit has been created successfully!",
