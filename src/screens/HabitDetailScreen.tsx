@@ -25,6 +25,7 @@ import { theme } from "../constants/theme";
 import { HabitAchievements } from "../features/achievements/HabitAchievements";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { BackButton } from "../components/BackButton";
+import { useScreenTracking, useAnalytics } from "../hooks/useAnalytics";
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -42,6 +43,10 @@ export default function HabitDetailScreen() {
   const [stats, setStats] = useState<CompletionStats | null>(null);
   const [markedDates, setMarkedDates] = useState<any>({});
   const storageService = StorageService.getInstance();
+  const analytics = useAnalytics();
+
+  // Track screen view
+  useScreenTracking("HabitDetailScreen");
 
   const calculateStats = useCallback(() => {
     const completionLogs = habit.completionLogs || [];
@@ -187,6 +192,54 @@ export default function HabitDetailScreen() {
               enableSwipeMonths={true}
               showSixWeeks={false}
               disableMonthChange={false}
+              onDayPress={async (day) => {
+                try {
+                  // Get current completion status
+                  const isCompleted = habit.completionLogs.some(
+                    (log) =>
+                      log.date.split("T")[0] === day.dateString && log.completed
+                  );
+
+                  // Toggle completion for this date
+                  await storageService.updateHabitCompletion(
+                    habit.id,
+                    day.dateString,
+                    !isCompleted
+                  );
+
+                  // Refresh the habit data
+                  const habits = await storageService.getHabits();
+                  const updatedHabit = habits.find((h) => h.id === habit.id);
+
+                  if (updatedHabit) {
+                    // Track in analytics if habit was completed
+                    if (!isCompleted) {
+                      // We toggled from incomplete to complete
+                      analytics.trackHabitCompleted(
+                        habit.id,
+                        habit.name,
+                        updatedHabit.streak
+                      );
+
+                      // If we reached a milestone streak, track it
+                      const milestones = [7, 14, 30, 60, 90, 180, 365];
+                      if (milestones.includes(updatedHabit.streak)) {
+                        analytics.trackStreakMilestone(
+                          habit.id,
+                          habit.name,
+                          updatedHabit.streak
+                        );
+                      }
+                    }
+
+                    // Update UI
+                    navigation.setParams({ habit: updatedHabit });
+                    calculateStats();
+                  }
+                } catch (error) {
+                  console.error("Error toggling habit completion:", error);
+                }
+              }}
               onMonthChange={(month) => {
                 console.log("Month changed to:", month.dateString);
               }}
