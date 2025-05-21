@@ -8,6 +8,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { setupNotifications } from "./src/utils/notifications"; // Changed from initializeNotifications
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native"; // Added import
+import analytics from "@react-native-firebase/analytics"; // Import Firebase Analytics
 import {
   useFonts,
   Quicksand_400Regular,
@@ -76,6 +77,23 @@ function AppContent() {
         // Check if onboarding has been completed
         const completedOnboarding = await hasCompletedOnboarding();
         setShowOnboarding(!completedOnboarding);
+
+        // Track app launch and user status in analytics funnel
+        await analytics().logAppOpen();
+
+        if (completedOnboarding) {
+          // Track returning user
+          await analytics().logEvent("user_session", {
+            user_type: "returning",
+            has_completed_onboarding: true,
+          });
+        } else {
+          // Track new user starting the funnel
+          await analytics().logEvent("user_session", {
+            user_type: "new",
+            has_completed_onboarding: false,
+          });
+        }
       } catch (e) {
         console.warn(e);
       } finally {
@@ -114,9 +132,36 @@ function AppContent() {
     return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
   }
 
+  // Create a navigation ref to track screen views
+  const routeNameRef = React.useRef<string | undefined>();
+  const navigationRef = React.createRef<any>();
+
   return (
     <ErrorBoundary>
-      <NavigationContainer theme={navigationTheme}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={navigationTheme}
+        onReady={() => {
+          const currentRoute = navigationRef.current?.getCurrentRoute();
+          routeNameRef.current = currentRoute?.name;
+        }}
+        onStateChange={async () => {
+          const previousRouteName = routeNameRef.current;
+          const currentRoute = navigationRef.current?.getCurrentRoute();
+          const currentRouteName = currentRoute?.name;
+
+          if (previousRouteName !== currentRouteName) {
+            // Track screen view with Firebase Analytics
+            await analytics().logScreenView({
+              screen_name: currentRouteName,
+              screen_class: currentRouteName,
+            });
+          }
+
+          // Save the current route name for later comparison
+          routeNameRef.current = currentRouteName;
+        }}
+      >
         <TabNavigator />
       </NavigationContainer>
     </ErrorBoundary>
