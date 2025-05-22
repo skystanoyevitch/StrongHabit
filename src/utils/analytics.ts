@@ -1,10 +1,37 @@
-import analytics from "@react-native-firebase/analytics";
+import analytics, { getAnalytics } from "@react-native-firebase/analytics";
 
 /**
  * Analytics service for tracking user actions and events
  * This centralizes all analytics tracking in one place for easier management
  */
 class AnalyticsService {
+  private isAnalyticsAvailable: boolean = true;
+
+  constructor() {
+    // Check if Firebase Analytics is available
+    try {
+      getAnalytics();
+    } catch (error) {
+      console.warn("[Analytics] Firebase Analytics not available:", error);
+      this.isAnalyticsAvailable = false;
+    }
+  }
+
+  /**
+   * Safely gets the analytics instance or returns null if not available
+   * @returns Firebase Analytics instance or null
+   */
+  private getAnalyticsInstance() {
+    if (!this.isAnalyticsAvailable) return null;
+
+    try {
+      return getAnalytics();
+    } catch (error) {
+      console.warn("[Analytics] Failed to get analytics instance:", error);
+      this.isAnalyticsAvailable = false;
+      return null;
+    }
+  }
   /**
    * Track when a user views a screen
    * @param screenName Name of the screen viewed
@@ -15,7 +42,10 @@ class AnalyticsService {
     screenClass?: string
   ): Promise<void> {
     try {
-      await analytics().logScreenView({
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logScreenView({
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
@@ -39,7 +69,10 @@ class AnalyticsService {
     frequency: number
   ): Promise<void> {
     try {
-      await analytics().logEvent("habit_created", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("habit_created", {
         habit_id: habitId,
         habit_name: habitName,
         category,
@@ -63,7 +96,10 @@ class AnalyticsService {
     streakCount: number
   ): Promise<void> {
     try {
-      await analytics().logEvent("habit_completed", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("habit_completed", {
         habit_id: habitId,
         habit_name: habitName,
         streak_count: streakCount,
@@ -86,7 +122,10 @@ class AnalyticsService {
     milestone: number
   ): Promise<void> {
     try {
-      await analytics().logEvent("streak_milestone", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("streak_milestone", {
         habit_id: habitId,
         habit_name: habitName,
         milestone,
@@ -111,7 +150,10 @@ class AnalyticsService {
     previousStreak: number
   ): Promise<void> {
     try {
-      await analytics().logEvent("streak_broken", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("streak_broken", {
         habit_id: habitId,
         habit_name: habitName,
         previous_streak: previousStreak,
@@ -136,7 +178,10 @@ class AnalyticsService {
     daysToAchieve: number
   ): Promise<void> {
     try {
-      await analytics().logEvent("achievement_unlocked", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("achievement_unlocked", {
         achievement_id: achievementId,
         achievement_name: achievementName,
         days_to_achieve: daysToAchieve,
@@ -156,7 +201,10 @@ class AnalyticsService {
    */
   async trackStatsViewed(statsType: string, habitId?: string): Promise<void> {
     try {
-      await analytics().logEvent("stats_viewed", {
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.logEvent("stats_viewed", {
         stats_type: statsType,
         habit_id: habitId || "all",
       });
@@ -180,7 +228,10 @@ class AnalyticsService {
     totalAchievements: number
   ): Promise<void> {
     try {
-      await analytics().setUserProperties({
+      const analyticsInstance = this.getAnalyticsInstance();
+      if (!analyticsInstance) return;
+
+      await analyticsInstance.setUserProperties({
         total_habits: String(totalHabits),
         longest_streak: String(longestStreak),
         most_consistent_category: mostConsistentCategory,
