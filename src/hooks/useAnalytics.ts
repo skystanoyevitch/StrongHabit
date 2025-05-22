@@ -20,23 +20,68 @@ export const useScreenTracking = (screenName: string, screenClass?: string) => {
 export const useAnalytics = () => {
   return {
     // Screen tracking
-    trackScreenView: analyticsService.trackScreenView,
+    trackScreenView: (screenName: string, screenClass?: string) =>
+      analyticsService.trackScreenView(screenName, screenClass),
 
     // Habit tracking
-    trackHabitCreated: analyticsService.trackHabitCreated,
-    trackHabitCompleted: analyticsService.trackHabitCompleted,
+    trackHabitCreated: (
+      habitId: string,
+      habitName: string,
+      category: string,
+      frequency: number
+    ) =>
+      analyticsService.trackHabitCreated(
+        habitId,
+        habitName,
+        category,
+        frequency
+      ),
+    trackHabitCompleted: (
+      habitId: string,
+      habitName: string,
+      streakCount: number
+    ) => analyticsService.trackHabitCompleted(habitId, habitName, streakCount),
 
     // Streak tracking
-    trackStreakMilestone: analyticsService.trackStreakMilestone,
-    trackStreakBroken: analyticsService.trackStreakBroken,
+    trackStreakMilestone: (
+      habitId: string,
+      habitName: string,
+      milestone: number
+    ) => analyticsService.trackStreakMilestone(habitId, habitName, milestone),
+    trackStreakBroken: (
+      habitId: string,
+      habitName: string,
+      previousStreak: number
+    ) => analyticsService.trackStreakBroken(habitId, habitName, previousStreak),
 
     // Achievement tracking
-    trackAchievementUnlocked: analyticsService.trackAchievementUnlocked,
+    trackAchievementUnlocked: (
+      achievementId: string,
+      achievementName: string,
+      daysToAchieve: number
+    ) =>
+      analyticsService.trackAchievementUnlocked(
+        achievementId,
+        achievementName,
+        daysToAchieve
+      ),
 
     // Stats tracking
-    trackStatsViewed: analyticsService.trackStatsViewed,
+    trackStatsViewed: (statsType: string, habitId?: string) =>
+      analyticsService.trackStatsViewed(statsType, habitId),
 
     // User properties
-    setUserProperties: analyticsService.setUserProperties,
+    setUserProperties: (
+      totalHabits: number,
+      longestStreak: number,
+      mostConsistentCategory: string,
+      totalAchievements: number
+    ) =>
+      analyticsService.setUserProperties(
+        totalHabits,
+        longestStreak,
+        mostConsistentCategory,
+        totalAchievements
+      ),
   };
 };
