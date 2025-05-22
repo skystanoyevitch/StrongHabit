@@ -8,7 +8,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import { setupNotifications } from "./src/utils/notifications"; // Changed from initializeNotifications
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native"; // Added import
-import analytics from "@react-native-firebase/analytics"; // Import Firebase Analytics
+import { analyticsService } from "./src/utils/analytics"; // Import our analytics service
 import {
   useFonts,
   Quicksand_400Regular,
@@ -79,20 +79,42 @@ function AppContent() {
         setShowOnboarding(!completedOnboarding);
 
         // Track app launch and user status in analytics funnel
-        await analytics().logAppOpen();
+        try {
+          if (completedOnboarding) {
+            // Track returning user
+            await analyticsService.trackScreenView("AppLaunch");
+            await analyticsService.trackStreakMilestone("app", "App Launch", 0);
 
-        if (completedOnboarding) {
-          // Track returning user
-          await analytics().logEvent("user_session", {
-            user_type: "returning",
-            has_completed_onboarding: true,
-          });
-        } else {
-          // Track new user starting the funnel
-          await analytics().logEvent("user_session", {
-            user_type: "new",
-            has_completed_onboarding: false,
-          });
+            // Use custom event for returning user
+            try {
+              const eventData = {
+                user_type: "returning",
+                has_completed_onboarding: true,
+              };
+              console.log("[Analytics] Tracking user session:", eventData);
+            } catch (error) {
+              console.error("[Analytics] Error tracking user session:", error);
+            }
+          } else {
+            // Track new user starting the funnel
+            await analyticsService.trackScreenView("Onboarding");
+
+            // Use custom event for new user
+            try {
+              const eventData = {
+                user_type: "new",
+                has_completed_onboarding: false,
+              };
+              console.log("[Analytics] Tracking new user session:", eventData);
+            } catch (error) {
+              console.error(
+                "[Analytics] Error tracking new user session:",
+                error
+              );
+            }
+          }
+        } catch (analyticsError) {
+          console.warn("Analytics tracking error:", analyticsError);
         }
       } catch (e) {
         console.warn(e);
@@ -115,6 +137,10 @@ function AppContent() {
     }
   }, [fontError]);
 
+  // Create a navigation ref to track screen views
+  const routeNameRef = React.useRef<string | undefined>();
+  const navigationRef = React.createRef<any>();
+
   if (!fontsLoaded || showOnboarding === null) {
     // Show a loading indicator while determining onboarding state
     return (
@@ -132,10 +158,6 @@ function AppContent() {
     return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
   }
 
-  // Create a navigation ref to track screen views
-  const routeNameRef = React.useRef<string | undefined>();
-  const navigationRef = React.createRef<any>();
-
   return (
     <ErrorBoundary>
       <NavigationContainer
@@ -151,11 +173,15 @@ function AppContent() {
           const currentRouteName = currentRoute?.name;
 
           if (previousRouteName !== currentRouteName) {
-            // Track screen view with Firebase Analytics
-            await analytics().logScreenView({
-              screen_name: currentRouteName,
-              screen_class: currentRouteName,
-            });
+            // Track screen view with our analytics service
+            try {
+              await analyticsService.trackScreenView(
+                currentRouteName || "Unknown",
+                currentRouteName || "Unknown"
+              );
+            } catch (error) {
+              console.warn("[Analytics] Error tracking screen view:", error);
+            }
           }
 
           // Save the current route name for later comparison
