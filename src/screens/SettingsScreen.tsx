@@ -372,7 +372,7 @@ const SettingsScreen: React.FC = () => {
         </SettingsSection>
 
         <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>StrongHabit v1.0.9</Text>
+          <Text style={styles.versionText}>StrongHabit v1.1.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
