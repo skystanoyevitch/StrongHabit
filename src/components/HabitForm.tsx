@@ -42,6 +42,7 @@ const initialFormState: HabitFormInput = {
   monthlyDays: [],
   reminderEnabled: false,
   color: theme.colors.primary, // Default to the primary theme color
+  startDate: new Date().toISOString().split("T")[0], // Add startDate to initial form state
 };
 
 interface HabitFormProps {
