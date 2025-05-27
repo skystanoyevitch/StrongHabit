@@ -24,6 +24,7 @@ export interface Habit {
   selectedDays?: DayOfWeek[];
   monthlyDays?: number[];
   createdAt: string;
+  startDate: string; // Add startDate field
   updatedAt?: string;
   archivedAt?: string | null;
   reminderTime?: string | null;
