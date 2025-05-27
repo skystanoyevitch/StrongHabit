@@ -259,7 +259,9 @@ export default function HomeScreen() {
   );
   const [calendarDates, setCalendarDates] = useState<CalendarDateItem[]>([]);
   const flatListRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current; // Changed from scrollY to scrollX
+  const scrollX = useRef(new Animated.Value(0)).current;
+  // initialScrollPerformedRef might still be used by other effects,
+  // but useFocusEffect will now primarily control the date centering on focus.
   const initialScrollPerformedRef = useRef(false);
   const analytics = useAnalytics();
 
@@ -301,89 +303,55 @@ export default function HomeScreen() {
   // Generate initial list of dates with pre-calculated display values
   useEffect(() => {
     const todayStr = getTodayDateString();
-    // Reduce number of days to improve performance
-    const visibleDays = Math.min(NUM_BUFFER_DAYS, 45); // Reduce total number of days
+    const visibleDays = Math.min(NUM_BUFFER_DAYS, 45);
     const dates: CalendarDateItem[] = [];
     for (let i = -visibleDays; i <= visibleDays; i++) {
-      const currentDateString = addDays(todayStr, i);
-      const dateObj = new Date(currentDateString + "T00:00:00");
+      const dateStr = addDays(todayStr, i);
+      const dateObj = new Date(dateStr + "T00:00:00");
       dates.push({
-        id: currentDateString,
-        dayOfMonth: dateObj.getDate().toString(),
+        id: dateStr,
+        dayOfMonth: String(dateObj.getDate()),
         dayOfWeekShort: dateObj
           .toLocaleDateString(undefined, { weekday: "short" })
           .substring(0, 3)
           .toUpperCase(),
         monthShort: dateObj
           .toLocaleDateString(undefined, { month: "short" })
-          .substring(0, 3)
           .toUpperCase(),
       });
     }
     setCalendarDates(dates);
-  }, []);
+  }, []); // Runs once on mount
 
-  // Ensure today's date is centered on initial load
-  useEffect(() => {
-    if (flatListRef.current && calendarDates.length > 0) {
-      const todayIndex = calendarDates.findIndex(
-        (d) => d.id === getTodayDateString()
-      );
-
-      if (todayIndex !== -1) {
-        // Ensure we delay this just slightly to allow the FlatList to fully render
-        setTimeout(() => {
-          if (flatListRef.current) {
-            preventAutoScrollRef.current = true;
-            flatListRef.current.scrollToIndex({
-              index: todayIndex,
-              animated: false,
-              viewPosition: 0.5, // Explicitly ensure center alignment
-            });
-
-            // Reset the prevention flag after a delay
-            setTimeout(() => {
-              preventAutoScrollRef.current = false;
-            }, 300);
-          }
-        }, 100);
-      }
-    }
-  }, [calendarDates]); // Only run when calendar dates change
-
-  // Scroll to selected date when calendarDates are populated or selectedDate changes
-  // Modified to prevent unintended automatic scrolling
-  useEffect(() => {
-    if (
-      flatListRef.current &&
-      calendarDates.length > 0 &&
-      !initialScrollPerformedRef.current
-    ) {
-      const index = calendarDates.findIndex((d) => d.id === selectedDate);
-      if (index !== -1) {
-        preventAutoScrollRef.current = true; // Prevent handling this as a user scroll
-        flatListRef.current.scrollToIndex({
-          index,
-          animated: false,
-          viewPosition: 0.5,
-        });
-        initialScrollPerformedRef.current = true;
-        // Reset the flag after initial scroll
-        setTimeout(() => {
-          preventAutoScrollRef.current = false;
-        }, 500);
-      }
-    }
-  }, [calendarDates, selectedDate]);
-
-  // Modified useFocusEffect to prevent unwanted auto-scrolling
+  // Modified useFocusEffect to ensure current day is selected and visible
   useFocusEffect(
     React.useCallback(() => {
-      refreshHabits();
+      refreshHabits(); // Refresh habits data
 
-      // Don't automatically scroll on focus - this was causing the scroll back issue
-      return () => {};
-    }, [refreshHabits])
+      const todayString = getTodayDateString();
+      setSelectedDate(todayString); // Set selected date to today
+
+      // Scroll the FlatList to today's date
+      if (flatListRef.current && calendarDates.length > 0) {
+        const todayIndex = calendarDates.findIndex((d) => d.id === todayString);
+        if (todayIndex !== -1) {
+          // Use setTimeout to allow UI to update before scrolling
+          setTimeout(() => {
+            if (flatListRef.current) {
+              // Re-check ref inside timeout
+              flatListRef.current.scrollToIndex({
+                index: todayIndex,
+                animated: false, // Or true for a smooth scroll
+                viewPosition: 0.5, // Centers the item
+              });
+            }
+          }, 0);
+        }
+      }
+      return () => {
+        // Optional: Cleanup if needed when screen loses focus
+      };
+    }, [refreshHabits, calendarDates]) // Dependencies for useCallback
   );
 
   useEffect(() => {
@@ -400,7 +368,7 @@ export default function HomeScreen() {
       }
     };
     initializeStorage();
-  }, []); // Removed dependencies as per original
+  }, []);
 
   const handleToggleComplete = useCallback(
     async (habitId: string, completed: boolean) => {
@@ -429,25 +397,24 @@ export default function HomeScreen() {
     [navigation]
   );
 
-  // Modified to handle simplified date selection with scroll control
   const handleDateItemPress = useCallback(
     (dateId: string) => {
       setSelectedDate(dateId);
       const index = calendarDates.findIndex((d) => d.id === dateId);
       if (index !== -1 && flatListRef.current) {
-        preventAutoScrollRef.current = true; // Flag to prevent handling this as a user scroll
+        preventAutoScrollRef.current = true; // Prevent auto-scroll during manual selection
         flatListRef.current.scrollToIndex({
           index,
           animated: true,
           viewPosition: 0.5,
         });
-        // Reset the flag after animation should be complete
+        // Reset the flag after a short delay
         setTimeout(() => {
           preventAutoScrollRef.current = false;
         }, 500);
       }
     },
-    [calendarDates, setSelectedDate]
+    [calendarDates, setSelectedDate] // Removed flatListRef from deps as it's stable
   );
 
   // Updated scroll handler to respect the control flags
@@ -514,42 +481,56 @@ export default function HomeScreen() {
 
   // Render a wheel item
   const renderWheelItem = useCallback(
-    ({ item, index }: { item: CalendarDateItem; index: number }) => {
-      return (
-        <MemoizedWheeledDateItem
-          item={item}
-          index={index}
-          scrollX={scrollX} // Changed from scrollY to scrollX
-          itemWidth={ITEM_WIDTH} // Changed from itemHeight to itemWidth
-          onPress={handleDateItemPress}
-          isSelected={item.id === selectedDate}
-        />
-      );
-    },
-    [selectedDate, handleDateItemPress, scrollX, ITEM_WIDTH]
+    ({ item, index }: { item: CalendarDateItem; index: number }) => (
+      <MemoizedWheeledDateItem
+        item={item}
+        index={index}
+        scrollX={scrollX}
+        itemWidth={ITEM_WIDTH}
+        onPress={handleDateItemPress}
+        isSelected={selectedDate === item.id}
+      />
+    ),
+    [selectedDate, handleDateItemPress, scrollX, ITEM_WIDTH] // scrollX is a dependency for animated values
   );
 
   const habitsForSelectedDate = habits
     .filter((habit) => {
-      if (habit.archivedAt) return false;
-      if (habit.frequency === "daily") return true;
+      // IMPORTANT: For this filter to work correctly, `habit.startDate`
+      // must be a valid date string (e.g., "YYYY-MM-DD") and correctly
+      // persisted when the habit is created/updated.
+      // If `habit.startDate` is missing or invalid, this check may not behave as expected.
+
+      // Filter 1: Do not show habit if selectedDate is before the habit's startDate
+      if (habit.startDate && selectedDate < habit.startDate) {
+        return false;
+      }
+
+      // Filter 2: Frequency-based filtering
+      const dayOfWeek = getDayOfWeek(selectedDate);
+      const dayOfMonth = new Date(selectedDate + "T00:00:00").getDate(); // Get day of month
+
+      if (habit.frequency === "daily") {
+        return true;
+      }
       if (habit.frequency === "weekly") {
-        const selectedDayOfWeek = getDayOfWeek(selectedDate);
-        return habit.selectedDays?.includes(selectedDayOfWeek) ?? false;
+        return habit.selectedDays?.includes(dayOfWeek);
       }
       if (habit.frequency === "monthly") {
-        // For monthly habits, check if the current day of month is in the selected days
-        const dayOfMonth = new Date(selectedDate + "T00:00:00").getDate();
-        return habit.monthlyDays?.includes(dayOfMonth) ?? false;
+        return habit.monthlyDays?.includes(dayOfMonth);
       }
-      return false;
+      return false; // Default: don't show if none of the above
     })
     .map((habit) => {
-      const logEntry = habit.completionLogs?.find(
-        (log) => log.date.split("T")[0] === selectedDate
+      // Example: Transform habit to include completion status for the selectedDate
+      const logEntry = habit.completionLogs.find(
+        (log) => log.date === selectedDate
       );
-      const completed = logEntry ? logEntry.completed : false;
-      return { ...habit, completed };
+      return {
+        ...habit,
+        completedForDate: logEntry?.completed || false,
+        // Ensure all properties needed by HabitItem are passed through
+      };
     });
 
   const getTitleText = () => {
