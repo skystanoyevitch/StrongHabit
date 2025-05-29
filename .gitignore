@@ -35,3 +35,12 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 assets/firebase/GoogleService-Info.plist
+
+# Monetization and business strategy files
+MONETIZATION_ROADMAP.md
+business-strategy/
+revenue-analytics/
+competitor-analysis/
+marketing-materials/
+financial-projections/
+user-research/
