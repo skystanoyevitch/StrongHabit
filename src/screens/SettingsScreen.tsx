@@ -1,21 +1,16 @@
-import React, { useEffect, useContext, useState } from "react"; // Added useState import
+import React, { useEffect, useContext } from "react"; // Removed useState import
 import {
   View,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  Switch,
   Linking,
   Alert,
   Platform,
   StatusBar,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  toggleNotifications,
-  getNotificationStatus,
-} from "../utils/notifications";
 import { DataManager } from "../utils/dataManager";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useThemeContext } from "../contexts/ThemeContext"; // Import useThemeContext
@@ -50,14 +45,11 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
 );
 
 const SettingsScreen: React.FC = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
   const { themeMode, setThemeMode } = useThemeContext(); // Get theme context
   const navigation = useNavigation<NavigationProp<SettingsStackParamList>>();
   const dataManager = DataManager.getInstance();
 
   useEffect(() => {
-    loadSettings();
-
     // Initialize backup system when settings screen loads
     BackupUtils.initializeBackupSystem().catch((error) => {
       console.error("Failed to initialize backup system:", error);
@@ -68,18 +60,6 @@ const SettingsScreen: React.FC = () => {
       console.error("Auto backup check failed:", error);
     });
   }, []);
-
-  const loadSettings = async () => {
-    const status = await getNotificationStatus();
-    setNotificationsEnabled(status);
-  };
-
-  const handleNotificationToggle = async (value: boolean) => {
-    const success = await toggleNotifications(value);
-    if (success) {
-      setNotificationsEnabled(value);
-    }
-  };
 
   const handlePrivacyPolicy = () => {
     Linking.openURL("https://www.skystanoyevitch.com/strong-habit/privacy");
@@ -213,16 +193,6 @@ const SettingsScreen: React.FC = () => {
               color={theme.colors.primary}
             />
           </TouchableOpacity>
-        </SettingsSection>
-
-        <SettingsSection title="Notifications">
-          <View style={styles.setting}>
-            <Text style={styles.settingLabel}>Enable Reminders</Text>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={handleNotificationToggle}
-            />
-          </View>
         </SettingsSection>
 
         <SettingsSection title="Data Management">

@@ -5,7 +5,6 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, useThemeContext } from "./src/contexts/ThemeContext";
 import TabNavigator from "./src/navigation/TabNavigator";
-import { setupNotifications } from "./src/utils/notifications"; // Changed from initializeNotifications
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native"; // Added import
 import { analyticsService } from "./src/utils/analytics"; // Import our analytics service
@@ -24,7 +23,6 @@ import {
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
-import * as Notifications from "expo-notifications";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 import { theme } from "./src/constants/theme"; // Import theme
 import * as BackupUtils from "./src/utils/backupUtils"; // Import backup utilities
@@ -32,17 +30,6 @@ import { StorageService } from "./src/utils/storage"; // Import StorageService
 import OnboardingScreen, {
   hasCompletedOnboarding,
 } from "./src/features/onboarding/OnboardingScreen";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
   const { paperTheme: theme, navigationTheme } = useThemeContext(); // Get theme and navigationTheme
@@ -63,9 +50,6 @@ function AppContent() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        // Initialize notifications
-        await setupNotifications();
-
         // Initialize storage service
         const storageService = StorageService.getInstance();
         await storageService.initialize();

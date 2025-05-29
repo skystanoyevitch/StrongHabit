@@ -25,12 +25,17 @@ import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 // Define form input type (exclude auto-generated fields)
 type HabitFormInput = Omit<
   Habit,
-  "id" | "createdAt" | "streak" | "completionLogs"
+  | "id"
+  | "createdAt"
+  | "streak"
+  | "completionLogs"
+  | "notificationId"
+  | "reminderEnabled"
 > & {
-  reminderEnabled: boolean;
   color: string;
   selectedDays: DayOfWeek[];
   monthlyDays?: number[];
+  reminderTime?: string;
 };
 
 // Define initial form state
@@ -40,9 +45,9 @@ const initialFormState: HabitFormInput = {
   frequency: "daily",
   selectedDays: [],
   monthlyDays: [],
-  reminderEnabled: false,
   color: theme.colors.primary, // Default to the primary theme color
   startDate: new Date().toISOString().split("T")[0], // Add startDate to initial form state
+  reminderTime: "09:00", // Set default reminder time
 };
 
 interface HabitFormProps {
@@ -387,93 +392,6 @@ export const HabitForm: React.FC<HabitFormProps> = ({
             </View>
             {errors.selectedDays && (
               <Text style={styles.errorText}>{errors.selectedDays}</Text>
-            )}
-          </Animated.View>
-        )}
-
-        {/* Reminder Toggle */}
-        <Animated.View
-          entering={FadeInUp.duration(500).delay(400)}
-          style={styles.formGroup}
-        >
-          <View style={styles.switchContainer}>
-            <View style={styles.switchLabelContainer}>
-              <MaterialCommunityIcons
-                name="bell"
-                size={18}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.label}>Set Reminder</Text>
-            </View>
-            <Switch
-              value={formData.reminderEnabled}
-              onValueChange={(value) => handleChange("reminderEnabled", value)}
-              trackColor={{ false: "#ccc", true: theme.colors.primary + "80" }}
-              thumbColor={
-                formData.reminderEnabled ? theme.colors.primary : "#f4f3f4"
-              }
-            />
-          </View>
-        </Animated.View>
-
-        {/* Time Picker (only show when reminderEnabled is true) */}
-        {formData.reminderEnabled && (
-          <Animated.View
-            entering={FadeIn.duration(500)}
-            style={styles.formGroup}
-          >
-            <Text style={styles.label}>
-              <MaterialCommunityIcons
-                name="clock-outline"
-                size={18}
-                color={theme.colors.primary}
-              />{" "}
-              Reminder Time
-            </Text>
-            <TouchableOpacity
-              style={styles.timePickerButton}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <MaterialCommunityIcons
-                name="clock"
-                size={22}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.timePickerText}>
-                {formData.reminderTime
-                  ? `${formData.reminderTime}`
-                  : "Set time (tap to select)"}
-              </Text>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={22}
-                color={theme.colors.secondaryText}
-              />
-            </TouchableOpacity>
-
-            {showTimePicker && (
-              <DateTimePicker
-                value={
-                  formData.reminderTime
-                    ? (() => {
-                        const [hours, minutes] = formData.reminderTime
-                          .split(":")
-                          .map(Number);
-                        const date = new Date();
-                        date.setHours(hours);
-                        date.setMinutes(minutes);
-                        return date;
-                      })()
-                    : new Date()
-                }
-                mode="time"
-                is24Hour={false}
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowTimePicker(Platform.OS === "ios");
-                  handleTimeChange(selectedDate);
-                }}
-              />
             )}
           </Animated.View>
         )}
