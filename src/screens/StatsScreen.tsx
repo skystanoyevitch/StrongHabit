@@ -93,45 +93,7 @@ const StatsScreen: React.FC = () => {
   // Debounce timer ref for real-time updates
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get previously viewed achievements from storage
-  useEffect(() => {
-    const loadViewedAchievements = async () => {
-      try {
-        const viewed = await AsyncStorage.getItem(VIEWED_ACHIEVEMENTS_KEY);
-        if (viewed) {
-          setViewedAchievements(JSON.parse(viewed));
-        }
-      } catch (error) {
-        console.error("Failed to load viewed achievements:", error);
-      }
-    };
-
-    loadViewedAchievements();
-  }, []);
-
-  // Recent unlocked achievements for the highlight section
-  const recentAchievements = useMemo(() => {
-    return [...unlockedAchievements]
-      .sort(
-        (a, b) =>
-          new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
-      )
-      .slice(0, 3); // Take only the 3 most recent
-  }, [unlockedAchievements]);
-
-  // Debounced calculation function to prevent excessive recalculations
-  const debouncedCalculateStats = useCallback(() => {
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(() => {
-      calculateStats();
-    }, 300); // 300ms debounce delay
-  }, []);
-
+  // DEFINE calculateStats FIRST
   const calculateStats = useCallback(() => {
     // Don't calculate if habits is empty or null
     if (!habits || habits.length === 0) {
@@ -266,7 +228,46 @@ const StatsScreen: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [habits, viewedAchievements, analytics, statsData]);
+  }, [habits, viewedAchievements, analytics, statsData]); // Dependencies for calculateStats
+
+  // THEN DEFINE debouncedCalculateStats, depending on calculateStats
+  const debouncedCalculateStats = useCallback(() => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      calculateStats();
+    }, 300); // 300ms debounce delay
+  }, [calculateStats]); // Pass calculateStats as a dependency
+
+  // Get previously viewed achievements from storage
+  useEffect(() => {
+    const loadViewedAchievements = async () => {
+      try {
+        const viewed = await AsyncStorage.getItem(VIEWED_ACHIEVEMENTS_KEY);
+        if (viewed) {
+          setViewedAchievements(JSON.parse(viewed));
+        }
+      } catch (error) {
+        console.error("Failed to load viewed achievements:", error);
+      }
+    };
+
+    loadViewedAchievements();
+  }, []);
+
+  // Recent unlocked achievements for the highlight section
+  const recentAchievements = useMemo(() => {
+    return [...unlockedAchievements]
+      .sort(
+        (a, b) =>
+          new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
+      )
+      .slice(0, 3); // Take only the 3 most recent
+  }, [unlockedAchievements]);
 
   // Handle next achievement in modal
   const handleNextAchievement = () => {
@@ -280,7 +281,8 @@ const StatsScreen: React.FC = () => {
 
   // Real-time stats updates based on habit changes with debouncing
   useEffect(() => {
-    if (habits && habits.length > 0) {
+    if (isFocused && habits && habits.length > 0) {
+      // Check isFocused
       debouncedCalculateStats();
     }
 
@@ -290,7 +292,7 @@ const StatsScreen: React.FC = () => {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [habits, lastUpdated, debouncedCalculateStats]);
+  }, [isFocused, habits, lastUpdated, debouncedCalculateStats]); // Add isFocused to dependencies
 
   if (loading && habits === null) {
     return (
