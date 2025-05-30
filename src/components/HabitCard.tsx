@@ -139,11 +139,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   // Apply different styling based on completion status
   const cardStyles = React.useMemo(() => {
-    // For completed habits
+    // For completed habits - completely grayscale
     if (isCompletedForSelectedDate) {
       return {
         backgroundColor: "#F5F5F5", // Consistent light gray for completed
-        accentColor: darkenColor(baseColor, 0.2), // Slightly darkened accent
+        accentColor: "#BDBDBD", // Gray accent color instead of colored
         textColor: "#616161", // Dark gray for primary text
         secondaryTextColor: "#9E9E9E", // Medium gray for secondary text
         separatorColor: "rgba(0,0,0,0.05)", // Subtle separator
@@ -179,7 +179,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   // Ensure check button has proper contrast text/icon
   const checkButtonColor = isCompletedForSelectedDate
-    ? cardStyles.accentColor
+    ? "#757575" // Gray color for completed habits
     : lightenColor(baseColor, 0.1); // Slightly lighter
 
   const checkmarkIconColor = getContrastTextColor(checkButtonColor);
