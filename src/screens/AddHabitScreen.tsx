@@ -3,7 +3,7 @@ import { View, StyleSheet, SafeAreaView, Alert, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { HabitForm } from "../components/HabitForm";
 import { StorageService } from "../utils/storage";
-import { Habit } from "../types/habit";
+import { Habit, DayOfWeek } from "../types/habit";
 import { theme } from "../constants/theme";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -19,9 +19,31 @@ export default function AddHabitScreen() {
 
   // Handle form submission
   const handleSubmit = async (
-    habitData: Omit<Habit, "id" | "createdAt" | "streak" | "completionLogs">
+    formData: Omit<
+      Habit,
+      | "id"
+      | "createdAt"
+      | "streak"
+      | "completionLogs"
+      | "notificationId"
+      | "reminderEnabled"
+    > & {
+      color: string;
+      selectedDays: DayOfWeek[];
+      monthlyDays?: number[];
+      reminderTime?: string;
+    }
   ) => {
     try {
+      // Transform the form data to add the missing fields required by storage
+      const habitData: Omit<
+        Habit,
+        "id" | "createdAt" | "streak" | "completionLogs"
+      > = {
+        ...formData,
+        reminderEnabled: !!formData.reminderTime, // Set reminderEnabled based on whether reminderTime is set
+      };
+
       const newHabit = await storageService.addHabit(habitData);
 
       // Track habit creation in analytics
