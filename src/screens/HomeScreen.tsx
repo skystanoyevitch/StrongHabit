@@ -20,6 +20,7 @@ import {
   ActivityIndicator,
   Animated,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   useFocusEffect,
   useNavigation,
@@ -524,7 +525,7 @@ export default function HomeScreen() {
     .map((habit) => {
       // Example: Transform habit to include completion status for the selectedDate
       const logEntry = habit.completionLogs.find(
-        (log) => log.date === selectedDate
+        (log) => log.date.split("T")[0] === selectedDate
       );
       return {
         ...habit,
@@ -532,6 +533,12 @@ export default function HomeScreen() {
         // Ensure all properties needed by HabitItem are passed through
       };
     });
+
+  // Check if all habits for the selected date are completed
+  const allHabitsCompleted = useMemo(() => {
+    if (habitsForSelectedDate.length === 0) return false;
+    return habitsForSelectedDate.every((habit) => habit.completedForDate);
+  }, [habitsForSelectedDate]);
 
   const getTitleText = () => {
     const today = getTodayDateString();
@@ -687,6 +694,40 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
+
+      {/* Congratulatory Message when all habits are completed */}
+      {allHabitsCompleted && habitsForSelectedDate.length > 0 && (
+        <AnimatedRN.View
+          entering={FadeInDown.duration(800).springify()}
+          style={styles.congratsContainer}
+        >
+          <LinearGradient
+            colors={[
+              theme.colors.primary + "15",
+              theme.colors.accent + "15",
+              theme.colors.primary + "10",
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.congratsGradient}
+          >
+            <View style={styles.congratsContent}>
+              <MaterialCommunityIcons
+                name="trophy"
+                size={32}
+                color={theme.colors.primary}
+                style={styles.congratsIcon}
+              />
+              <Text style={styles.congratsTitle}>🎉 Congratulations!</Text>
+              <Text style={styles.congratsMessage}>
+                You've completed all your habits for{" "}
+                {selectedDate === getTodayDateString() ? "today" : "this day"}!
+                Now go reward yourself! 🌟
+              </Text>
+            </View>
+          </LinearGradient>
+        </AnimatedRN.View>
+      )}
 
       <HabitList
         habits={habitsForSelectedDate}
@@ -879,5 +920,44 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
     maxWidth: "90%",
+  },
+
+  // Congratulatory message styles
+  congratsContainer: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  congratsGradient: {
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 0.5,
+    borderColor: theme.colors.primary + "10",
+  },
+  congratsContent: {
+    alignItems: "center",
+  },
+  congratsIcon: {
+    marginBottom: 8,
+  },
+  congratsTitle: {
+    fontFamily: theme.fonts.titleBold,
+    fontSize: 20,
+    color: theme.colors.primary,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  congratsMessage: {
+    fontFamily: theme.fonts.regular,
+    fontSize: 16,
+    color: theme.colors.text,
+    textAlign: "center",
+    lineHeight: 22,
   },
 });
