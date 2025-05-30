@@ -133,6 +133,33 @@ export default function HabitDetailScreen() {
           {habit.description && (
             <Text style={styles.headerSubtitle}>{habit.description}</Text>
           )}
+
+          {/* Action buttons moved to header */}
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={[styles.headerButton, styles.editButton]}
+              onPress={() => navigation.navigate("EditHabit", { habit })}
+            >
+              <MaterialCommunityIcons
+                name="pencil"
+                size={20}
+                color={theme.colors.contrastPrimary}
+              />
+              <Text style={styles.headerButtonText}>Edit</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.headerButton, styles.deleteButton]}
+              onPress={handleDelete}
+            >
+              <MaterialCommunityIcons
+                name="delete"
+                size={20}
+                color={theme.colors.contrastPrimary}
+              />
+              <Text style={styles.headerButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
 
         <View style={styles.contentWrapper}>
@@ -264,34 +291,6 @@ export default function HabitDetailScreen() {
             />
           </Animated.View>
         </View>
-        <Animated.View
-          entering={FadeInDown.duration(600).delay(400).springify()}
-          style={styles.actions}
-        >
-          <TouchableOpacity
-            style={[styles.button, styles.editButton]}
-            onPress={() => navigation.navigate("EditHabit", { habit })}
-          >
-            <MaterialCommunityIcons
-              name="pencil"
-              size={24}
-              color={theme.colors.contrastPrimary}
-            />
-            <Text style={styles.buttonText}>Edit Habit</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.deleteButton]}
-            onPress={handleDelete}
-          >
-            <MaterialCommunityIcons
-              name="delete"
-              size={24}
-              color={theme.colors.contrastPrimary}
-            />
-            <Text style={styles.buttonText}>Delete Habit</Text>
-          </TouchableOpacity>
-        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -315,7 +314,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 15,
+    paddingBottom: 20,
     alignItems: "center",
   },
   iconContainer: {
@@ -343,10 +342,36 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.regular,
     fontSize: 16,
     color: theme.colors.secondaryText,
-    marginBottom: 16,
+    marginBottom: 20,
     textAlign: "center",
     maxWidth: "90%",
     lineHeight: 22,
+  },
+  headerActions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 12,
+    marginTop: 8,
+  },
+  headerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    minWidth: 90,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  headerButtonText: {
+    fontFamily: theme.fonts.semibold,
+    color: theme.colors.contrastPrimary,
+    fontSize: 14,
+    marginLeft: 6,
   },
   statsContainer: {
     flexDirection: "row",
@@ -426,48 +451,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     paddingLeft: 4,
   },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: theme.colors.surface,
-    marginTop: 8,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    borderColor: theme.colors.outline,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    borderRadius: 14,
-    minWidth: 145,
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
   editButton: {
     backgroundColor: theme.colors.primary,
   },
   deleteButton: {
     backgroundColor: theme.colors.error,
-  },
-  buttonText: {
-    fontFamily: theme.fonts.semibold,
-    color: theme.colors.contrastPrimary,
-    fontSize: 16,
-    marginLeft: 8,
   },
   // Add a back button
   backButton: {
