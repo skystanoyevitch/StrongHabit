@@ -13,6 +13,7 @@ describe("Achievement Utilities", () => {
     color: "#FF0000",
     frequency: "daily",
     createdAt: "2023-01-01T00:00:00.000Z",
+    startDate: "2023-01-01",
     streak: 0,
     completionLogs: [],
     reminderEnabled: false,
