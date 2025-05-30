@@ -26,6 +26,7 @@ import { HabitAchievements } from "../features/achievements/HabitAchievements";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { BackButton } from "../components/BackButton";
 import { useScreenTracking, useAnalytics } from "../hooks/useAnalytics";
+import { useHabits } from "../hooks/useHabits";
 
 type HabitDetailScreenRouteProp = RouteProp<RootStackParamList, "HabitDetail">;
 
@@ -44,6 +45,7 @@ export default function HabitDetailScreen() {
   const [markedDates, setMarkedDates] = useState<any>({});
   const storageService = StorageService.getInstance();
   const analytics = useAnalytics();
+  const { refreshHabits } = useHabits();
 
   // Track screen view
   useScreenTracking("HabitDetailScreen");
@@ -234,7 +236,10 @@ export default function HabitDetailScreen() {
                     !isCompleted
                   );
 
-                  // Refresh the habit data
+                  // Use refreshHabits from useHabits hook to trigger real-time updates
+                  await refreshHabits();
+
+                  // Get updated habit data for local UI updates
                   const habits = await storageService.getHabits();
                   const updatedHabit = habits.find((h) => h.id === habit.id);
 

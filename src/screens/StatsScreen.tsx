@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   StyleSheet,
   Text,
@@ -56,7 +62,7 @@ const initialStats: StatsData = {
 };
 
 const StatsScreen: React.FC = () => {
-  const { habits, loading } = useHabits();
+  const { habits, loading, lastUpdated } = useHabits();
   const isFocused = useIsFocused();
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [statsData, setStatsData] = useState<StatsData>(initialStats);
@@ -84,6 +90,9 @@ const StatsScreen: React.FC = () => {
   const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
   const [viewedAchievements, setViewedAchievements] = useState<string[]>([]);
 
+  // Debounce timer ref for real-time updates
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Get previously viewed achievements from storage
   useEffect(() => {
     const loadViewedAchievements = async () => {
@@ -110,7 +119,25 @@ const StatsScreen: React.FC = () => {
       .slice(0, 3); // Take only the 3 most recent
   }, [unlockedAchievements]);
 
+  // Debounced calculation function to prevent excessive recalculations
+  const debouncedCalculateStats = useCallback(() => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      calculateStats();
+    }, 300); // 300ms debounce delay
+  }, []);
+
   const calculateStats = useCallback(() => {
+    // Don't calculate if habits is empty or null
+    if (!habits || habits.length === 0) {
+      return;
+    }
+
     setIsCalculating(true);
 
     try {
@@ -239,7 +266,7 @@ const StatsScreen: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [habits, viewedAchievements]);
+  }, [habits, viewedAchievements, analytics, statsData]);
 
   // Handle next achievement in modal
   const handleNextAchievement = () => {
@@ -251,11 +278,19 @@ const StatsScreen: React.FC = () => {
     }
   };
 
+  // Real-time stats updates based on habit changes with debouncing
   useEffect(() => {
-    if (habits && isFocused) {
-      calculateStats();
+    if (habits && habits.length > 0) {
+      debouncedCalculateStats();
     }
-  }, [habits, isFocused, calculateStats]);
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [habits, lastUpdated, debouncedCalculateStats]);
 
   if (loading && habits === null) {
     return (
