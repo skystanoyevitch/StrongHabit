@@ -22,15 +22,21 @@ import { HabitError } from "../types/errors"; // Corrected import path
 import { theme } from "../constants/theme"; // Import theme
 import { BackButton } from "../components/BackButton"; // Import BackButton component
 
-interface FormValues {
-  name: string;
-  description: string;
-  frequency: HabitFrequency;
-  selectedDays: DayOfWeek[];
-  reminderTime?: string | null;
-  reminderEnabled: boolean;
+// Use the same type as HabitForm expects
+type HabitFormInput = Omit<
+  Habit,
+  | "id"
+  | "createdAt"
+  | "streak"
+  | "completionLogs"
+  | "notificationId"
+  | "reminderEnabled"
+> & {
   color: string;
-}
+  selectedDays: DayOfWeek[];
+  monthlyDays?: number[];
+  reminderTime?: string;
+};
 
 export default function EditHabitScreen(): React.ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -40,7 +46,7 @@ export default function EditHabitScreen(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const storageService = StorageService.getInstance();
 
-  const validateForm = (values: FormValues): boolean => {
+  const validateForm = (values: HabitFormInput): boolean => {
     if (!values.name.trim()) {
       setError("Name is required");
       return false;
@@ -50,7 +56,7 @@ export default function EditHabitScreen(): React.ReactElement {
   };
 
   const handleSubmit = useCallback(
-    async (values: FormValues): Promise<void> => {
+    async (values: HabitFormInput): Promise<void> => {
       setError(null);
       if (!validateForm(values)) return;
 
@@ -82,14 +88,19 @@ export default function EditHabitScreen(): React.ReactElement {
     [habit, navigation, storageService]
   );
 
-  const initialValues: FormValues = {
+  const initialValues: HabitFormInput = {
     name: habit.name || "",
     description: habit.description || "",
     frequency: habit.frequency || "daily",
     selectedDays: habit.selectedDays || [],
-    reminderTime: habit.reminderTime || null,
-    reminderEnabled: habit.reminder ?? false,
+    reminderTime: habit.reminderTime || undefined,
     color: habit.color ?? "#000000",
+    startDate: habit.startDate || new Date().toISOString().split("T")[0],
+    monthlyDays: habit.monthlyDays || [],
+    updatedAt: habit.updatedAt,
+    archivedAt: habit.archivedAt,
+    reminder: habit.reminder,
+    category: habit.category,
   };
 
   return (
