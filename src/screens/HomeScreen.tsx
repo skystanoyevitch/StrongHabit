@@ -322,6 +322,30 @@ export default function HomeScreen() {
       });
     }
     setCalendarDates(dates);
+
+    // After setting calendar dates, scroll to today's position
+    // Use multiple attempts with increasing delays to ensure it works
+    const attemptScroll = (attempt = 1) => {
+      const todayIndex = dates.findIndex((d) => d.id === todayStr);
+      if (todayIndex !== -1 && flatListRef.current) {
+        try {
+          flatListRef.current.scrollToOffset({
+            offset: todayIndex * ITEM_WIDTH,
+            animated: false, // No animation on initial load
+          });
+        } catch (error) {
+          // If scroll fails, try again with a longer delay
+          if (attempt < 3) {
+            setTimeout(() => attemptScroll(attempt + 1), 200 * attempt);
+          }
+        }
+      } else if (attempt < 3) {
+        // FlatList not ready yet, try again
+        setTimeout(() => attemptScroll(attempt + 1), 100 * attempt);
+      }
+    };
+
+    setTimeout(() => attemptScroll(), 50);
   }, []); // Runs once on mount
 
   // Modified useFocusEffect to ensure current day is selected and visible
@@ -330,29 +354,36 @@ export default function HomeScreen() {
       refreshHabits(); // Refresh habits data
 
       const todayString = getTodayDateString();
-      setSelectedDate(todayString); // Set selected date to today
 
-      // Scroll the FlatList to today's date
-      if (flatListRef.current && calendarDates.length > 0) {
-        const todayIndex = calendarDates.findIndex((d) => d.id === todayString);
-        if (todayIndex !== -1) {
-          // Use setTimeout to allow UI to update before scrolling
-          setTimeout(() => {
-            if (flatListRef.current) {
-              // Re-check ref inside timeout
-              flatListRef.current.scrollToIndex({
-                index: todayIndex,
-                animated: false, // Or true for a smooth scroll
-                viewPosition: 0.5, // Centers the item
-              });
-            }
-          }, 0);
+      // Only update the selected date and scroll if we're coming back to the screen
+      // and the current selected date is not today
+      if (selectedDate !== todayString) {
+        setSelectedDate(todayString); // Set selected date to today
+
+        // Scroll the FlatList to today's date
+        if (flatListRef.current && calendarDates.length > 0) {
+          const todayIndex = calendarDates.findIndex(
+            (d) => d.id === todayString
+          );
+          if (todayIndex !== -1) {
+            // Use setTimeout to allow UI to update before scrolling
+            setTimeout(() => {
+              if (flatListRef.current) {
+                // Re-check ref inside timeout
+                flatListRef.current.scrollToOffset({
+                  offset: todayIndex * ITEM_WIDTH,
+                  animated: true, // Animate when coming back to screen
+                });
+              }
+            }, 50);
+          }
         }
       }
+
       return () => {
         // Optional: Cleanup if needed when screen loses focus
       };
-    }, [refreshHabits, calendarDates]) // Dependencies for useCallback
+    }, [refreshHabits, calendarDates, selectedDate, ITEM_WIDTH]) // Added selectedDate and ITEM_WIDTH to dependencies
   );
 
   useEffect(() => {
@@ -553,17 +584,6 @@ export default function HomeScreen() {
     });
   };
 
-  // Calculate initial scroll index safely for the wheel
-  let initialDateViewIndex: number | undefined = undefined;
-  if (calendarDates.length > 0) {
-    const todayIndex = calendarDates.findIndex(
-      (d) => d.id === getTodayDateString()
-    );
-    if (todayIndex !== -1) {
-      initialDateViewIndex = todayIndex;
-    }
-  }
-
   // Memoize the contentContainerStyle to prevent recreation on every render
   const contentContainerStyle = useMemo(
     () => ({
@@ -598,40 +618,28 @@ export default function HomeScreen() {
         onPress={() => {
           // Force recalculation of today's date to ensure it's accurate
           const todayStr = getTodayDateString();
-          console.log("Today's date:", todayStr); // Debug logging
 
           // Update selected date first
           setSelectedDate(todayStr);
 
-          // Wait for state update to complete
-          setTimeout(() => {
-            // Find index of today's date in the calendar dates array
-            const todayIndex = calendarDates.findIndex(
-              (d) => d.id === todayStr
-            );
-            console.log(
-              "Today index:",
-              todayIndex,
-              "Date:",
-              calendarDates[todayIndex]?.id
-            ); // Debug logging
+          // Find index of today's date in the calendar dates array
+          const todayIndex = calendarDates.findIndex((d) => d.id === todayStr);
 
-            if (todayIndex !== -1 && flatListRef.current) {
-              // Set flag to prevent interference from other scroll handlers
-              preventAutoScrollRef.current = true;
+          if (todayIndex !== -1 && flatListRef.current) {
+            // Set flag to prevent interference from other scroll handlers
+            preventAutoScrollRef.current = true;
 
-              // Use scrollToOffset for more precise control
-              flatListRef.current.scrollToOffset({
-                offset: todayIndex * ITEM_WIDTH,
-                animated: true,
-              });
+            // Use scrollToOffset for more precise control
+            flatListRef.current.scrollToOffset({
+              offset: todayIndex * ITEM_WIDTH,
+              animated: true,
+            });
 
-              // Reset prevention flag after animation completes
-              setTimeout(() => {
-                preventAutoScrollRef.current = false;
-              }, 500);
-            }
-          }, 50);
+            // Reset prevention flag after animation completes
+            setTimeout(() => {
+              preventAutoScrollRef.current = false;
+            }, 500);
+          }
         }}
       >
         <MaterialCommunityIcons
@@ -666,7 +674,6 @@ export default function HomeScreen() {
               snapToInterval={ITEM_WIDTH} // Changed from ITEM_HEIGHT to ITEM_WIDTH
               decelerationRate="fast"
               getItemLayout={getItemLayout}
-              initialScrollIndex={initialDateViewIndex}
               onMomentumScrollEnd={handleScrollEnd}
               onScroll={handleScroll}
               contentContainerStyle={contentContainerStyle}
